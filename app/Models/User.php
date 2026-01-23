@@ -23,6 +23,15 @@ class User extends Authenticatable
         'password',
     ];
 
+    public function characters() {
+        return $this->belongsToMany(Character::class)->using(UserCharacter::class)->withPivot([
+            'interval',
+            'next_review_at',
+            'easy_factor',
+            'last_result'
+        ])->withTimestamps();
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *
