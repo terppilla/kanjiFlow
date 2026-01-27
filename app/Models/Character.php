@@ -12,9 +12,13 @@ class Character extends Model
     protected $fillable = [
         'character',
         'pinyin',
+        'hsk_level',
+        'example_hanzi',
+        'example_pinyin',
+        'example_translation',
+        'audio_character',
+        'audio_example',
         'meaning',
-        'example',
-        'audio',
     ];
 
     public function users() {

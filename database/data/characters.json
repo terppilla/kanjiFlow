@@ -1,0 +1,39 @@
+[
+    { "character": "我", "pinyin": "wǒ", "meaning": "я", "hsk_level": 1, "example_hanzi": "我是学生。", "example_pinyin": "Wǒ shì xuéshēng.", "example_translation": "Я студент.", "audio": null },
+    { "character": "你", "pinyin": "nǐ", "meaning": "ты", "hsk_level": 1, "example_hanzi": "你好吗？", "example_pinyin": "Nǐ hǎo ma?", "example_translation": "Как ты?", "audio": null },
+    { "character": "他", "pinyin": "tā", "meaning": "он", "hsk_level": 1, "example_hanzi": "他是老师。", "example_pinyin": "Tā shì lǎoshī.", "example_translation": "Он учитель.", "audio": null },
+    { "character": "她", "pinyin": "tā", "meaning": "она", "hsk_level": 1, "example_hanzi": "她很漂亮。", "example_pinyin": "Tā hěn piàoliang.", "example_translation": "Она красивая.", "audio": null },
+    { "character": "我们", "pinyin": "wǒmen", "meaning": "мы", "hsk_level": 1, "example_hanzi": "我们学习汉语。", "example_pinyin": "Wǒmen xuéxí Hànyǔ.", "example_translation": "Мы учим китайский.", "audio": null },
+  
+    { "character": "学", "pinyin": "xué", "meaning": "учить", "hsk_level": 1, "example_hanzi": "我学中文。", "example_pinyin": "Wǒ xué Zhōngwén.", "example_translation": "Я учу китайский.", "audio": null },
+    { "character": "习", "pinyin": "xí", "meaning": "практиковать", "hsk_level": 1, "example_hanzi": "我练习写字。", "example_pinyin": "Wǒ liànxí xiězì.", "example_translation": "Я практикую письмо.", "audio": null },
+    { "character": "看", "pinyin": "kàn", "meaning": "смотреть", "hsk_level": 1, "example_hanzi": "我看书。", "example_pinyin": "Wǒ kàn shū.", "example_translation": "Я читаю книгу.", "audio": null },
+    { "character": "听", "pinyin": "tīng", "meaning": "слушать", "hsk_level": 1, "example_hanzi": "我听音乐。", "example_pinyin": "Wǒ tīng yīnyuè.", "example_translation": "Я слушаю музыку.", "audio": null },
+    { "character": "说", "pinyin": "shuō", "meaning": "говорить", "hsk_level": 1, "example_hanzi": "他说中文。", "example_pinyin": "Tā shuō Zhōngwén.", "example_translation": "Он говорит по-китайски.", "audio": null },
+  
+    { "character": "来", "pinyin": "lái", "meaning": "приходить", "hsk_level": 1, "example_hanzi": "他明天来。", "example_pinyin": "Tā míngtiān lái.", "example_translation": "Он придёт завтра.", "audio": null },
+    { "character": "去", "pinyin": "qù", "meaning": "уходить", "hsk_level": 1, "example_hanzi": "我去学校。", "example_pinyin": "Wǒ qù xuéxiào.", "example_translation": "Я иду в школу.", "audio": null },
+    { "character": "吃", "pinyin": "chī", "meaning": "есть", "hsk_level": 1, "example_hanzi": "我吃米饭。", "example_pinyin": "Wǒ chī mǐfàn.", "example_translation": "Я ем рис.", "audio": null },
+    { "character": "喝", "pinyin": "hē", "meaning": "пить", "hsk_level": 1, "example_hanzi": "我喝水。", "example_pinyin": "Wǒ hē shuǐ.", "example_translation": "Я пью воду.", "audio": null },
+    { "character": "想", "pinyin": "xiǎng", "meaning": "думать, хотеть", "hsk_level": 1, "example_hanzi": "我想学习。", "example_pinyin": "Wǒ xiǎng xuéxí.", "example_translation": "Я хочу учиться.", "audio": null },
+  
+    { "character": "大", "pinyin": "dà", "meaning": "большой", "hsk_level": 1, "example_hanzi": "房子很大。", "example_pinyin": "Fángzi hěn dà.", "example_translation": "Дом большой.", "audio": null },
+    { "character": "小", "pinyin": "xiǎo", "meaning": "маленький", "hsk_level": 1, "example_hanzi": "猫很小。", "example_pinyin": "Māo hěn xiǎo.", "example_translation": "Кошка маленькая.", "audio": null },
+    { "character": "多", "pinyin": "duō", "meaning": "много", "hsk_level": 1, "example_hanzi": "我有很多书。", "example_pinyin": "Wǒ yǒu hěn duō shū.", "example_translation": "У меня много книг.", "audio": null },
+    { "character": "少", "pinyin": "shǎo", "meaning": "мало", "hsk_level": 1, "example_hanzi": "人很少。", "example_pinyin": "Rén hěn shǎo.", "example_translation": "Людей мало.", "audio": null },
+  
+    { "character": "好", "pinyin": "hǎo", "meaning": "хороший", "hsk_level": 1, "example_hanzi": "天气很好。", "example_pinyin": "Tiānqì hěn hǎo.", "example_translation": "Погода хорошая.", "audio": null },
+    { "character": "坏", "pinyin": "huài", "meaning": "плохой", "hsk_level": 1, "example_hanzi": "这是坏主意。", "example_pinyin": "Zhè shì huài zhǔyì.", "example_translation": "Это плохая идея.", "audio": null },
+  
+    { "character": "天", "pinyin": "tiān", "meaning": "день, небо", "hsk_level": 1, "example_hanzi": "今天很忙。", "example_pinyin": "Jīntiān hěn máng.", "example_translation": "Сегодня я занят.", "audio": null },
+    { "character": "月", "pinyin": "yuè", "meaning": "месяц, луна", "hsk_level": 1, "example_hanzi": "这个月很忙。", "example_pinyin": "Zhège yuè hěn máng.", "example_translation": "Этот месяц занятой.", "audio": null },
+    { "character": "年", "pinyin": "nián", "meaning": "год", "hsk_level": 1, "example_hanzi": "今年很好。", "example_pinyin": "Jīnnián hěn hǎo.", "example_translation": "Этот год хороший.", "audio": null },
+  
+    { "character": "上", "pinyin": "shàng", "meaning": "вверх, на", "hsk_level": 1, "example_hanzi": "书在桌子上。", "example_pinyin": "Shū zài zhuōzi shàng.", "example_translation": "Книга на столе.", "audio": null },
+    { "character": "下", "pinyin": "xià", "meaning": "вниз, под", "hsk_level": 1, "example_hanzi": "猫在桌子下。", "example_pinyin": "Māo zài zhuōzi xià.", "example_translation": "Кошка под столом.", "audio": null },
+  
+    { "character": "中", "pinyin": "zhōng", "meaning": "середина, Китай", "hsk_level": 1, "example_hanzi": "我在中国。", "example_pinyin": "Wǒ zài Zhōngguó.", "example_translation": "Я в Китае.", "audio": null },
+    { "character": "国", "pinyin": "guó", "meaning": "страна", "hsk_level": 1, "example_hanzi": "中国很大。", "example_pinyin": "Zhōngguó hěn dà.", "example_translation": "Китай большой.", "audio": null }
+  
+  ]
+  

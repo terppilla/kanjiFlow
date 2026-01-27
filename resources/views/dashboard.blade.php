@@ -12,5 +12,7 @@
                     Привет, {{ auth()->user()->name }} 
                 </p>
                   <p>личный кабинет</p>
+
+                <a href="{{route('characters.index')}}">Список иероглифов</a>
             </div>
 </x-app-layout>

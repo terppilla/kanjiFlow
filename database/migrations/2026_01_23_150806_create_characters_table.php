@@ -13,11 +13,10 @@ return new class extends Migration
     {
         Schema::create('characters', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
             $table->string('character');
-            $table->string('piniyn');
-            $table->string('audio');
+            $table->string('pinyin');
             $table->text('meaning');
+            $table->timestamps();
         });
     }
 
