@@ -13,19 +13,21 @@ class CharacterSeeder extends Seeder
      */
     public function run(): void
     {
-        Character::insert([
-            [
-                'character' => '学',
-                'piniyn' => 'xué',
-                'meaning' => 'учить',
-                'audio' => '...'
-            ],
-            [
-                'character' => '日',
-                'piniyn' => 'rì',
-                'meaning' => 'день',
-                'audio' => '...'
-            ]
+       $json = file_get_contents(database_path('data/characters.json'));
+       $data = json_decode($json, true);
+
+       foreach ($data as $item) {
+        Character::create([
+          'character'  => $item['character'],
+          'pinyin' => $item['pinyin'],
+          'meaning' => $item['meaning'],
+          'hsk_level' => $item['hsk_level'],
+          'example_hanzi' => $item['example_hanzi'] ?? null,
+          'example_pinyin' => $item['example_pinyin'] ?? null,
+          'example_translation' => $item['example_translation'] ?? null,
+          'audio_character' => null,
+          'audio_example' => null,
         ]);
+       }
     }
 }
