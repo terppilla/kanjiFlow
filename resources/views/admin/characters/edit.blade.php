@@ -9,7 +9,7 @@
 <body>
     <h1>Редактировать иероглиф</h1>
 
-    <form action="{{route('characters.update', $character->id)}}" method="POST">
+    <form action="{{route('admin.characters.update', $character->id)}}" method="POST">
     @csrf
     @method('PUT')
 
@@ -56,6 +56,6 @@
     <button type="submit">Сохранить</button>
     </form>
 
-    <a href="{{route('characters.index')}}">Назад</a>
+    <a href="{{route('admin.characters.index')}}">Назад</a>
 </body>
 </html>

@@ -8,7 +8,7 @@
 </head>
 <body>
     <h1>Всё иероглифы</h1>
-    <a href="{{route('characters.create')}}">Добавить новый иероглиф</a>
+    <a href="{{route('admin.characters.create')}}">Добавить новый иероглиф</a>
 
     <table>
         <thead>
@@ -36,8 +36,8 @@
               <td>{{ $character->example_translation }}</td>
               <td>{{ $character->audio_example }}</td>
               <td>
-                <a href="{{ route('characters.edit', $character->id)}}">Редактировать</a>
-                <form action="{{route('characters.destroy', $character->id)}}" method="POST">
+                <a href="{{ route('admin.characters.edit', $character->id)}}">Редактировать</a>
+                <form action="{{route('admin.characters.destroy', $character->id)}}" method="POST">
                     @csrf
                     @method('DELETE')
                     <button type="submit">Удалить</button>

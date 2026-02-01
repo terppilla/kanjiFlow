@@ -17,11 +17,11 @@ class UserCharacter extends Model
         'next_review_at',
         'easy_factor',
         'last_result',
-    ]
-
-    protected $casts = [
-        'next_review_at' => 'datetime',
     ];
+
+    // protected $casts = [
+    //     'next_review_at' => 'datetime',
+    // ];
 
     public function user() {
         return $this->belongsTo(User::class);

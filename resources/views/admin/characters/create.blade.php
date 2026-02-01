@@ -9,7 +9,7 @@
 <body>
     <h1>Добавить иероглиф</h1>
 
-    <form action="{{route('characters.store')}}" method="POST">
+    <form action="{{route('admin.characters.store')}}" method="POST">
         @csrf
 
         <label for="character">Иероглиф</label>
@@ -56,6 +56,6 @@
 
     </form>
 
-    <a href="{{route('characters.index')}}">Назад</a>
+    <a href="{{route('admin.characters.index')}}">Назад</a>
 </body>
 </html>

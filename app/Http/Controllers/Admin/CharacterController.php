@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Character;
 use Illuminate\Http\Request;
 
@@ -9,11 +10,11 @@ class CharacterController extends Controller
 {
     public function index() {
         $characters = Character::all();
-        return view('characters.index',  compact('characters'));
+        return view('admin.characters.index',  compact('characters'));
     }
 
     public function create() {
-        return view('characters.create');
+        return view('admin.characters.create');
     }
 
     public function store(Request $request) {
@@ -43,12 +44,12 @@ class CharacterController extends Controller
 
         ]);
 
-        return redirect()->route('characters.index');
+        return redirect()->route('admin.characters.index');
     }
 
     public function edit($id) {
         $character = Character::findOrFail($id);
-        return view('characters.edit', compact('character'));
+        return view('admin.characters.edit', compact('character'));
     }
 
     public function update(Request $request, $id) {
@@ -77,13 +78,13 @@ class CharacterController extends Controller
             'audio_example'=>$request->input('audio_example'),
         ]);
 
-        return redirect()->route('characters.index');
+        return redirect()->route('admin.characters.index');
     }
 
     public function destroy($id) {
         $character = Character::findOrFail($id);
         $character->delete();
 
-        return redirect()->route('characters.index');
+        return redirect()->route('admin.characters.index');
     }
 }

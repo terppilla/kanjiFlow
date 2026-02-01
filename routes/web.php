@@ -1,8 +1,12 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Admin\CharacterController;
+use App\Http\Controllers\User\LearningController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\CharacterController;
+
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -18,11 +22,26 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::resource('characters', CharacterController::class);
+// admin
+Route::middleware(['auth', 'admin'])->group(function() {
+    Route::get('/admin', function() {
+        return view('admin.dashboard');
+    })->name('admin.dashboard');
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+    Route::resource('/admin/characters', CharacterController::class)->names('admin.characters');
+    });
+
+
+// user
+Route::get('dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])
+->name('dashboard');
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/learn', [LearningController::class, 'index'])->name('learn');
+    Route::get('/learn/{character}', [LearningController::class, 'show'])->name('learn.show');
+});
+
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
