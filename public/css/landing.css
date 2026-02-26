@@ -1,0 +1,1086 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --color-primary: #C1121F;
+    --color-dark-red: #7A1414;
+    --color-red: #8E1B1B;
+
+    --color-gold: #D69B64;
+    --color-white-gold: #F3CAA5;
+
+    --color-calm-blue: #1F2933;
+    --color-dark-blue: #0F172A;
+
+    --color-gray: #C0C0C0;
+};
+
+body {
+    font-family: 'Noto Sans SC', sans-serif;
+    margin: 0 !important;
+    padding: 0;
+}
+
+
+header {
+    background: var(--color-dark-red);
+    padding: 20px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+
+nav {
+    display: flex;
+    justify-content: center;
+    padding: 25px 0;
+    align-items: center;
+    width: 100%;
+    position: relative;
+    z-index: 20;
+} 
+
+
+/* hero */
+.hero {
+    display: flex;
+    align-items: center;
+    height: 100vh;  
+    color: white;
+    position: relative;
+    z-index: 15;
+}
+
+.hero::after {
+    content: ''; 
+    position: absolute;
+    display: flex;
+    align-items: center;
+    top: 20%;
+    left: 2%;
+    width: 75%;
+    height: 75%;
+    background: url('/img/kanji-xue.svg') no-repeat center center/contain; 
+   pointer-events: none;
+   z-index: -1;
+}
+
+.header::before {
+    content: ''; 
+    position: absolute;
+    display: flex;
+    align-items: center;
+    top: 15%;
+    left: 12%;
+    width: 140%;
+    height: 140%;
+    background: url('/img/hero-dragon.svg') no-repeat center center/contain;
+    z-index: 50; 
+    animation: 
+        dragonSlideIn 1.5s ease-out forwards,
+        dragonBreathing 4s ease-in-out 1.5s infinite;
+    opacity: 0;
+    transform: translateX(100px); 
+    pointer-events: none;
+}
+
+@keyframes dragonSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateX(150px);
+        filter: blur(10px);
+    }
+    70% {
+        opacity: 0.8;
+        transform: translateX(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+@keyframes dragonBreathing {
+    0%, 100% {
+        transform: scale(1) translateY(0);
+    }
+    50% {
+        transform: scale(1.01) translateY(-8px);
+    }
+}
+
+.hero-big-title {
+  position: absolute; 
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 5px 20px 0 20px;
+  top: 20px;
+  z-index: 25;
+  text-align: center;
+}
+
+.hero-big-title img { 
+    width: 110%; 
+}
+
+.hero-text {
+    max-width: 600px;
+    margin: 200px 0 0 60px;
+}
+
+.hero-text span {
+    font-weight: 100;
+    font-family:  'Noto Serif SC' ;
+    font-size: 0.5rem;
+    opacity: 0.7;
+}
+
+.hero h1 {
+    font-family: 'Noto Serif SC';
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 20px;
+    letter-spacing: 4px;
+}
+
+.hero span {
+    display: block;
+    font-size: 1.2rem;
+    margin-bottom: 40px;
+    letter-spacing: 1px;
+
+}
+
+.hero-buttons a {
+    display: block;
+    max-width: 350px;
+    margin-bottom: 20px;
+}
+
+
+
+
+
+/* ===== БЛОК "КАК ПРОХОДИТ ОБУЧЕНИЕ" - ПАНЕЛЬНЫЙ ДИЗАЙН ===== */
+
+.how {
+    padding: 120px 20px;
+    background: var(--color-dark-blue);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Фон с едва заметной текстурой */
+.how::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        linear-gradient(45deg, rgba(122, 20, 20, 0.02) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(122, 20, 20, 0.02) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, rgba(122, 20, 20, 0.02) 75%),
+        linear-gradient(-45deg, transparent 75%, rgba(122, 20, 20, 0.02) 75%);
+    background-size: 40px 40px;
+    background-position: 0 0, 0 20px, 20px -20px, -20px 0px;
+    opacity: 0.3;
+    z-index: 1;
+}
+
+/* Заголовок */
+.how h2 {
+    font-family: 'Noto Serif SC', serif;
+    text-align: center;
+    font-size: 4rem;
+    color: var(--color-white-gold);
+    margin-bottom: 100px;
+    position: relative;
+    z-index: 2;
+    font-weight: 400;
+}
+
+.how h2::after {
+    content: '学习之路'; /* Путь обучения */
+    position: absolute;
+    top: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.2rem;
+    color: var(--color-gold);
+    opacity: 0.6;
+    font-style: italic;
+    letter-spacing: 3px;
+}
+
+/* Контейнер для карточек */
+.how .cards-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+}
+
+/* Сетка карточек - 2x2 */
+.how ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 60px;
+    counter-reset: step-counter;
+}
+
+/* Крупные карточки */
+.how li {
+    counter-increment: step-counter;
+    background: rgba(31, 41, 51, 0.7);
+    border-radius: 25px;
+    padding: 70px 50px;
+    position: relative;
+    transition: all 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+    border: 1px solid rgba(214, 155, 100, 0.1);
+    backdrop-filter: blur(10px);
+    min-height: 450px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Декоративный уголок */
+.how li::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, transparent 50%, var(--color-gold) 50%);
+    border-radius: 0 25px 0 50px;
+    opacity: 0.2;
+    transition: opacity 0.6s ease;
+}
+
+.how li:hover::before {
+    opacity: 0.5;
+}
+
+/* Номер в углу */
+.how li::after {
+    content: counter(step-counter);
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-family: 'Noto Serif SC', serif;
+    font-size: 2.5rem;
+    color: var(--color-gold);
+    font-weight: 700;
+    opacity: 0.3;
+    transition: all 0.6s ease;
+}
+
+.how li:hover::after {
+    opacity: 0.8;
+    transform: scale(1.1);
+}
+
+/* Иконка - крупная и в рамке */
+.how li .icon-wrapper {
+    width: 120px;
+    height: 120px;
+    margin-bottom: 40px;
+    position: relative;
+    z-index: 2;
+}
+
+.how li img {
+    width: 100%;
+    height: 100%;
+    padding: 25px;
+    background: rgba(214, 155, 100, 0.1);
+    border-radius: 25px;
+    border: 2px solid rgba(214, 155, 100, 0.2);
+    transition: all 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.2));
+}
+
+.how li:hover img {
+    transform: translateY(-10px) scale(1.1);
+    background: rgba(214, 155, 100, 0.2);
+    border-color: rgba(214, 155, 100, 0.4);
+    box-shadow: 0 20px 40px rgba(214, 155, 100, 0.2);
+}
+
+/* Подзаголовок */
+.how li h3 {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 2.2rem;
+    color: var(--color-white-gold);
+    margin-bottom: 25px;
+    position: relative;
+    padding-bottom: 15px;
+    font-weight: 500;
+}
+
+.how li h3::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: var(--color-gold);
+    border-radius: 2px;
+    transition: width 0.6s ease;
+}
+
+.how li:hover h3::after {
+    width: 100px;
+}
+
+/* Описание */
+.how li p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.3rem;
+    line-height: 1.7;
+    font-family: 'Noto Sans SC', sans-serif;
+    flex-grow: 1;
+    font-weight: 300;
+    transition: color 0.6s ease;
+}
+
+.how li:hover p {
+    color: var(--color-white-gold);
+}
+
+/* Акцентная линия снизу */
+.how li .accent-line {
+    position: absolute;
+    bottom: 0;
+    left: 50px;
+    right: 50px;
+    height: 4px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--color-gold),
+        transparent
+    );
+    border-radius: 2px;
+    opacity: 0;
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: all 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.how li:hover .accent-line {
+    opacity: 0.6;
+    transform: scaleX(1);
+}
+
+/* Эффект "подсветки" при наведении */
+.how li .hover-glow {
+    position: absolute;
+    top: -100%;
+    left: -100%;
+    width: 300%;
+    height: 300%;
+    background: radial-gradient(
+        circle at center,
+        rgba(214, 155, 100, 0.1) 0%,
+        transparent 70%
+    );
+    opacity: 0;
+    transition: opacity 0.8s ease;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.how li:hover .hover-glow {
+    opacity: 1;
+}
+
+/* Анимация появления */
+@keyframes panelAppear {
+    0% {
+        opacity: 0;
+        transform: translateY(60px) scale(0.95);
+        filter: blur(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+.how li {
+    opacity: 0;
+    animation: panelAppear 1s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+}
+
+.how li:nth-child(1) { animation-delay: 0.1s; }
+.how li:nth-child(2) { animation-delay: 0.2s; }
+.how li:nth-child(3) { animation-delay: 0.3s; }
+.how li:nth-child(4) { animation-delay: 0.4s; }
+
+/* Декоративные элементы между карточками */
+.how .grid-connector {
+    position: absolute;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(214, 155, 100, 0.1),
+        transparent
+    );
+    z-index: 1;
+    opacity: 0;
+    animation: connectorFadeIn 1s ease-out 0.8s forwards;
+}
+
+.how .grid-connector.horizontal {
+    height: 1px;
+    width: calc(50% - 180px);
+    top: 50%;
+    left: 25%;
+}
+
+.how .grid-connector.vertical {
+    width: 1px;
+    height: calc(50% - 180px);
+    left: 50%;
+    top: 25%;
+}
+
+@keyframes connectorFadeIn {
+    to { opacity: 0.3; }
+}
+
+/* Адаптивность */
+@media (max-width: 1200px) {
+    .how ul {
+        gap: 40px;
+    }
+    
+    .how li {
+        padding: 50px 35px;
+        min-height: 400px;
+    }
+    
+    .how li .icon-wrapper {
+        width: 100px;
+        height: 100px;
+        margin-bottom: 30px;
+    }
+    
+    .how li h3 {
+        font-size: 2rem;
+    }
+    
+    .how li p {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 992px) {
+    .how ul {
+        grid-template-columns: 1fr;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .how .grid-connector {
+        display: none;
+    }
+    
+    .how li {
+        min-height: 350px;
+    }
+}
+
+@media (max-width: 768px) {
+    .how {
+        padding: 80px 15px;
+    }
+    
+    .how h2 {
+        font-size: 3rem;
+        margin-bottom: 60px;
+    }
+    
+    .how h2::after {
+        font-size: 1rem;
+        top: -40px;
+    }
+    
+    .how li {
+        padding: 40px 30px;
+        min-height: 300px;
+    }
+    
+    .how li .icon-wrapper {
+        width: 90px;
+        height: 90px;
+        margin-bottom: 25px;
+    }
+    
+    .how li img {
+        padding: 20px;
+    }
+    
+    .how li h3 {
+        font-size: 1.8rem;
+    }
+    
+    .how li p {
+        font-size: 1.1rem;
+    }
+    
+    .how li::after {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .how h2 {
+        font-size: 2.5rem;
+    }
+    
+    .how li {
+        padding: 30px 25px;
+    }
+    
+    .how li .icon-wrapper {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .how li h3 {
+        font-size: 1.6rem;
+    }
+    
+    .how li p {
+        font-size: 1rem;
+    }
+}
+
+/* Дополнительный декоративный элемент */
+.how .chinese-pattern {
+    position: absolute;
+    font-family: 'Noto Serif SC', serif;
+    font-size: 10rem;
+    color: rgba(214, 155, 100, 0.03);
+    z-index: 1;
+    pointer-events: none;
+    user-select: none;
+    animation: patternFloat 30s linear infinite;
+}
+
+.how .pattern-1 {
+    top: 10%;
+    right: 5%;
+    transform: rotate(15deg);
+}
+
+.how .pattern-2 {
+    bottom: 10%;
+    left: 5%;
+    transform: rotate(-15deg);
+}
+
+@keyframes patternFloat {
+    0% { transform: rotate(15deg) translateY(0); }
+    50% { transform: rotate(15deg) translateY(20px); }
+    100% { transform: rotate(15deg) translateY(0); }
+}
+
+
+/* ===== БЛОК "ПОЧЕМУ KANJIFLOW" - ЛЕСТНИЦА ЗНАНИЙ ===== */
+
+.why {
+    padding: 120px 20px;
+    background: var(--color-dark-red);
+    position: relative;
+    overflow: hidden;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Заголовок */
+.why h2 {
+    font-family: 'Noto Serif SC', serif;
+    text-align: center;
+    font-size: 3.5rem;
+    color: var(--color-white-gold);
+    margin-bottom: 80px;
+    position: relative;
+    z-index: 2;
+    font-weight: 400;
+}
+
+/* Линия под заголовком */
+.why h2::after {
+    content: '';
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: var(--color-gold);
+    border-radius: 2px;
+}
+
+/* Контейнер для лестницы */
+.why .staircase {
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+    padding: 60px 0;
+}
+
+/* Ступени (платформы) */
+.why .step {
+    position: relative;
+    margin-bottom: 40px;
+    /* УБРАЛ opacity и transform - теперь видно сразу */
+}
+
+/* Лесенка - каждая следующая ступень сдвинута */
+.why .step:nth-child(1) {
+    margin-left: 0;
+}
+
+.why .step:nth-child(2) {
+    margin-left: 80px;
+}
+
+.why .step:nth-child(3) {
+    margin-left: 160px;
+}
+
+.why .step:nth-child(4) {
+    margin-left: 240px;
+}
+
+/* Сама платформа (ступень) */
+.why .platform {
+    background: var(--color-white-gold);
+    border-radius: 20px;
+    padding: 50px 60px;
+    max-width: 800px;
+    position: relative;
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.2),
+        0 10px 20px rgba(122, 20, 20, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    border: 3px solid transparent;
+    transition: all 0.5s ease;
+}
+
+/* Номер ступени */
+.why .step-number {
+    position: absolute;
+    left: -60px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 80px;
+    height: 80px;
+    background: var(--color-gold);
+    color: var(--color-dark-red);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Noto Serif SC', serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    border: 5px solid var(--color-dark-red);
+    box-shadow: 
+        0 10px 20px rgba(0, 0, 0, 0.3),
+        0 0 0 4px var(--color-white-gold);
+    z-index: 3;
+    transition: all 0.5s ease;
+}
+
+/* Содержимое платформы */
+.why .platform-content {
+    position: relative;
+    z-index: 2;
+}
+
+/* Заголовок преимущества */
+.why .platform h3 {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 2.2rem;
+    color: var(--color-dark-red);
+    margin-bottom: 20px;
+    font-weight: 600;
+    position: relative;
+    padding-bottom: 15px;
+}
+
+/* Линия под заголовком */
+.why .platform h3::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: var(--color-primary);
+    border-radius: 2px;
+    transition: width 0.5s ease;
+}
+
+/* Текст преимущества */
+.why .platform p {
+    color: var(--color-calm-blue);
+    font-size: 1.4rem;
+    line-height: 1.6;
+    font-family: 'Noto Sans SC', sans-serif;
+    font-weight: 400;
+    max-width: 600px;
+    transition: color 0.5s ease;
+}
+
+/* Декоративный угол платформы */
+.why .platform::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    width: 40px;
+    height: 40px;
+    background: var(--color-gold);
+    border-radius: 10px 0 10px 0;
+    opacity: 0.8;
+    transition: all 0.5s ease;
+}
+
+/* Эффект при наведении на платформу */
+.why .platform:hover {
+    transform: translateY(-10px) scale(1.02);
+    border-color: var(--color-gold);
+    box-shadow: 
+        0 30px 60px rgba(0, 0, 0, 0.3),
+        0 20px 40px rgba(122, 20, 20, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.why .platform:hover::before {
+    opacity: 1;
+    transform: scale(1.2);
+}
+
+.why .platform:hover h3::after {
+    width: 100px;
+}
+
+.why .platform:hover p {
+    color: var(--color-dark-red);
+}
+
+/* Эффект при наведении на номер */
+.why .step:hover .step-number {
+    background: var(--color-primary);
+    color: var(--color-white-gold);
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 
+        0 15px 30px rgba(0, 0, 0, 0.4),
+        0 0 0 4px var(--color-white-gold);
+}
+
+/* Вертикальная линия-опора лестницы */
+.why .staircase::before {
+    content: '';
+    position: absolute;
+    left: 40px;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    background: linear-gradient(
+        to bottom,
+        var(--color-gold),
+        var(--color-white-gold),
+        var(--color-gold)
+    );
+    border-radius: 4px;
+    z-index: 1;
+    opacity: 0.7;
+}
+
+/* Горизонтальные перекладины лестницы */
+.why .step::after {
+    content: '';
+    position: absolute;
+    left: -20px;
+    top: 50%;
+    width: 30px;
+    height: 8px;
+    background: var(--color-gold);
+    border-radius: 4px;
+    z-index: 1;
+    opacity: 0.8;
+}
+
+/* УБРАЛ всё про .visible и анимацию появления */
+
+/* Адаптивность для лестницы */
+@media (max-width: 992px) {
+    .why .step {
+        margin-left: 0 !important;
+    }
+    
+    .why .staircase::before,
+    .why .step::after {
+        display: none;
+    }
+    
+    .why .step-number {
+        position: relative;
+        left: 0;
+        top: 0;
+        transform: none;
+        margin-bottom: 30px;
+        margin-left: -20px;
+    }
+    
+    .why .platform {
+        margin-left: 40px;
+    }
+}
+
+@media (max-width: 768px) {
+    .why {
+        padding: 80px 20px;
+    }
+    
+    .why h2 {
+        font-size: 2.8rem;
+        margin-bottom: 60px;
+    }
+    
+    .why .platform {
+        padding: 40px 30px;
+    }
+    
+    .why .step-number {
+        width: 60px;
+        height: 60px;
+        font-size: 2rem;
+        margin-left: -15px;
+    }
+    
+    .why .platform h3 {
+        font-size: 1.8rem;
+    }
+    
+    .why .platform p {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .why h2 {
+        font-size: 2.2rem;
+    }
+    
+    .why .platform {
+        padding: 30px 25px;
+        margin-left: 30px;
+    }
+    
+    .why .step-number {
+        width: 50px;
+        height: 50px;
+        font-size: 1.6rem;
+    }
+    
+    .why .platform h3 {
+        font-size: 1.5rem;
+    }
+    
+    .why .platform p {
+        font-size: 1rem;
+    }
+}
+
+
+
+/* ===== ПЛАВНЫЕ ПЕРЕХОДЫ МЕЖДУ СЕКЦИЯМИ ===== */
+
+/* Декоративные волны между секциями */
+.section-divider {
+    position: relative;
+    height: 120px;
+    width: 100%;
+    overflow: hidden;
+    z-index: 10;
+}
+
+/* Волна между hero и how */
+.divider-hero-to-how {
+    background: var(--color-dark-red);
+}
+
+.divider-hero-to-how::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background: var(--color-dark-blue);
+    clip-path: ellipse(100% 100% at 50% 0%);
+}
+
+/* Волна между how и why */
+.divider-how-to-why {
+    background: var(--color-dark-blue);
+}
+
+.divider-how-to-why::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background: var(--color-dark-red);
+    clip-path: ellipse(100% 100% at 50% 0%);
+}
+
+/* Волна после why (если будет следующая секция) */
+.divider-why-to-next {
+    background: var(--color-dark-red);
+}
+
+.divider-why-to-next::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background: var(--color-calm-blue); /* или любой следующий фон */
+    clip-path: ellipse(100% 100% at 50% 0%);
+}
+
+
+
+/* ===== БЛОК CTA (ПРИЗЫВ К ДЕЙСТВИЮ) ===== */
+
+.sta {
+    padding: 100px 20px;
+    background: var(--color-white-gold);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Декоративный элемент (опционально) */
+.sta::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(
+        90deg,
+        var(--color-primary),
+        var(--color-gold),
+        var(--color-primary)
+    );
+    opacity: 0.7;
+}
+
+/* Заголовок */
+.sta h2 {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 3rem;
+    color: var(--color-dark-red);
+    margin-bottom: 20px;
+    font-weight: 600;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.3;
+}
+
+/* Текст */
+.sta p {
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 1.4rem;
+    color: var(--color-calm-blue);
+    margin-bottom: 50px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.5;
+    opacity: 0.9;
+}
+
+/* Контейнер для кнопок */
+.sta .cta-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 40px;
+}
+
+
+
+/* Активное состояние */
+.sta a:active {
+    transform: translateY(0);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .sta {
+        padding: 80px 20px;
+    }
+    
+    .sta h2 {
+        font-size: 2.2rem;
+    }
+    
+    .sta p {
+        font-size: 1.1rem;
+        margin-bottom: 40px;
+    }
+    
+    .sta .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .sta a {
+        width: 100%;
+        max-width: 300px;
+        text-align: center;
+        padding: 14px 24px;
+    }
+}
+
+@media (max-width: 480px) {
+    .sta h2 {
+        font-size: 1.8rem;
+    }
+    
+    .sta p {
+        font-size: 1rem;
+    }
+}

@@ -1,0 +1,151 @@
+:root {
+    --color-primary: #C1121F;
+    --color-dark-red: #7A1414;
+    --color-red: #8E1B1B;
+
+    --color-gold: #D69B64;
+    --color-white-gold: #F3CAA5;
+
+    --color-calm-blue: #1F2933;
+    --color-dark-blue: #0F172A;
+
+    --color-gray: #C0C0C0;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Noto Sans SC', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* ===== ОБНОВЛЁННЫЕ КНОПКИ ===== */
+
+/* Базовые стили для ВСЕХ кнопок */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 28px;
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 500;
+    text-decoration: none;
+    text-align: center;
+    border-radius: 12px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+    user-select: none;
+    outline: none;
+    line-height: 1.5;
+    min-width: 140px;
+}
+
+/* Эффект при нажатии */
+.btn:active {
+    transform: scale(0.98);
+    transition-duration: 0.1s;
+}
+
+/* Основная кнопка (красная) */
+.btn-primary {
+    background: var(--color-primary);
+    color: white;
+    box-shadow: 0 6px 0 var(--color-dark-red);
+    font-size: 1.3rem;
+    font-weight: 550;
+    letter-spacing: 1px;
+}
+
+.btn-primary:hover {
+    background: var(--color-red);
+    transform: translateY(1px);
+    box-shadow: 0 8px 0 rgb(70, 3, 3);
+}
+
+.btn-primary:active {
+    transform: translateY(2px);
+    box-shadow: 0 4px 0 var(--color-dark-red);
+}
+
+
+.btn--gold-filled {
+    background: var(--color-white-gold);
+    color: var(--color-dark-red);
+    box-shadow: 0 8px 0 rgba(0, 0, 0, 0.3);
+}
+
+.btn--gold-filled:hover {
+    background: var(--color-gold);
+    color: white;
+    transform: translateY(1px);
+}
+
+
+.btn--outline {
+    background: transparent;
+    color: var(--color-white-gold);
+    border: 2px solid rgba(247, 209, 175, 0.24);
+    box-shadow: 0 8px 0 rgba(0, 0, 0, 0.062);
+
+}
+
+.btn--outline:hover {
+    background: rgb(115, 12, 12);
+    color: white;
+    transform: translateY(1px);
+    box-shadow: 0 8px 0 rgba(0, 0, 0, 0.3);
+}
+
+.btn--outline:active, .btn--gold-filled:active {
+    transform: translateY(2px);
+
+}
+
+
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .btn {
+        padding: 12px 24px;
+        font-size: 1rem;
+        min-width: 120px;
+    }
+    
+@media (max-width: 480px) {
+    .btn {
+        padding: 10px 20px;
+        font-size: 0.95rem;
+        min-width: 110px;
+    }
+}
+
+
+
+/* Убираем стандартные стили для кнопок в формах */
+button.btn,
+input[type="submit"].btn,
+input[type="button"].btn {
+    background: none;
+    border: none;
+    font: inherit;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+}
+
+
+
+
