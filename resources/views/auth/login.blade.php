@@ -24,6 +24,8 @@
                 {{ session('status') }}
             </div>
         @endif
+
+
         
         <form method="POST" action="{{ route('login') }}" class="auth-form">
             @csrf

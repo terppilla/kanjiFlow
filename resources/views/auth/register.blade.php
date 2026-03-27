@@ -25,7 +25,7 @@
             <!-- Имя -->
             <div class="form-group">
                 <label for="name" class="form-label">Имя</label>
-                <input id="name" type="text" name="name" value="{{ old('name') }}" required autofocus autocomplete="name" class="form-input">
+                <input id="name" type="text" name="name" value="{{ old('name') }}"  min="3"required autofocus autocomplete="name" class="form-input">
                 @error('name')
                     <div class="form-error">{{ $message }}</div>
                 @enderror

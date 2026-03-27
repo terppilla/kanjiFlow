@@ -16,17 +16,25 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role'
+        'role',
+        'two_factor_code',
+        'two_factor_expires_at',
+        'login_attempts',
+        'locked_until',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_code',
     ];
 
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'two_factor_expires_at' => 'datetime',
+        'locked_until' => 'datetime',
+        'login_attempts' => 'integer',
     ];
 
     public function isAdmin(): bool

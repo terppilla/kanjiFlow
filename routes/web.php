@@ -7,6 +7,9 @@ use App\Http\Controllers\LearningController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\CollectionController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\TwoFactorController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -21,6 +24,23 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
+});
+
+Route::middleware('guest')->group(function () {
+    Route::get('login', [AuthenticatedSessionController::class, 'create'])
+        ->name('login');
+    
+    Route::post('login', [AuthenticatedSessionController::class, 'store']);
+    
+    // 2FA маршруты
+    Route::get('two-factor/verify', [TwoFactorController::class, 'showVerifyForm'])
+        ->name('two-factor.verify');
+    
+    Route::post('two-factor/verify', [TwoFactorController::class, 'verify'])
+        ->name('two-factor.verify');
+    
+    Route::post('two-factor/resend', [TwoFactorController::class, 'resend'])
+        ->name('two-factor.resend');
 });
 
 // Главный дашборд
