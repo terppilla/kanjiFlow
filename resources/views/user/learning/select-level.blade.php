@@ -408,7 +408,7 @@
                     
                     <div class="hsk-actions">
                         <span class="action-btn learn-btn">Изучать</span>
-                        {{-- <span class="action-btn review-btn">Повторить</span> --}}
+                        <span class="action-btn review-btn">Повторить</span>
                     </div>
                 </a>
             @endfor
