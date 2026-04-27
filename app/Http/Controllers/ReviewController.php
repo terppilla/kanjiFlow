@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\InteractsWithReviewFeedback;
 use App\Models\UserCharacter;
 use App\Models\Character;
 use Illuminate\Http\Request;
@@ -9,9 +10,19 @@ use Illuminate\Support\Facades\Auth;
 
 class ReviewController extends Controller
 {
+    use InteractsWithReviewFeedback;
+
     public function __construct()
     {
         $this->middleware('auth');
+    }
+
+    /**
+     * Alias для маршрута review.submit
+     */
+    public function submitResult(Request $request, UserCharacter $userCharacter)
+    {
+        return $this->submitAnswer($request, $userCharacter);
     }
     
     /**
@@ -126,17 +137,5 @@ class ReviewController extends Controller
                 'pinyin' => $nextCard->character->pinyin,
             ] : null,
         ]);
-    }
-    
-    private function getResultMessage(string $result): string
-    {
-        $messages = [
-            'again' => 'Не расстраивайтесь! Повторим через день.',
-            'hard' => 'Сложно, но справились.',
-            'good' => 'Отлично! Вы хорошо знаете этот иероглиф.',
-            'easy' => 'Прекрасно! Вы отлично знаете этот иероглиф.',
-        ];
-        
-        return $messages[$result] ?? 'Ответ принят.';
     }
 }

@@ -21,6 +21,11 @@ class Character extends Model
         'meaning',
     ];
 
+    public function collections()
+    {
+        return $this->belongsToMany(Collection::class, 'collection_character')->withTimestamps();
+    }
+
     public function users()
     {
         return $this->belongsToMany(User::class, 'user_characters')

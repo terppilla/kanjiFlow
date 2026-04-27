@@ -15,8 +15,12 @@ class Collection extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function characters() {
-        return $this->BelongsToMany(Character::class, 'collection_character');
+    public function characters()
+    {
+        return $this->belongsToMany(Character::class, 'collection_character')
+            ->withTimestamps()
+            ->orderByPivot('id');
     }
 }
+
 

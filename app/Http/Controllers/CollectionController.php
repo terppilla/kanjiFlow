@@ -2,72 +2,173 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Character;
+use App\Models\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
 class CollectionController extends Controller
 {
     public function __construct()
     {
         $this->middleware('auth');
     }
-    
-    // ВСЕ методы возвращают представление "в разработке"
+
     public function index()
     {
-        return view('user.collections.under_construction');
+        $collections = Auth::user()
+            ->collections()
+            ->withCount('characters')
+            ->latest()
+            ->get();
+
+        return view('user.collections.index', compact('collections'));
     }
-    
+
     public function create()
     {
-        return view('user.collections.under_construction');
+        return view('user.collections.create');
     }
-    
+
     public function store(Request $request)
     {
-        return redirect()->route('user.collections.index')
-            ->with('info', 'Функция коллекций временно недоступна');
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:120'],
+        ]);
+
+        $collection = Auth::user()->collections()->create([
+            'name' => trim($data['name']),
+        ]);
+
+        return redirect()
+            ->route('collections.show', $collection)
+            ->with('success', 'Коллекция создана. Добавьте иероглифы.');
     }
-    
-    public function show($id)
+
+    public function show(Collection $collection)
     {
-        return view('user.collections.under_construction');
+        $this->authorizeCollection($collection);
+
+        $collection->load(['characters' => function ($q) {
+            $q->orderByPivot('id');
+        }]);
+
+        return view('user.collections.show', compact('collection'));
     }
-    
-    public function edit($id)
+
+    public function edit(Collection $collection)
     {
-        return view('user.collections.under_construction');
+        $this->authorizeCollection($collection);
+
+        return view('user.collections.edit', compact('collection'));
     }
-    
-    public function update(Request $request, $id)
+
+    public function update(Request $request, Collection $collection)
     {
-        return redirect()->route('collections.index')
-            ->with('info', 'Функция коллекций временно недоступна');
+        $this->authorizeCollection($collection);
+
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:120'],
+        ]);
+
+        $collection->update(['name' => trim($data['name'])]);
+
+        return redirect()
+            ->route('collections.show', $collection)
+            ->with('success', 'Название обновлено.');
     }
-    
-    public function destroy($id)
+
+    public function destroy(Collection $collection)
     {
-        return redirect()->route('collections.index')
-            ->with('info', 'Функция коллекций временно недоступна');
+        $this->authorizeCollection($collection);
+
+        $collection->delete();
+
+        return redirect()
+            ->route('collections.index')
+            ->with('success', 'Коллекция удалена.');
     }
-    
-    public function addCharacter(Request $request, $collection)
+
+    public function addCharacter(Request $request, Collection $collection)
     {
-        return back()->with('info', 'Функция коллекций временно недоступна');
+        $this->authorizeCollection($collection);
+
+        $data = $request->validate([
+            'character_id' => ['required', 'integer', 'exists:characters,id'],
+        ]);
+
+        if ($collection->characters()->where('characters.id', $data['character_id'])->exists()) {
+            return back()->with('info', 'Этот иероглиф уже в коллекции.');
+        }
+
+        $collection->characters()->attach($data['character_id']);
+
+        return back()->with('success', 'Иероглиф добавлен.');
     }
-    
-    public function addMultipleCharacters(Request $request, $collection)
+
+    public function addMultipleCharacters(Request $request, Collection $collection)
     {
-        return back()->with('info', 'Функция коллекций временно недоступна');
+        $this->authorizeCollection($collection);
+
+        $data = $request->validate([
+            'character_ids' => ['required', 'array', 'min:1'],
+            'character_ids.*' => ['integer', 'exists:characters,id'],
+        ]);
+
+        $existing = $collection->characters()->pluck('characters.id')->all();
+        $toAttach = array_values(array_diff($data['character_ids'], $existing));
+
+        if ($toAttach === []) {
+            return back()->with('info', 'Все выбранные иероглифы уже в коллекции.');
+        }
+
+        $collection->characters()->attach($toAttach);
+
+        return back()->with('success', 'Добавлено иероглифов: ' . count($toAttach));
     }
-    
-    public function removeCharacter($collection, $character)
+
+    public function removeCharacter(Collection $collection, Character $character)
     {
-        return back()->with('info', 'Функция коллекций временно недоступна');
+        $this->authorizeCollection($collection);
+
+        $collection->characters()->detach($character->id);
+
+        return back()->with('success', 'Иероглиф убран из коллекции.');
     }
-    
-    public function review($collection)
+
+    /**
+     * Поиск иероглифов для автодополнения (добавление в коллекцию).
+     */
+    public function searchCharacters(Request $request, Collection $collection)
     {
-        return view('user.collections.under_construction');
+        $this->authorizeCollection($collection);
+
+        $q = trim((string) $request->get('q', ''));
+        if (mb_strlen($q) < 1) {
+            return response()->json(['characters' => []]);
+        }
+
+        $characters = Character::query()
+            ->where(function ($query) use ($q) {
+                $query->where('meaning', 'like', '%' . $q . '%')
+                    ->orWhere('pinyin', 'like', '%' . $q . '%')
+                    ->orWhere('character', 'like', '%' . $q . '%');
+            })
+            ->orderBy('id')
+            ->limit(25)
+            ->get(['id', 'character', 'pinyin', 'meaning', 'hsk_level']);
+
+        return response()->json(['characters' => $characters]);
+    }
+
+    public function review(Collection $collection)
+    {
+        $this->authorizeCollection($collection);
+
+        return redirect()->route('learning.collection.level', $collection);
+    }
+
+    private function authorizeCollection(Collection $collection): void
+    {
+        abort_unless($collection->user_id === Auth::id(), 403);
     }
 }

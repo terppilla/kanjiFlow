@@ -156,6 +156,8 @@
         <a href="{{ route('dashboard') }}" class="text-2xl font-semibold">KanjiFlow</a>
         <div>
             @auth
+                <a href="{{ route('learning.select-level') }}" class="text-lg">Обучение</a>
+                <a href="{{ route('collections.index') }}" class="text-lg">Коллекции</a>
                 <a href="{{ route('profile.edit') }}" class="text-lg">Профиль</a>
                 <form method="POST" action="{{ route('logout') }}" style="display: inline;">
                     @csrf

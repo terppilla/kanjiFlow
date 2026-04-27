@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\CharacterController;
 use App\Http\Controllers\LearningController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\CollectionController;
+use App\Http\Controllers\AudioController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -56,11 +57,25 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
 
 // Обучение иероглифам
 Route::middleware(['auth'])->prefix('learn')->group(function () {
+    // Генерация и сохранение аудио иероглифа
+Route::post('/audio/character/{characterId}', [AudioController::class, 'generateCharacterAudio']);
+
+// Генерация и сохранение аудио для примера
+Route::post('/audio/example/{characterId}', [AudioController::class, 'generateExampleAudio']);
+
+// Получение Base64 для иероглифа (без сохранения)
+Route::get('/audio/character/{characterId}/base64', [AudioController::class, 'getCharacterBase64']);
+
+// Получение Base64 для примера (без сохранения)
+Route::get('/audio/example/{characterId}/base64', [AudioController::class, 'getExampleBase64']);
     Route::get('/', [LearningController::class, 'selectLevel'])->name('learning.select-level');
+    Route::get('/collection/{collection}/level', [LearningController::class, 'showCollectionLevel'])->name('learning.collection.level');
+    Route::get('/collection/{collection}/character/{character}', [LearningController::class, 'showInCollection'])->name('learning.collection.show');
     Route::get('/level/{level}', [LearningController::class, 'showLevel'])->name('learning.level');
     Route::get('/character/{character}', [LearningController::class, 'show'])->name('learning.show');
+    Route::get('/character/{character}/panel', [LearningController::class, 'characterPanel'])->name('learning.panel');
     Route::get('/character/{character}/options', [LearningController::class, 'getMultipleChoiceOptions'])->name('learning.options');
-    Route::post('/character/{character}/check', [LearningController::class, 'checkAnswer'])->name('learning.check');
+    Route::post('/character/{character}/practice', [LearningController::class, 'submitPractice'])->name('learning.practice');
 });
 
 // Повторение (SRS)
@@ -72,11 +87,11 @@ Route::middleware(['auth'])->prefix('review')->name('review.')->group(function (
     Route::get('/hsk/{level}', [ReviewController::class, 'showReview'])->name('hsk');
 });
 
-// Коллекции - ВСЕ маршруты ведут на страницу "в разработке"
 Route::middleware(['auth'])->prefix('collections')->name('collections.')->group(function () {
     Route::get('/', [CollectionController::class, 'index'])->name('index');
     Route::get('/create', [CollectionController::class, 'create'])->name('create');
     Route::post('/', [CollectionController::class, 'store'])->name('store');
+    Route::get('/{collection}/characters/search', [CollectionController::class, 'searchCharacters'])->name('characters.search');
     Route::get('/{collection}', [CollectionController::class, 'show'])->name('show');
     Route::get('/{collection}/edit', [CollectionController::class, 'edit'])->name('edit');
     Route::put('/{collection}', [CollectionController::class, 'update'])->name('update');

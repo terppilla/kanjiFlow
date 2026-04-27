@@ -6,13 +6,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-
 class UserCharacter extends Model
 {
     use HasFactory;
-    protected $table = "user_characters";
 
-     protected $fillable = [
+    protected $table = 'user_characters';
+
+    protected $fillable = [
         'user_id',
         'character_id',
         'interval',
@@ -29,7 +29,7 @@ class UserCharacter extends Model
         'learned_at',
         'days_studied',
     ];
-    
+
     protected $casts = [
         'next_review_at' => 'datetime',
         'last_reviewed_at' => 'datetime',
@@ -44,112 +44,110 @@ class UserCharacter extends Model
         'is_learned' => 'boolean',
         'days_studied' => 'integer',
     ];
-    
-    
-   public function user(): BelongsTo 
-   {
-    return $this->belongsTo(User::class);
-   }
 
-   public function character(): BelongsTo
-   {
-    return $this->belongsTo(Character::class);
-   }
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 
-   public function StartLearning(Character $character) :self {
-    $this->userCharacters()->create([
-        'character_id'=>$character->id, 
-        'interval' => 15,
-        'ease_factor' => 2.5,
-        'repetitions' => 0,
-        'streak' => 0,
-        'total_reviews' => 0,
-        'succes_rate' => 0,
-        'is_learned' => false,
-        'days_studied' => 0, 
-        'last_reviewed_at' => now(),
-        'next_review_at' => now()->addMinutes(15),
-    ]);
+    public function character(): BelongsTo
+    {
+        return $this->belongsTo(Character::class);
+    }
 
-    return $this;
-   }
+    /**
+     * Обновление SRS по оценке: again | hard | good | easy
+     * (как в повторении: «забыл» … «легко»).
+     */
+    public function processReview(string $result): void
+    {
+        $result = in_array($result, ['again', 'hard', 'good', 'easy'], true) ? $result : 'again';
 
-   public function proccessReview(string $result) {
-    $this->last_reviewed_at = now();
-    $this->last_result = $result;
-    $this->total_reviews++;
-    $isCorrect = $this->validatedAnswer($userAnswer, $CorrectAnswer);
+        $this->last_reviewed_at = now();
+        $this->last_result = $result;
+        $this->total_reviews = (int) $this->total_reviews + 1;
 
-    if (!isCorrect) {
-        $this->interval = 15;
-        $this->repetitions = 0;
-        $this->ease_factor = max(1.3, $this->ease_factor - 0.2);
-        $this->next_review_at = now()->addMinutes(30);
-    } else {
-        switch($result) {
-            case 'again':
-             $this->interval = 15;
-             $this->repetitions = 0;
-             $this->ease_factor = max(1.3, $this->ease_factor - 0.2);
-             $this->next_review_at = now()->addMinutes(30);
-             break;
+        $ease = (float) $this->ease_factor;
+        $interval = (int) $this->interval;
 
-            case 'hard':
-                $this->repetitions++;
-                $this->streak++;
-                $this->ease_factor = max(1.3, $this->ease_factor - 0.15);
-                $this->interval = (int) ($this->interval * 1.2);
-                break;
+        if ($result === 'again') {
+            $this->repetitions = 0;
+            $this->streak = 0;
+            $this->ease_factor = max(1.3, $ease - 0.2);
+            $this->interval = 15;
+            $this->next_review_at = now()->addMinutes(30);
+            $this->applySuccessRateUpdate(false);
+            $this->checkIfLearned();
+            $this->save();
 
-             case 'good':
-                $this->repetitions++;
-                $this->streak++;
-                $this->interval = (int) ($this->interval * $this->ease_factor);
-                break;
-
-            case 'ease':
-                $this->repetitions++;
-                $this->streak++;
-                $this->ease_factor = min(2.5, $this->ease_factor + 0.1);
-                $this->interval = (int) ($this->interval * $this->ease_factor * 1.3);
-                break;
+            return;
         }
-            
-       $this->next_review_at = now()->addMinutes($this->interval);
-       $this->checkIfLearned();
-       $this->updateSuccessRate();
-       $this->save();
-       return $this;
-    }
+
+        $this->repetitions = (int) $this->repetitions + 1;
+        $this->streak = (int) $this->streak + 1;
+
+        match ($result) {
+            'hard' => $this->applyHardGrade($interval, $ease),
+            'good' => $this->applyGoodGrade($interval, $ease),
+            'easy' => $this->applyEasyGrade($interval, $ease),
+            default => null,
+        };
+
+        $this->next_review_at = now()->addMinutes(max(1, (int) $this->interval));
+        $this->applySuccessRateUpdate(true);
+        $this->checkIfLearned();
+        $this->save();
     }
 
-        private function validateAnswer(string $userAnswer = null, string $сorrectAnswer = null): bool
+    private function applyHardGrade(int $interval, float $ease): void
     {
-        return strtolower(trim($userAnswer)) === strtolower(trim($correctAnswer));
+        $this->ease_factor = max(1.3, $ease - 0.15);
+        $this->interval = (int) round($interval * 1.2);
     }
 
-    private function checkIfLearned(): void 
+    private function applyGoodGrade(int $interval, float $ease): void
     {
-        if(!$this->is_learned && 
-             $this->repetitions >= 5 &&
-             $this->interval >= 43200 &&
-             $this->success_rate >=90)
-             {
-                $this->is_learned = true;
-                $this->learned_at = now();
-             }
+        $this->interval = (int) round($interval * $ease);
     }
 
-    private function updateSuccessRate(string $result): void
+    private function applyEasyGrade(int $interval, float $ease): void
     {
-        $isSuccessful = in_array($result, ['good', 'ease']);
+        $this->ease_factor = min(2.5, $ease + 0.1);
+        $this->interval = (int) round($interval * $ease * 1.3);
+    }
 
-        if($this->total_reviews == 1) {
-            $this->success_rate = $isSuccessful ? 100:0;
-        } else {
-            $successCount = ($this->success_rate / 100) * ($this->total_reviews - 1);
-            $successCount += $isSuccessful ? 1 : 0;
-            $this->success_rate = ($successCount / $this->total_reviews) * 100;
+    private function applySuccessRateUpdate(bool $wasSuccessful): void
+    {
+        $n = (int) $this->total_reviews;
+        if ($n < 1) {
+            return;
+        }
+
+        if ($n === 1) {
+            $this->success_rate = $wasSuccessful ? 100.0 : 0.0;
+
+            return;
+        }
+
+        $prevTotal = $n - 1;
+        $successCount = ((float) $this->success_rate / 100.0) * $prevTotal;
+        $successCount += $wasSuccessful ? 1.0 : 0.0;
+        $this->success_rate = ($successCount / (float) $n) * 100.0;
+    }
+
+    private function checkIfLearned(): void
+    {
+        if ($this->is_learned) {
+            return;
+        }
+
+        if (
+            $this->repetitions >= 5
+            && $this->interval >= 43_200
+            && (float) $this->success_rate >= 90.0
+        ) {
+            $this->is_learned = true;
+            $this->learned_at = now();
         }
     }
 }
