@@ -142,7 +142,7 @@ class UserCharacter extends Model
         }
 
         if (
-            $this->repetitions >= 5
+            $this->repetitions >= 3
             && $this->interval >= 43_200
             && (float) $this->success_rate >= 90.0
         ) {

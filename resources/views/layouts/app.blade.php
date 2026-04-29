@@ -15,7 +15,7 @@
         <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
         <link rel="stylesheet" href="{{ asset('css/user.css') }}">
         
-
+    
     </head>
     <body class="font-sans antialiased">
         <div class="container">

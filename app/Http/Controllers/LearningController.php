@@ -54,11 +54,11 @@ class LearningController extends Controller
         return view('user.learning.select-level', compact('hskStats', 'userCollections'));
     }
 
-    public function showLevel($level)
+    public function showLevel(Request $request, $level)
     {
         $characters = Character::where('hsk_level', $level)
             ->orderBy('id')
-            ->paginate(20);
+            ->paginate(10);
 
         $learnedCharacterIds = UserCharacter::where('user_id', Auth::id())
             ->where('is_learned', true)
@@ -71,6 +71,15 @@ class LearningController extends Controller
 
         $collection = null;
 
+        if ($request->ajax()) {
+            return response()->view('user.learning.partials.level-characters', compact(
+                'characters',
+                'learnedCharacterIds',
+                'collection',
+                'level'
+            ));
+        }
+
         return view('user.learning.level', compact(
             'characters',
             'level',
@@ -81,7 +90,7 @@ class LearningController extends Controller
         ));
     }
 
-    public function showCollectionLevel(Collection $collection)
+    public function showCollectionLevel(Request $request, Collection $collection)
     {
         $this->authorizeOwnedCollection($collection);
 
@@ -106,6 +115,15 @@ class LearningController extends Controller
             ->count();
 
         $level = null;
+
+        if ($request->ajax()) {
+            return response()->view('user.learning.partials.level-characters', compact(
+                'characters',
+                'learnedCharacterIds',
+                'collection',
+                'level'
+            ));
+        }
 
         return view('user.learning.level', compact(
             'characters',
@@ -133,18 +151,86 @@ class LearningController extends Controller
         return $this->renderShow($request, $character, $collection);
     }
 
-    private function renderShow(Request $request, Character $character, ?Collection $learningCollection)
+    /**
+     * Повторение иероглифов из очереди SRS (те же условия, что счётчик на дашборде).
+     */
+    public function dueReview(Request $request)
+    {
+        $user = Auth::user();
+
+        $firstDueCharacterId = UserCharacter::where('user_id', $user->id)
+            ->where('next_review_at', '<=', now())
+            ->where('is_learned', false)
+            ->orderBy('next_review_at')
+            ->value('character_id');
+
+        if (! $firstDueCharacterId) {
+            return redirect()->route('dashboard')->with('info', 'Нет иероглифов для повторения.');
+        }
+
+        $dueRemaining = UserCharacter::where('user_id', $user->id)
+            ->where('next_review_at', '<=', now())
+            ->where('is_learned', false)
+            ->count();
+        $request->session()->put('due_review_initial_count', max(1, $dueRemaining));
+
+        $character = Character::findOrFail($firstDueCharacterId);
+
+        return $this->renderShow($request, $character, null, true);
+    }
+
+    private function renderShow(Request $request, Character $character, ?Collection $learningCollection, bool $dueReview = false)
     {
         $user = Auth::user();
         $mode = $request->get('mode', 'keyboard');
-        $ctx = $this->learningContext($user, $character, $learningCollection);
 
-        return view('user.learning.show', array_merge($ctx, compact('mode', 'learningCollection')));
+        if (! $dueReview) {
+            $request->session()->forget('due_review_initial_count');
+        }
+
+        $ctx = $dueReview
+            ? $this->dueReviewContext($request, $user, $character)
+            : $this->learningContext($user, $character, $learningCollection);
+
+        return view('user.learning.show', array_merge($ctx, compact('mode', 'learningCollection', 'dueReview')));
     }
 
     public function characterPanel(Request $request, Character $character)
     {
         $user = Auth::user();
+
+        if ($request->boolean('due_review')) {
+            $exists = UserCharacter::where('user_id', $user->id)
+                ->where('character_id', $character->id)
+                ->where('next_review_at', '<=', now())
+                ->where('is_learned', false)
+                ->exists();
+            abort_unless($exists, 404);
+
+            $ctx = $this->dueReviewContext($request, $user, $character);
+
+            return response()->json([
+                'character' => $this->serializeCharacterForPanel($ctx['character']),
+                'stats' => [
+                    'progress' => $ctx['progress'],
+                    'learned_count' => $ctx['learnedCount'],
+                    'practiced_count' => $ctx['practicedCount'],
+                    'total_in_level' => $ctx['totalInLevel'],
+                    'hsk_level' => $character->hsk_level,
+                    'progress_title' => $ctx['progressTitle'],
+                    'nav_title' => $ctx['navTitle'],
+                    'due_review_mode' => true,
+                    'due_completed' => $ctx['dueCompleted'],
+                    'due_initial' => $ctx['dueInitial'],
+                    'due_remaining' => $ctx['dueRemaining'],
+                ],
+                'nav' => [
+                    'prev_id' => $ctx['prevCharacter']?->id,
+                    'next_id' => $ctx['nextCharacter']?->id,
+                ],
+            ]);
+        }
+
         $collection = $this->resolveCollectionFromQuery($request, $user, $character);
         $ctx = $this->learningContext($user, $character, $collection);
 
@@ -209,6 +295,7 @@ class LearningController extends Controller
             'answer' => Rule::requiredIf($request->input('mode') === 'keyboard'),
             'selected_option' => Rule::requiredIf($request->input('mode') === 'multiple'),
             'collection_id' => 'nullable|integer|exists:collections,id',
+            'due_review' => 'nullable|boolean',
         ]);
 
         $user = Auth::user();
@@ -237,6 +324,25 @@ class LearningController extends Controller
 
         $userCharacter->processReview($effectiveResult);
 
+        if ($request->boolean('due_review')) {
+            $nextDue = UserCharacter::where('user_id', $user->id)
+                ->where('next_review_at', '<=', now())
+                ->where('is_learned', false)
+                ->orderBy('next_review_at')
+                ->first();
+
+            if (! $nextDue) {
+                $request->session()->forget('due_review_initial_count');
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => $this->getResultMessage($effectiveResult),
+                'next_character_id' => $nextDue?->character_id,
+                'redirect_url' => $nextDue ? null : route('dashboard'),
+            ]);
+        }
+
         $ctx = $this->learningContext($user, $character, $collection);
         $nextCharacter = $ctx['nextCharacter'];
 
@@ -252,6 +358,68 @@ class LearningController extends Controller
             'next_character_id' => $nextCharacter?->id,
             'redirect_url' => $redirectUrl,
         ]);
+    }
+
+    /**
+     * Контекст страницы обучения для очереди «к повторению сегодня» (дашборд).
+     */
+    private function dueReviewContext(Request $request, $user, Character $character): array
+    {
+        $queueIds = UserCharacter::where('user_id', $user->id)
+            ->where('next_review_at', '<=', now())
+            ->where('is_learned', false)
+            ->orderBy('next_review_at')
+            ->pluck('character_id')
+            ->all();
+
+        $remainingCount = count($queueIds);
+
+        if (! $request->session()->has('due_review_initial_count')) {
+            $request->session()->put('due_review_initial_count', max(1, $remainingCount));
+        }
+
+        $initial = (int) $request->session()->get('due_review_initial_count');
+        if ($initial < 1) {
+            $initial = max(1, $remainingCount);
+        }
+        if ($remainingCount > $initial) {
+            $initial = $remainingCount;
+            $request->session()->put('due_review_initial_count', $initial);
+        }
+
+        $completed = max(0, $initial - $remainingCount);
+        $progress = $initial > 0 ? min(100, max(0, (int) round(($completed / $initial) * 100))) : 0;
+
+        $idx = array_search($character->id, $queueIds, true);
+        if ($idx === false) {
+            $idx = 0;
+            $queueIds = [$character->id];
+        }
+
+        $prevCharacter = ($idx > 0) ? Character::find($queueIds[$idx - 1]) : null;
+        $nextCharacter = ($idx < count($queueIds) - 1) ? Character::find($queueIds[$idx + 1]) : null;
+
+        $queueSize = count($queueIds);
+
+        $learnedCount = UserCharacter::where('user_id', $user->id)
+            ->where('is_learned', true)
+            ->count();
+
+        return [
+            'character' => $character,
+            'prevCharacter' => $prevCharacter,
+            'nextCharacter' => $nextCharacter,
+            'totalInLevel' => $queueSize,
+            'learnedCount' => $learnedCount,
+            'practicedCount' => $completed,
+            'progress' => $progress,
+            'progressTitle' => 'Повторение по расписанию',
+            'navTitle' => 'Очередь SRS',
+            'backUrl' => route('dashboard'),
+            'dueCompleted' => $completed,
+            'dueInitial' => $initial,
+            'dueRemaining' => $remainingCount,
+        ];
     }
 
     private function learningContext($user, Character $character, ?Collection $learningCollection): array
@@ -327,7 +495,9 @@ class LearningController extends Controller
             $backUrl = route('learning.level', $character->hsk_level);
         }
 
-        $progress = $totalInLevel > 0 ? round(($practicedCount / $totalInLevel) * 100) : 0;
+        $progress = $totalInLevel > 0
+            ? min(100, max(0, (int) round(($practicedCount / $totalInLevel) * 100)))
+            : 0;
 
         return compact(
             'character',

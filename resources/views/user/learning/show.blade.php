@@ -822,7 +822,7 @@
             
             <div class="nav-center">
                 <div class="nav-title" id="navHskTitle">{{ $navTitle }}</div>
-                <div class="nav-subtitle">Изучение иероглифов</div>
+                <div class="nav-subtitle">{{ ($dueReview ?? false) ? 'Повторение (SRS)' : 'Изучение иероглифов' }}</div>
             </div>
             
             <a href="{{ route('dashboard') }}" class="nav-btn">
@@ -833,14 +833,19 @@
         <div class="level-progress">
             <div class="progress-header">
                 <div class="progress-title" id="progressTitle">{{ $progressTitle }}</div>
-                <div id="progressPercent">{{ $progress }}%</div>
+                <div id="progressPercent">{{ min(100, max(0, (int) $progress)) }}%</div>
             </div>
             <div class="progress-bar">
-                <div class="progress-fill" id="progressFill" style="width: {{ $progress }}%"></div>
+                <div class="progress-fill" id="progressFill" style="width: {{ min(100, max(0, (int) $progress)) }}%"></div>
             </div>
             <div class="progress-stats">
-                <span id="statPracticed">Пройдено в практике: {{ $practicedCount }}/{{ $totalInLevel }}</span>
-                <span id="statLearned">Полностью выучено: {{ $learnedCount }}</span>
+                @if($dueReview ?? false)
+                    <span id="statPracticed">Обработано из очереди: {{ $dueCompleted }} из {{ $dueInitial }}</span>
+                    <span id="statLearned">Осталось к повторению: {{ $dueRemaining }}</span>
+                @else
+                    <span id="statPracticed">Пройдено в практике: {{ $practicedCount }}/{{ $totalInLevel }}</span>
+                    <span id="statLearned">Полностью выучено: {{ $learnedCount }}</span>
+                @endif
             </div>
         </div>
         
@@ -988,6 +993,7 @@
         const LEARN_BASE = @json(rtrim(url('/learn'), '/'));
         const csrfToken = @json(csrf_token());
         const learningCollectionId = @json($learningCollection !== null ? $learningCollection->id : null);
+        const learningDueReview = @json($dueReview ?? false);
 
         let practiceUrl = @json(route('learning.practice', $character));
 
@@ -999,6 +1005,8 @@
             let url = LEARN_BASE + '/character/' + id + '/panel';
             if (learningCollectionId) {
                 url += '?collection=' + encodeURIComponent(learningCollectionId);
+            } else if (learningDueReview) {
+                url += '?due_review=1';
             }
             return url;
         }
@@ -1011,15 +1019,15 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            const progressBars = document.querySelectorAll('.progress-fill');
-            progressBars.forEach(bar => {
-                const width = bar.style.width;
-                bar.style.width = '0';
-                setTimeout(() => {
-                    bar.style.transition = 'width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1)';
-                    bar.style.width = width;
-                }, 100);
-            });
+            const progressFillEl = document.getElementById('progressFill');
+            if (progressFillEl && progressFillEl.style.width) {
+                const targetW = progressFillEl.style.width;
+                progressFillEl.style.width = '0';
+                setTimeout(function() {
+                    progressFillEl.style.transition = 'width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                    progressFillEl.style.width = targetW;
+                }, 80);
+            }
         });
 
         let currentMode = '{{ $mode }}';
@@ -1159,9 +1167,10 @@
             document.getElementById('wrongRevealMeaning').textContent = c.meaning || '';
 
             document.getElementById('progressTitle').textContent = st.progress_title || ('Прогресс уровня HSK ' + st.hsk_level);
-            document.getElementById('progressPercent').textContent = st.progress + '%';
+            const pct = Math.min(100, Math.max(0, parseInt(st.progress, 10) || 0));
+            document.getElementById('progressPercent').textContent = pct + '%';
             const fill = document.getElementById('progressFill');
-            const w = st.progress + '%';
+            const w = pct + '%';
             fill.style.transition = 'none';
             fill.style.width = '0';
             requestAnimationFrame(function() {
@@ -1171,9 +1180,16 @@
                 });
             });
 
-            document.getElementById('statPracticed').textContent =
-                'Пройдено в практике: ' + st.practiced_count + '/' + st.total_in_level;
-            document.getElementById('statLearned').textContent = 'Полностью выучено: ' + st.learned_count;
+            if (st.due_review_mode) {
+                document.getElementById('statPracticed').textContent =
+                    'Обработано из очереди: ' + st.due_completed + ' из ' + st.due_initial;
+                document.getElementById('statLearned').textContent =
+                    'Осталось к повторению: ' + st.due_remaining;
+            } else {
+                document.getElementById('statPracticed').textContent =
+                    'Пройдено в практике: ' + st.practiced_count + '/' + st.total_in_level;
+                document.getElementById('statLearned').textContent = 'Полностью выучено: ' + st.learned_count;
+            }
 
             const acBtn = document.getElementById('audioCharacterBtn');
             if (c.audio_character) {
@@ -1552,6 +1568,9 @@
 
             if (learningCollectionId) {
                 payload.collection_id = learningCollectionId;
+            }
+            if (learningDueReview) {
+                payload.due_review = true;
             }
 
             document.querySelectorAll('.eval-btn').forEach(b => { b.disabled = true; });

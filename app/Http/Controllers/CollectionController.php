@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Character;
 use App\Models\Collection;
+use App\Models\UserCharacter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 class CollectionController extends Controller
@@ -52,7 +53,12 @@ class CollectionController extends Controller
             $q->orderByPivot('id');
         }]);
 
-        return view('user.collections.show', compact('collection'));
+        $learnedCharacterIds = UserCharacter::where('user_id', Auth::id())
+            ->where('is_learned', true)
+            ->pluck('character_id')
+            ->all();
+
+        return view('user.collections.show', compact('collection', 'learnedCharacterIds'));
     }
 
     public function edit(Collection $collection)

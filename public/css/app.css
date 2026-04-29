@@ -146,6 +146,88 @@ input[type="button"].btn {
 
 }
 
+/* Пагинация */
+
+/* Кастомная пагинация для всего сайта */
+.custom-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 2rem;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(214, 155, 100, 0.2);
+}
+
+.pagination-info {
+    font-size: 0.9rem;
+    color: #1F2933;
+    background: rgba(214, 155, 100, 0.1);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+}
+
+.pagination-buttons {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.pagination-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.25rem;
+    background: white;
+    border: 1px solid rgba(214, 155, 100, 0.4);
+    border-radius: 8px;
+    color: #C1121F;
+    font-weight: 500;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.pagination-btn.page {
+    border: none;
+    background-color: none;
+}
+
+
+.pagination-btn:hover {
+    background: #C1121F;
+    border-color: #C1121F;
+    color: white;
+    transform: translateY(-1px);
+}
+
+.pagination-btn.page:hover {
+    color: var(--color-gold);
+    background: none;
+    border: none;
+}
+
+.pagination-btn.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Адаптация для телефонов */
+@media (max-width: 640px) {
+    .custom-pagination {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .pagination-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
+}
 
 
 

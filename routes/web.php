@@ -47,6 +47,7 @@ Route::middleware('guest')->group(function () {
 // Главный дашборд
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    
 });
 
 // Админка 
@@ -54,6 +55,8 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'adminIndex'])->name('admin.dashboard');
     Route::resource('/characters', CharacterController::class)->names('admin.characters');
 });
+
+
 
 // Обучение иероглифам
 Route::middleware(['auth'])->prefix('learn')->group(function () {
@@ -69,6 +72,7 @@ Route::get('/audio/character/{characterId}/base64', [AudioController::class, 'ge
 // Получение Base64 для примера (без сохранения)
 Route::get('/audio/example/{characterId}/base64', [AudioController::class, 'getExampleBase64']);
     Route::get('/', [LearningController::class, 'selectLevel'])->name('learning.select-level');
+    Route::get('/review/due', [LearningController::class, 'dueReview'])->name('learning.review.due');
     Route::get('/collection/{collection}/level', [LearningController::class, 'showCollectionLevel'])->name('learning.collection.level');
     Route::get('/collection/{collection}/character/{character}', [LearningController::class, 'showInCollection'])->name('learning.collection.show');
     Route::get('/level/{level}', [LearningController::class, 'showLevel'])->name('learning.level');
@@ -81,7 +85,7 @@ Route::get('/audio/example/{characterId}/base64', [AudioController::class, 'getE
 // Повторение (SRS)
 Route::middleware(['auth'])->prefix('review')->name('review.')->group(function () {
     Route::get('/', [ReviewController::class, 'selectLevel'])->name('select-level');
-    Route::get('review/show', [ReviewController::class, 'showReview'])->name('show');
+    Route::get('review/show', [ReviewController::class, 'show'])->name('show');
     Route::post('/submit/{userCharacter}', [ReviewController::class, 'submitResult'])->name('submit');
     Route::post('/check/{userCharacter}', [ReviewController::class, 'checkAnswer'])->name('check');
     Route::get('/hsk/{level}', [ReviewController::class, 'showReview'])->name('hsk');

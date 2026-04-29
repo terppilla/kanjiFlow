@@ -1045,6 +1045,7 @@
                 transform: translateY(0);
             }
         }
+
     </style>
 
     <div class="dashboard-container">
@@ -1055,19 +1056,16 @@
             <aside class="sidebar">
                 <div class="quick-actions">
                     <h3>Быстрые действия</h3>
-                    {{-- <a href="{{ route('review.show') }}" class="action-btn primary">
+                    <a href="{{ route('learning.review.due') }}" class="action-btn primary">
                         <span class="action-icon">⏱</span>
                         <span class="action-text">Повторить иероглифы ({{ $dueCards->count() }})</span>
-                    </a> --}}
+                    </a>
                     <a href="{{ route('learning.select-level') }}" class="action-btn">
                         <span class="action-text">Изучать новые</span>
                     </a>
                     <a href="{{ route('collections.index') }}" class="action-btn">
                         <span class="action-text">Мои коллекции</span>
                     </a>
-                    {{-- <a href="{{ route('review.select-level') }}" class="action-btn">
-                        <span class="action-text">Тренировать по HSK</span>
-                    </a> --}}
                 </div>
 
                 <!-- Статистика -->
@@ -1119,9 +1117,6 @@
                                 <a href="{{ route('learning.level', $level) }}" class="hsk-action-btn">
                                     Изучать
                                 </a>
-                                {{-- <a href="{{ route('review.hsk', $level) }}" class="hsk-review-btn">
-                                    Повторить
-                                </a> --}}
                             </div>
                         @endfor
                     </div>
@@ -1132,7 +1127,7 @@
                     <h3>Иероглифы для повторения сегодня</h3>
                     @if($dueCards->count() > 0)
                         <div class="due-cards-grid">
-                            @foreach($dueCards->take(10) as $card)
+                            @foreach($dueCards as $card)
                                 <div class="due-card">
                                     <div class="due-card-character">
                                         {{ $card->character->character }}
@@ -1150,13 +1145,16 @@
                                 </div>
                             @endforeach
                         </div>
-                        @if($dueCards->count() > 10)
-                            <div class="view-all-container">
-                                <a href="{{ route('review.show') }}" class="view-all-btn">
-                                    Показать все ({{ $dueCards->count() }})
-                                </a>
-                            </div>
-                        @endif
+
+                        <div class="pagination">
+                            {{ $dueCards->links('vendor.pagination.my-pagination') }}
+                        </div>
+                        
+                        <a href="{{ route('learning.review.due') }}" class="btn action-btn primary">
+                            <span class="action-icon">⏱</span>
+                            <span class="action-text">Повторить иероглифы ({{ $dueCardsTotal }})</span>
+                        </a>
+                
                     @else
                         <div class="no-cards-message">
                             Отличная работа! Сегодня нет иероглифов для повторения.
@@ -1240,14 +1238,22 @@
     <script>
         // Простая анимация для прогресс-баров
         document.addEventListener('DOMContentLoaded', function() {
-            const progressBars = document.querySelectorAll('.progress-fill');
-            progressBars.forEach(bar => {
-                const width = bar.style.width;
+            document.querySelectorAll('.hsk-level-card .progress-fill').forEach(function(bar) {
+                var width = bar.style && bar.style.width;
+                if (!width && bar.getAttribute('style')) {
+                    var m = bar.getAttribute('style').match(/width\s*:\s*([^;]+)/i);
+                    if (m) {
+                        width = m[1].trim();
+                    }
+                }
+                if (!width) {
+                    return;
+                }
                 bar.style.width = '0';
-                setTimeout(() => {
+                setTimeout(function() {
                     bar.style.transition = 'width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1)';
                     bar.style.width = width;
-                }, 100);
+                }, 80);
             });
         });
 
@@ -1276,5 +1282,74 @@
                 }
             }, 5000);
         }
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Находим все ссылки пагинации
+    document.querySelectorAll('.pagination a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            let url = this.getAttribute('href');
+            
+            // Показываем загрузку
+            document.querySelector('.due-cards-grid').style.opacity = '0.5';
+            
+            // Загружаем новую страницу
+            fetch(url, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => response.text())
+            .then(html => {
+                // Обновляем весь блок
+                let temp = document.createElement('div');
+                temp.innerHTML = html;
+                
+                let newGrid = temp.querySelector('.due-cards-grid');
+                let newPagination = temp.querySelector('.pagination');
+                
+                if (newGrid) document.querySelector('.due-cards-grid').innerHTML = newGrid.innerHTML;
+                if (newPagination) document.querySelector('.pagination').innerHTML = newPagination.innerHTML;
+                
+                document.querySelector('.due-cards-grid').style.opacity = '1';
+                
+                // Обновляем обработчики
+                attachHandlers();
+            });
+        });
+    });
+    
+    function attachHandlers() {
+        document.querySelectorAll('.pagination a').forEach(link => {
+            link.removeEventListener('click', clickHandler);
+            link.addEventListener('click', clickHandler);
+        });
+    }
+    
+    function clickHandler(e) {
+        e.preventDefault();
+        let url = this.getAttribute('href');
+        
+        document.querySelector('.due-cards-grid').style.opacity = '0.5';
+        
+        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(response => response.text())
+            .then(html => {
+                let temp = document.createElement('div');
+                temp.innerHTML = html;
+                
+                let newGrid = temp.querySelector('.due-cards-grid');
+                let newPagination = temp.querySelector('.pagination');
+                
+                if (newGrid) document.querySelector('.due-cards-grid').innerHTML = newGrid.innerHTML;
+                if (newPagination) document.querySelector('.pagination').innerHTML = newPagination.innerHTML;
+                
+                document.querySelector('.due-cards-grid').style.opacity = '1';
+                attachHandlers();
+            });
+    }
+    
+    attachHandlers();
+});
+        
     </script>
 </x-app-layout>

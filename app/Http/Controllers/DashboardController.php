@@ -33,9 +33,13 @@ public function index()
         ->where('is_learned', false)
         ->with('character')
         ->orderBy('next_review_at')
-        ->limit(10) // Ограничим для дашборда
-        ->get();
+        ->paginate(6);
     
+        $dueCardsTotal = UserCharacter::where('user_id', $user->id)
+    ->where('next_review_at', '<=', now())
+    ->where('is_learned', false)
+    ->count();
+
     // Статистика по уровням HSK
     $hskStats = [];
     for ($level = 1; $level <= 6; $level++) {
@@ -60,9 +64,12 @@ public function index()
         'allCharacters',
         'reviewStats',
         'dueCards',
-        'hskStats'
+        'hskStats',
+        'dueCardsTotal',
     ));
 }
+
+
 
 
     public function adminIndex()

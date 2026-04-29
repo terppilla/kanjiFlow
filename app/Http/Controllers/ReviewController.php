@@ -44,7 +44,7 @@ class ReviewController extends Controller
             ]);
         }
         
-        return view('review.show', [
+        return view('user.review.show', [
             'userCharacter' => $userCharacter,
             'character' => $userCharacter->character,
             'hskLevel' => $hskLevel,
