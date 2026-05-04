@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\InteractsWithReviewFeedback;
-use App\Models\UserCharacter;
 use App\Models\Character;
+use App\Models\UserCharacter;
+use App\Services\GamificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -12,8 +13,9 @@ class ReviewController extends Controller
 {
     use InteractsWithReviewFeedback;
 
-    public function __construct()
-    {
+    public function __construct(
+        private GamificationService $gamification,
+    ) {
         $this->middleware('auth');
     }
 
@@ -123,19 +125,25 @@ class ReviewController extends Controller
         
         // Обрабатываем результат через SRS (метод в модели UserCharacter)
         $userCharacter->processReview($request->result);
-        
+        $userCharacter->refresh();
+
+        $user = Auth::user();
+        $this->gamification->recordStudyActivity($user);
+        $newAchievements = $this->gamification->evaluateAndGrant($user, null, false);
+
         // Получаем следующую карточку
         $nextCard = $this->getNextCard(Auth::id(), $request->get('hsk_level', 1));
-        
+
         return response()->json([
             'success' => true,
             'message' => $this->getResultMessage($request->result),
-            'next_review_at' => $userCharacter->next_review_at->format('d.m.Y H:i'),
+            'next_review_at' => $userCharacter->next_review_at?->format('d.m.Y H:i'),
             'next_card' => $nextCard ? [
                 'id' => $nextCard->id,
                 'character' => $nextCard->character->character,
                 'pinyin' => $nextCard->character->pinyin,
             ] : null,
+            'new_achievements' => $newAchievements,
         ]);
     }
 }

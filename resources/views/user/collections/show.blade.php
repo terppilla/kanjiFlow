@@ -57,16 +57,18 @@
                 @endif
             </section>
 
-            <section class="collections-danger-zone" aria-labelledby="danger-zone-title">
-                <h2 id="danger-zone-title" class="collections-danger-title">Опасная зона</h2>
-                <p class="collections-danger-text">Удаление коллекции не удаляет иероглифы из базы, только убирает этот набор.</p>
-                <form action="{{ route('collections.destroy', $collection) }}" method="post"
-                    onsubmit="return confirm('Удалить коллекцию «{{ addslashes($collection->name) }}»?');">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger-solid">Удалить коллекцию</button>
-                </form>
-            </section>
+            @if(! $collection->is_builtin)
+                <section class="collections-danger-zone" aria-labelledby="danger-zone-title">
+                    <h2 id="danger-zone-title" class="collections-danger-title">Опасная зона</h2>
+                    <p class="collections-danger-text">Удаление коллекции не удаляет иероглифы из базы, только убирает этот набор.</p>
+                    <form action="{{ route('collections.destroy', $collection) }}" method="post"
+                        onsubmit="return confirm('Удалить коллекцию «{{ addslashes($collection->name) }}»?');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger-solid">Удалить коллекцию</button>
+                    </form>
+                </section>
+            @endif
         </div>
     </div>
 

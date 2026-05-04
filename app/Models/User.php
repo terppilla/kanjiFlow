@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -19,8 +20,12 @@ class User extends Authenticatable
         'role',
         'two_factor_code',
         'two_factor_expires_at',
+        'two_factor_enabled',
         'login_attempts',
         'locked_until',
+        'last_study_date',
+        'study_streak',
+        'study_sessions_completed',
     ];
 
     protected $hidden = [
@@ -33,8 +38,12 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'two_factor_expires_at' => 'datetime',
+        'two_factor_enabled' => 'boolean',
         'locked_until' => 'datetime',
         'login_attempts' => 'integer',
+        'last_study_date' => 'date',
+        'study_streak' => 'integer',
+        'study_sessions_completed' => 'integer',
     ];
 
     public function isAdmin(): bool
@@ -71,6 +80,19 @@ class User extends Authenticatable
     public function userCharacters(): HasMany
     {
         return $this->hasMany(UserCharacter::class);
+    }
+
+    public function favoriteArticles(): BelongsToMany
+    {
+        return $this->belongsToMany(Article::class, 'article_user_favorites')->withTimestamps();
+    }
+
+    public function achievements(): BelongsToMany
+    {
+        return $this->belongsToMany(Achievement::class, 'user_achievements')
+            ->withPivot('earned_at')
+            ->withTimestamps()
+            ->orderByDesc('user_achievements.earned_at');
     }
 
 public function dueForReview()

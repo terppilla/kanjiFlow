@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -56,5 +57,50 @@ class ProfileController extends Controller
         $request->session()->regenerateToken();
 
         return Redirect::to('/');
+    }
+
+    /**
+     * Включение или отключение двухфакторной аутентификации (отключение — только с подтверждением пароля).
+     */
+    public function updateTwoFactor(Request $request): RedirectResponse|JsonResponse
+    {
+        $user = $request->user();
+        $enable = $request->boolean('two_factor_enabled');
+
+        if ($enable) {
+            if (! $user->two_factor_enabled) {
+                $user->update([
+                    'two_factor_enabled' => true,
+                ]);
+            }
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'two_factor_enabled' => true,
+                    'message' => 'Двухфакторная аутентификация включена.',
+                ]);
+            }
+
+            return Redirect::route('profile.edit')->with('status', 'two-factor-enabled');
+        }
+
+        $request->validateWithBag('twoFactor', [
+            'password' => ['required', 'current_password'],
+        ]);
+
+        $user->update([
+            'two_factor_enabled' => false,
+            'two_factor_code' => null,
+            'two_factor_expires_at' => null,
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'two_factor_enabled' => false,
+                'message' => 'Двухфакторная аутентификация отключена.',
+            ]);
+        }
+
+        return Redirect::route('profile.edit')->with('status', 'two-factor-disabled');
     }
 }

@@ -19,17 +19,10 @@
             padding: 0;
         }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--color-light-bg);
-            color: var(--color-calm-blue);
-        }
-
-        .select-level-container {
-            max-width: 1200px;
+        .page-learning-select-level-inner {
+            max-width: 1120px;
             margin: 0 auto;
-            padding: 2rem 1.5rem;
-            min-height: 100vh;
+            padding: 0 1rem 2rem;
         }
 
         /* Ссылка назад */
@@ -49,27 +42,6 @@
             color: var(--color-dark-red);
             background: rgba(193, 18, 31, 0.1);
             transform: translateX(-2px);
-        }
-
-        /* Заголовок страницы */
-        .page-header {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-
-        .page-header h1 {
-            font-size: 2.5rem;
-            color: var(--color-dark-red);
-            margin-bottom: 0.5rem;
-            font-weight: 700;
-        }
-
-        .page-subtitle {
-            font-size: 1.1rem;
-            color: var(--color-calm-blue);
-            opacity: 0.9;
-            max-width: 600px;
-            margin: 0 auto;
         }
 
         /* Сетка уровней HSK */
@@ -163,7 +135,7 @@
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, var(--color-primary), var(--color-gold));
+            background: var(--color-primary);
             border-radius: 4px;
             transition: width 0.6s ease;
         }
@@ -293,16 +265,126 @@
             border-left: 3px solid var(--color-gold);
         }
 
+        /* Тематические коллекции */
+        .select-level-collections {
+            margin-bottom: 2.75rem;
+        }
+
+        .select-level-collections-header {
+            text-align: center;
+            margin-bottom: 1.35rem;
+        }
+
+        .select-level-collections-title {
+            font-size: 1.65rem;
+            color: var(--color-dark-blue);
+            font-weight: 600;
+            margin-bottom: 0.45rem;
+        }
+
+        .select-level-collections-lead {
+            font-size: 0.98rem;
+            color: var(--color-calm-blue);
+            opacity: 0.92;
+            max-width: 640px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
+        .select-level-collections-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .select-level-collection-card {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 1.35rem 1.4rem;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid rgba(214, 155, 100, 0.22);
+            border-left: 4px solid var(--color-gold);
+            text-decoration: none;
+            color: inherit;
+            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+            transition: all 0.2s ease;
+        }
+
+        .select-level-collection-card:hover {
+            border-color: rgba(214, 155, 100, 0.45);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+        }
+
+        .select-level-collection-badge {
+            align-self: flex-start;
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--color-primary);
+            background: rgba(193, 18, 31, 0.08);
+            padding: 0.25rem 0.55rem;
+            border-radius: 6px;
+        }
+
+        .select-level-collection-card h3 {
+            font-size: 1.15rem;
+            color: var(--color-dark-blue);
+            font-weight: 600;
+            margin: 0;
+            line-height: 1.3;
+        }
+
+        .select-level-collection-meta {
+            font-size: 0.88rem;
+            color: #64748b;
+            margin: 0;
+        }
+
+        .select-level-collections-empty {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 1.25rem;
+            color: #64748b;
+            font-size: 0.92rem;
+            background: rgba(248, 250, 252, 0.9);
+            border-radius: 10px;
+            border: 1px dashed rgba(214, 155, 100, 0.35);
+        }
+
+        .select-level-collections-empty code {
+            font-size: 0.82rem;
+            background: rgba(15, 23, 42, 0.06);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+        }
+
+        .select-level-collections-all-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--color-primary);
+            text-decoration: none;
+            margin-top: 0.25rem;
+        }
+
+        .select-level-collections-all-link:hover {
+            color: var(--color-dark-red);
+            text-decoration: underline;
+        }
+
+        .select-level-collections-footer {
+            text-align: center;
+        }
+
         /* Адаптивность */
         @media (max-width: 768px) {
-            .select-level-container {
-                padding: 1.5rem 1rem;
-            }
-
-            .page-header h1 {
-                font-size: 2rem;
-            }
-
             .hsk-levels-grid {
                 grid-template-columns: 1fr;
                 gap: 1rem;
@@ -344,13 +426,45 @@
         }
     </style>
 
-    <div class="select-level-container">
+    <div class="articles-page page-learning-select-level">
+        <div class="articles-shell page-learning-select-level-inner">
         <a href="{{ route('dashboard') }}" class="back-link">← Назад в дашборд</a>
-        
-        <div class="page-header">
-            <h1>Выберите уровень HSK для изучения</h1>
-            <p class="page-subtitle">Начните с HSK 1 и постепенно переходите к более сложным уровням</p>
-        </div>
+
+        <header class="articles-header">
+            <div class="articles-header-text">
+                <h1 class="articles-title">Выберите уровень HSK для изучения</h1>
+                <p class="articles-lead">Начните с HSK 1 и постепенно переходите к более сложным уровням</p>
+            </div>
+        </header>
+
+        @php
+            $builtinCollections = $builtinCollections ?? collect();
+        @endphp
+
+        <section class="select-level-collections" aria-labelledby="select-level-collections-heading">
+            <div class="select-level-collections-header">
+                <h2 id="select-level-collections-heading" class="select-level-collections-title">Тематические подборки</h2>
+              
+            </div>
+            <div class="select-level-collections-grid">
+                @forelse ($builtinCollections as $collection)
+                    <a href="{{ route('learning.collection.level', $collection) }}" class="select-level-collection-card">
+                        <span class="select-level-collection-badge">Базовая подборка</span>
+                        <h3>{{ $collection->name }}</h3>
+                        <p class="select-level-collection-meta">{{ $collection->characters_count }} иероглифов в наборе</p>
+                    </a>
+                @empty
+                    <p class="select-level-collections-empty">
+                        Встроенные подборки ещё не созданы для вашего аккаунта. Администратор может выполнить команду
+                        <code>php artisan collections:sync-builtin</code>
+                        или зарегистрируйтесь заново после обновления приложения.
+                    </p>
+                @endforelse
+            </div>
+            <div class="select-level-collections-footer">
+                <a href="{{ route('collections.index') }}" class="select-level-collections-all-link">Все мои коллекции →</a>
+            </div>
+        </section>
         
         <div class="hsk-levels-grid">
             @for($level = 1; $level <= 6; $level++)
@@ -433,7 +547,7 @@
                 некоторые знания. Это поможет систематизировать обучение и заполнить пробелы.
             </p>
         </div>
+        </div>
     </div>
-    
 
 </x-app-layout>

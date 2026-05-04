@@ -887,8 +887,9 @@
                     <span class="mode-label">Режим ввода</span>
                 </button>
                 
-                <button class="mode-btn {{ $mode == 'eye' ? 'active' : '' }}" 
-                        data-mode="eye" onclick="setMode('eye')">
+                <button type="button" class="mode-btn {{ $mode == 'eye' ? 'active' : '' }}" 
+                        data-mode="eye" onclick="setMode('eye')"
+                        title="Станет доступен после двух неверных ответов на этом иероглифе">
                     <span class="mode-label">Режим просмотра</span>
                 </button>
                 
@@ -1025,9 +1026,27 @@
         let objectiveAnswerCorrect = true;
         let practiceLocked = false;
         let isLoadingCharacter = false;
+        let incorrectObjectiveCount = 0;
 
         document.addEventListener('DOMContentLoaded', function() {
             history.replaceState({ characterId: characterId }, '', window.location.href);
+
+            if (currentMode === 'eye' && incorrectObjectiveCount < 2) {
+                currentMode = 'keyboard';
+                document.querySelectorAll('.answer-mode').forEach(function(el) { el.classList.remove('active'); });
+                document.querySelectorAll('.mode-btn').forEach(function(btn) { btn.classList.remove('active'); });
+                const km = document.getElementById('keyboardMode');
+                const kb = document.querySelector('[data-mode="keyboard"]');
+                if (km) {
+                    km.classList.add('active');
+                }
+                if (kb) {
+                    kb.classList.add('active');
+                }
+                const url = new URL(window.location.href);
+                url.searchParams.set('mode', 'keyboard');
+                window.history.replaceState({}, '', url);
+            }
 
             if (currentMode === 'multiple') {
                 loadMultipleChoiceOptions();
@@ -1036,6 +1055,7 @@
             setupEventListeners();
             wireNavHandlers();
             wireAudioButtons();
+            syncEyeModeAvailability();
 
             if (currentMode === 'keyboard') {
                 document.getElementById('textAnswer').focus();
@@ -1218,6 +1238,7 @@
                 nextBtn.removeAttribute('data-character-id');
             }
 
+            incorrectObjectiveCount = 0;
             resetAnswerState();
             wireNavHandlers();
             wireAudioButtons();
@@ -1238,8 +1259,37 @@
             }
         }
         
+        function syncEyeModeAvailability() {
+            const eyeBtn = document.querySelector('.mode-btn[data-mode="eye"]');
+            const kbBtn = document.querySelector('.mode-btn[data-mode="keyboard"]');
+            const multBtn = document.querySelector('.mode-btn[data-mode="multiple"]');
+            if (!eyeBtn) {
+                return;
+            }
+            if (practiceLocked) {
+                document.querySelectorAll('.mode-btn').forEach(function(btn) { btn.disabled = true; });
+                return;
+            }
+            const unlocked = incorrectObjectiveCount >= 2;
+            if (kbBtn) {
+                kbBtn.disabled = false;
+            }
+            if (multBtn) {
+                multBtn.disabled = false;
+            }
+            eyeBtn.disabled = !unlocked;
+            eyeBtn.title = unlocked
+                ? 'Режим просмотра'
+                : 'Станет доступен после двух неверных ответов на этом иероглифе';
+        }
+
         function setMode(mode) {
             if (practiceLocked) {
+                return;
+            }
+
+            if (mode === 'eye' && incorrectObjectiveCount < 2) {
+                showNotification('Режим просмотра доступен после двух неверных ответов.', 'warning');
                 return;
             }
 
@@ -1330,6 +1380,8 @@
                 revealAfterAnswer(true);
             } else {
                 objectiveAnswerCorrect = false;
+                incorrectObjectiveCount++;
+                syncEyeModeAvailability();
                 attemptsLeft--;
                 attemptsLeftSpan.textContent = attemptsLeft;
                 attemptsCounter.style.display = 'block';
@@ -1364,6 +1416,8 @@
                 revealAfterAnswer(true);
             } else {
                 objectiveAnswerCorrect = false;
+                incorrectObjectiveCount++;
+                syncEyeModeAvailability();
                 button.classList.add('incorrect');
                 multipleAttemptsLeft--;
                 attemptsLeftSpan.textContent = multipleAttemptsLeft;
@@ -1432,7 +1486,7 @@
             objectiveAnswerCorrect = true;
             practiceLocked = false;
 
-            document.querySelectorAll('.mode-btn').forEach(btn => { btn.disabled = false; });
+            syncEyeModeAvailability();
 
             const textInput = document.getElementById('textAnswer');
             if (textInput) {

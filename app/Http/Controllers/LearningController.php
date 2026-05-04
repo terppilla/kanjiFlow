@@ -6,6 +6,8 @@ use App\Http\Controllers\Concerns\InteractsWithReviewFeedback;
 use App\Models\Character;
 use App\Models\Collection;
 use App\Models\UserCharacter;
+use App\Services\BuiltinCollectionsSync;
+use App\Services\GamificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -15,8 +17,9 @@ class LearningController extends Controller
 {
     use InteractsWithReviewFeedback;
 
-    public function __construct()
-    {
+    public function __construct(
+        private GamificationService $gamification,
+    ) {
         $this->middleware('auth');
     }
 
@@ -49,9 +52,17 @@ class LearningController extends Controller
             ];
         }
 
-        $userCollections = $user->collections()->withCount('characters')->latest()->limit(12)->get();
+        if (Character::query()->exists()) {
+            app(BuiltinCollectionsSync::class)->syncForUser($user);
+        }
 
-        return view('user.learning.select-level', compact('hskStats', 'userCollections'));
+        $builtinCollections = $user->collections()
+            ->where('is_builtin', true)
+            ->withCount('characters')
+            ->orderBy('builtin_slug')
+            ->get();
+
+        return view('user.learning.select-level', compact('hskStats', 'builtinCollections'));
     }
 
     public function showLevel(Request $request, $level)
@@ -322,9 +333,36 @@ class LearningController extends Controller
             ]
         );
 
+        $dueReview = $request->boolean('due_review');
+        $remainingBeforeDue = null;
+        $initialDue = null;
+
+        if ($dueReview) {
+            $remainingBeforeDue = UserCharacter::where('user_id', $user->id)
+                ->where('next_review_at', '<=', now())
+                ->where('is_learned', false)
+                ->count();
+            $initialDue = (int) $request->session()->get('due_review_initial_count', max(1, $remainingBeforeDue));
+            if ($remainingBeforeDue === $initialDue) {
+                $request->session()->put('due_review_session_stats', ['correct' => 0, 'total' => 0]);
+            }
+        }
+
         $userCharacter->processReview($effectiveResult);
 
-        if ($request->boolean('due_review')) {
+        $this->gamification->recordStudyActivity($user);
+
+        $sessionStatsForEval = null;
+        $incrementSession = false;
+
+        if ($dueReview) {
+            $stats = $request->session()->get('due_review_session_stats', ['correct' => 0, 'total' => 0]);
+            $stats['total'] = (int) $stats['total'] + 1;
+            if ($isCorrect) {
+                $stats['correct'] = (int) $stats['correct'] + 1;
+            }
+            $request->session()->put('due_review_session_stats', $stats);
+
             $nextDue = UserCharacter::where('user_id', $user->id)
                 ->where('next_review_at', '<=', now())
                 ->where('is_learned', false)
@@ -333,15 +371,23 @@ class LearningController extends Controller
 
             if (! $nextDue) {
                 $request->session()->forget('due_review_initial_count');
+                $sessionStatsForEval = $stats;
+                $incrementSession = true;
+                $request->session()->forget('due_review_session_stats');
             }
+
+            $newAchievements = $this->gamification->evaluateAndGrant($user, $sessionStatsForEval, $incrementSession);
 
             return response()->json([
                 'success' => true,
                 'message' => $this->getResultMessage($effectiveResult),
                 'next_character_id' => $nextDue?->character_id,
                 'redirect_url' => $nextDue ? null : route('dashboard'),
+                'new_achievements' => $newAchievements,
             ]);
         }
+
+        $newAchievements = $this->gamification->evaluateAndGrant($user, null, false);
 
         $ctx = $this->learningContext($user, $character, $collection);
         $nextCharacter = $ctx['nextCharacter'];
@@ -357,6 +403,7 @@ class LearningController extends Controller
             'message' => $this->getResultMessage($effectiveResult),
             'next_character_id' => $nextCharacter?->id,
             'redirect_url' => $redirectUrl,
+            'new_achievements' => $newAchievements,
         ]);
     }
 

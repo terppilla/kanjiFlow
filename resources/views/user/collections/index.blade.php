@@ -17,6 +17,9 @@
             @if(session('info'))
                 <div class="alert alert-info">{{ session('info') }}</div>
             @endif
+            @if($errors->any())
+                <div class="alert alert-info" role="alert">{{ $errors->first() }}</div>
+            @endif
 
             @if($collections->isEmpty())
                 <div class="collections-empty-state">
@@ -35,12 +38,14 @@
                                 <a href="{{ route('learning.collection.level', $collection) }}" class="btn btn-primary btn-sm">Учить</a>
                                 <a href="{{ route('collections.show', $collection) }}" class="btn btn-outline btn-sm">Открыть</a>
                                 <a href="{{ route('collections.edit', $collection) }}" class="btn btn-ghost btn-sm">Переименовать</a>
-                                <form action="{{ route('collections.destroy', $collection) }}" method="post" class="coll-delete-form"
-                                    onsubmit="return confirm('Удалить коллекцию «{{ addslashes($collection->name) }}»? Связи с иероглифами будут сняты.');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger-outline btn-sm">Удалить</button>
-                                </form>
+                                @if(! $collection->is_builtin)
+                                    <form action="{{ route('collections.destroy', $collection) }}" method="post" class="coll-delete-form"
+                                        onsubmit="return confirm('Удалить коллекцию «{{ addslashes($collection->name) }}»? Связи с иероглифами будут сняты.');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger-outline btn-sm">Удалить</button>
+                                    </form>
+                                @endif
                             </div>
                         </li>
                     @endforeach

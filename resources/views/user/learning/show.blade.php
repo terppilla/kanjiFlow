@@ -606,9 +606,11 @@
 
         .evaluation-section {
             display: none;
-            margin-top: 0.85rem;
-            padding-top: 0.85rem;
-            border-top: 1px solid rgba(214, 155, 100, 0.15);
+            margin-top: 1rem;
+            padding: 1rem 0.9rem 0.95rem;
+            border: 1px solid rgba(214, 155, 100, 0.22);
+            border-radius: 10px;
+            background: rgba(243, 202, 165, 0.08);
         }
 
         .evaluation-section.is-visible {
@@ -616,18 +618,19 @@
         }
 
         .evaluation-question {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             color: var(--color-dark-blue);
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
             text-align: center;
             font-weight: 600;
+            letter-spacing: 0.01em;
         }
 
         .evaluation-note {
-            font-size: 0.85rem;
-            color: var(--color-gray);
+            font-size: 0.84rem;
+            color: #64748b;
             text-align: center;
-            margin-bottom: 1rem;
+            margin-bottom: 0.8rem;
             line-height: 1.45;
         }
 
@@ -635,27 +638,27 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 0.75rem;
+            gap: 0.6rem;
         }
 
         .eval-btn {
             background: white;
             border: 2px solid rgba(214, 155, 100, 0.25);
-            border-radius: 10px;
-            padding: 0.85rem 1rem;
+            border-radius: 9px;
+            padding: 0.7rem 0.9rem;
             cursor: pointer;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 0.35rem;
-            min-width: 110px;
+            gap: 0.2rem;
+            min-width: 104px;
             transition: all 0.2s ease;
             font: inherit;
         }
 
         .eval-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+            transform: translateY(-1px);
+            box-shadow: 0 5px 12px rgba(15, 23, 42, 0.12);
         }
 
         .eval-btn:disabled {
@@ -675,15 +678,15 @@
         .eval-label {
             font-weight: 600;
             color: var(--color-calm-blue);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         .practice-feedback {
             min-height: 1.25rem;
             text-align: center;
             color: var(--color-calm-blue);
-            font-size: 0.95rem;
-            margin: 0.5rem 0 0;
+            font-size: 0.9rem;
+            margin: 0 0 0.65rem;
         }
 
         /* Уведомления */
@@ -899,8 +902,9 @@
                     <span class="mode-label">Режим ввода</span>
                 </button>
                 
-                <button class="mode-btn {{ $mode == 'eye' ? 'active' : '' }}" 
-                        data-mode="eye" onclick="setMode('eye')">
+                <button type="button" class="mode-btn {{ $mode == 'eye' ? 'active' : '' }}" 
+                        data-mode="eye" onclick="setMode('eye')"
+                        title="Станет доступен после двух неверных ответов на этом иероглифе">
                     <span class="mode-label">Режим просмотра</span>
                 </button>
                 
@@ -962,7 +966,7 @@
                 <div id="practiceFeedback" class="practice-feedback" role="status"></div>
                 <div class="evaluation-buttons">
                     <button type="button" class="eval-btn btn-again" data-result="again" onclick="submitPracticeRating('again')">
-                        <span class="eval-label">Снова</span>
+                        <span class="eval-label">Не помню</span>
                     </button>
                     <button type="button" class="eval-btn btn-hard" data-result="hard" onclick="submitPracticeRating('hard')">
                         <span class="eval-label">Сложно</span>
@@ -1040,9 +1044,28 @@
         let objectiveAnswerCorrect = true;
         let practiceLocked = false;
         let isLoadingCharacter = false;
+        /** Неверные проверки ответа (ввод или варианты), для разблокировки режима просмотра */
+        let incorrectObjectiveCount = 0;
 
         document.addEventListener('DOMContentLoaded', function() {
             history.replaceState({ characterId: characterId }, '', window.location.href);
+
+            if (currentMode === 'eye' && incorrectObjectiveCount < 2) {
+                currentMode = 'keyboard';
+                document.querySelectorAll('.answer-mode').forEach(function(el) { el.classList.remove('active'); });
+                document.querySelectorAll('.mode-btn').forEach(function(btn) { btn.classList.remove('active'); });
+                const km = document.getElementById('keyboardMode');
+                const kb = document.querySelector('[data-mode="keyboard"]');
+                if (km) {
+                    km.classList.add('active');
+                }
+                if (kb) {
+                    kb.classList.add('active');
+                }
+                const url = new URL(window.location.href);
+                url.searchParams.set('mode', 'keyboard');
+                window.history.replaceState({}, '', url);
+            }
 
             if (currentMode === 'multiple') {
                 loadMultipleChoiceOptions();
@@ -1051,6 +1074,7 @@
             setupEventListeners();
             wireNavHandlers();
             wireAudioButtons();
+            syncEyeModeAvailability();
 
             if (currentMode === 'keyboard') {
                 document.getElementById('textAnswer').focus();
@@ -1241,6 +1265,7 @@
                 nextBtn.removeAttribute('data-character-id');
             }
 
+            incorrectObjectiveCount = 0;
             resetAnswerState();
             wireNavHandlers();
             wireAudioButtons();
@@ -1261,8 +1286,37 @@
             }
         }
         
+        function syncEyeModeAvailability() {
+            const eyeBtn = document.querySelector('.mode-btn[data-mode="eye"]');
+            const kbBtn = document.querySelector('.mode-btn[data-mode="keyboard"]');
+            const multBtn = document.querySelector('.mode-btn[data-mode="multiple"]');
+            if (!eyeBtn) {
+                return;
+            }
+            if (practiceLocked) {
+                document.querySelectorAll('.mode-btn').forEach(function(btn) { btn.disabled = true; });
+                return;
+            }
+            const unlocked = incorrectObjectiveCount >= 2;
+            if (kbBtn) {
+                kbBtn.disabled = false;
+            }
+            if (multBtn) {
+                multBtn.disabled = false;
+            }
+            eyeBtn.disabled = !unlocked;
+            eyeBtn.title = unlocked
+                ? 'Режим просмотра'
+                : 'Станет доступен после двух неверных ответов на этом иероглифе';
+        }
+
         function setMode(mode) {
             if (practiceLocked) {
+                return;
+            }
+
+            if (mode === 'eye' && incorrectObjectiveCount < 2) {
+                showNotification('Режим просмотра доступен после двух неверных ответов.', 'warning');
                 return;
             }
 
@@ -1353,6 +1407,8 @@
                 revealAfterAnswer(true);
             } else {
                 objectiveAnswerCorrect = false;
+                incorrectObjectiveCount++;
+                syncEyeModeAvailability();
                 attemptsLeft--;
                 attemptsLeftSpan.textContent = attemptsLeft;
                 attemptsCounter.style.display = 'block';
@@ -1387,6 +1443,8 @@
                 revealAfterAnswer(true);
             } else {
                 objectiveAnswerCorrect = false;
+                incorrectObjectiveCount++;
+                syncEyeModeAvailability();
                 button.classList.add('incorrect');
                 multipleAttemptsLeft--;
                 attemptsLeftSpan.textContent = multipleAttemptsLeft;
@@ -1455,7 +1513,7 @@
             objectiveAnswerCorrect = true;
             practiceLocked = false;
 
-            document.querySelectorAll('.mode-btn').forEach(btn => { btn.disabled = false; });
+            syncEyeModeAvailability();
 
             const textInput = document.getElementById('textAnswer');
             if (textInput) {
@@ -1603,6 +1661,15 @@
 
                 const pause = data.message ? 450 : 0;
                 await new Promise(function(r) { setTimeout(r, pause); });
+
+                if (data.new_achievements && data.new_achievements.length) {
+                    for (let i = 0; i < data.new_achievements.length; i++) {
+                        const a = data.new_achievements[i];
+                        const t = (a.icon ? a.icon + ' ' : '') + 'Достижение: «' + a.name + '». ' + (a.description || '');
+                        showNotification(t, 'success');
+                    }
+                    await new Promise(function(r) { setTimeout(r, Math.min(1200 + data.new_achievements.length * 400, 4000)); });
+                }
 
                 if (data.next_character_id) {
                     const ok = await loadCharacter(data.next_character_id);

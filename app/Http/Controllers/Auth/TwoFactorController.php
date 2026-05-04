@@ -37,27 +37,27 @@ class TwoFactorController extends Controller
             return redirect()->route('login')->withErrors(['code' => 'Пользователь не найден.']);
         }
 
-        if($user->two_factor_code !== $request->code) {
-            $this->handleFailed2FAAtempt($user);
+        if ((string) $user->two_factor_code !== (string) $request->code) {
+            $this->handleFailed2FAAttempt($user);
 
             return back()->withErrors([
-                'code' => 'Неверный код подтверждения'
+                'code' => 'Неверный код подтверждения',
             ]);
         }
 
-        
-        if (Carbon::parse($user->two_factor_expires_at)->isPast()) {
+        if ($user->two_factor_expires_at === null || Carbon::parse($user->two_factor_expires_at)->isPast()) {
             return back()->withErrors([
-                'code' => 'Код подтверждения истёк. Войдите снова.'
+                'code' => 'Код подтверждения истёк. Войдите снова.',
             ]);
         }
 
         $user->update([
-            'two_factor_code' => null, 
-            'two_factor_expires_at' => null
+            'two_factor_code' => null,
+            'two_factor_expires_at' => null,
         ]);
 
         Auth::login($user);
+        $request->session()->regenerate();
 
         Session::forget('two_factor_user_id');
 

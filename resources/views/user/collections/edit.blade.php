@@ -17,16 +17,18 @@
                     </div>
                 </form>
 
-                <div class="collections-danger-zone collections-danger-zone--inline">
-                    <h2 class="collections-danger-title">Удалить коллекцию</h2>
-                    <p class="collections-danger-text">Иероглифы останутся в базе; удаляется только этот набор.</p>
-                    <form action="{{ route('collections.destroy', $collection) }}" method="post"
-                        onsubmit="return confirm('Удалить коллекцию «{{ addslashes($collection->name) }}»?');">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger-solid">Удалить коллекцию</button>
-                    </form>
-                </div>
+                @if(! $collection->is_builtin)
+                    <div class="collections-danger-zone collections-danger-zone--inline">
+                        <h2 class="collections-danger-title">Удалить коллекцию</h2>
+                        <p class="collections-danger-text">Иероглифы останутся в базе; удаляется только этот набор.</p>
+                        <form action="{{ route('collections.destroy', $collection) }}" method="post"
+                            onsubmit="return confirm('Удалить коллекцию «{{ addslashes($collection->name) }}»?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger-solid">Удалить коллекцию</button>
+                        </form>
+                    </div>
+                @endif
             </div>
         </div>
     </div>

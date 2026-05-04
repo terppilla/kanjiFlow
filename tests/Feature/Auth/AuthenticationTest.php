@@ -20,7 +20,9 @@ class AuthenticationTest extends TestCase
 
     public function test_users_can_authenticate_using_the_login_screen(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create([
+            'two_factor_enabled' => false,
+        ]);
 
         $response = $this->post('/login', [
             'email' => $user->email,
@@ -29,6 +31,21 @@ class AuthenticationTest extends TestCase
 
         $this->assertAuthenticated();
         $response->assertRedirect(RouteServiceProvider::HOME);
+    }
+
+    public function test_users_with_two_factor_redirected_to_verify_after_login(): void
+    {
+        $user = User::factory()->create([
+            'two_factor_enabled' => true,
+        ]);
+
+        $response = $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $this->assertGuest();
+        $response->assertRedirect(route('two-factor.verify'));
     }
 
     public function test_users_can_not_authenticate_with_invalid_password(): void

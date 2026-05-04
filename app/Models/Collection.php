@@ -9,7 +9,11 @@ class Collection extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'user_id'];
+    protected $fillable = ['name', 'user_id', 'is_builtin', 'builtin_slug'];
+
+    protected $casts = [
+        'is_builtin' => 'boolean',
+    ];
 
     public function user() {
         return $this->belongsTo(User::class);

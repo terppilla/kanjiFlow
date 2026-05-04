@@ -3,10 +3,12 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\CharacterController;
+use App\Http\Controllers\Admin\ArticleController as AdminArticleController;
 use App\Http\Controllers\LearningController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\AudioController;
+use App\Http\Controllers\ArticleController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -51,9 +53,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // Админка 
-Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {
+Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'adminIndex'])->name('admin.dashboard');
     Route::resource('/characters', CharacterController::class)->names('admin.characters');
+    Route::resource('/articles', AdminArticleController::class)->except(['show'])->names('admin.articles');
 });
 
 
@@ -110,11 +113,19 @@ Route::middleware(['auth'])->prefix('collections')->name('collections.')->group(
     Route::get('/{collection}/review', [CollectionController::class, 'review'])->name('review');
 });
 
-// Профиль
+Route::middleware(['auth'])->prefix('articles')->name('articles.')->group(function () {
+    Route::get('/', [ArticleController::class, 'index'])->name('index');
+    Route::get('/favorites', [ArticleController::class, 'favorites'])->name('favorites');
+    Route::get('/{article}', [ArticleController::class, 'show'])->name('show');
+    Route::post('/{article}/favorite', [ArticleController::class, 'toggleFavorite'])->name('favorite.toggle');
+});
+
+// Профиль (удаление аккаунта — отдельный URI, чтобы не пересекаться с PATCH /profile и 2FA)
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::patch('/profile/two-factor', [ProfileController::class, 'updateTwoFactor'])->name('profile.two-factor.update');
+    Route::delete('/profile/account', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 // Устаревшие маршруты для обратной совместимости

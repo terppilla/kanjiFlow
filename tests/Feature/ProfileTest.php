@@ -67,7 +67,7 @@ class ProfileTest extends TestCase
 
         $response = $this
             ->actingAs($user)
-            ->delete('/profile', [
+            ->delete('/profile/account', [
                 'password' => 'password',
             ]);
 
@@ -86,7 +86,7 @@ class ProfileTest extends TestCase
         $response = $this
             ->actingAs($user)
             ->from('/profile')
-            ->delete('/profile', [
+            ->delete('/profile/account', [
                 'password' => 'wrong-password',
             ]);
 
@@ -95,5 +95,56 @@ class ProfileTest extends TestCase
             ->assertRedirect('/profile');
 
         $this->assertNotNull($user->fresh());
+    }
+
+    public function test_user_can_disable_two_factor_with_password(): void
+    {
+        $user = User::factory()->create([
+            'two_factor_enabled' => true,
+        ]);
+
+        $this->actingAs($user)
+            ->from('/profile')
+            ->patch('/profile/two-factor', [
+                'two_factor_enabled' => false,
+                'password' => 'password',
+            ])
+            ->assertSessionHasNoErrors()
+            ->assertRedirect('/profile');
+
+        $this->assertFalse($user->fresh()->two_factor_enabled);
+    }
+
+    public function test_user_cannot_disable_two_factor_without_password(): void
+    {
+        $user = User::factory()->create([
+            'two_factor_enabled' => true,
+        ]);
+
+        $this->actingAs($user)
+            ->from('/profile')
+            ->patch('/profile/two-factor', [
+                'two_factor_enabled' => false,
+            ])
+            ->assertSessionHasErrorsIn('twoFactor', 'password')
+            ->assertRedirect('/profile');
+
+        $this->assertTrue($user->fresh()->two_factor_enabled);
+    }
+
+    public function test_user_can_enable_two_factor_without_password(): void
+    {
+        $user = User::factory()->create([
+            'two_factor_enabled' => false,
+        ]);
+
+        $this->actingAs($user)
+            ->patch('/profile/two-factor', [
+                'two_factor_enabled' => true,
+            ])
+            ->assertSessionHasNoErrors()
+            ->assertRedirect('/profile');
+
+        $this->assertTrue($user->fresh()->two_factor_enabled);
     }
 }

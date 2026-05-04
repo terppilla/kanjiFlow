@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Collection;
+use App\Models\Achievement;
+use App\Models\Article;
 use App\Models\Character;
+use App\Models\Collection;
+use App\Models\User;
 use App\Models\UserCharacter;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -36,9 +41,38 @@ public function index()
         ->paginate(6);
     
         $dueCardsTotal = UserCharacter::where('user_id', $user->id)
-    ->where('next_review_at', '<=', now())
-    ->where('is_learned', false)
-    ->count();
+            ->where('next_review_at', '<=', now())
+            ->where('is_learned', false)
+            ->count();
+
+        $allAchievements = Achievement::query()
+            ->orderBy('category')
+            ->orderBy('id')
+            ->get();
+
+        $earnedById = $user->achievements()->get()->keyBy('id');
+
+        $sortedAchievements = $allAchievements
+            ->sort(function (Achievement $a, Achievement $b) use ($earnedById) {
+                $aEarned = $earnedById->has($a->id);
+                $bEarned = $earnedById->has($b->id);
+                if ($aEarned !== $bEarned) {
+                    return $aEarned ? -1 : 1;
+                }
+                if ($aEarned) {
+                    $ta = Carbon::parse($earnedById[$a->id]->pivot->earned_at)->timestamp;
+                    $tb = Carbon::parse($earnedById[$b->id]->pivot->earned_at)->timestamp;
+
+                    return $tb <=> $ta;
+                }
+
+                return ($a->category <=> $b->category) ?: ($a->id <=> $b->id);
+            })
+            ->values();
+
+        $earnedAtByAchievementId = $earnedById->mapWithKeys(
+            fn (Achievement $row) => [$row->id => $row->pivot->earned_at]
+        )->all();
 
     // Статистика по уровням HSK
     $hskStats = [];
@@ -66,6 +100,8 @@ public function index()
         'dueCards',
         'hskStats',
         'dueCardsTotal',
+        'sortedAchievements',
+        'earnedAtByAchievementId',
     ));
 }
 
@@ -75,13 +111,61 @@ public function index()
     public function adminIndex()
     {
         $totalCharacters = Character::count();
-        $totalUsers = \App\Models\User::count();
+        $totalUsers = User::count();
         $recentCharacters = Character::latest()->take(5)->get();
-        
+        $totalArticles = Article::query()->count();
+
+        $newUsersWeek = User::where('created_at', '>=', now()->subDays(7))->count();
+
+        $activeTodayUsers = (int) DB::table('user_characters')
+            ->whereNotNull('last_reviewed_at')
+            ->where('last_reviewed_at', '>=', now()->startOfDay())
+            ->selectRaw('COUNT(DISTINCT user_id) AS c')
+            ->value('c');
+
+        $learnedGlyphRecords = UserCharacter::where('is_learned', true)->count();
+        $totalReviews = (int) UserCharacter::query()->sum('total_reviews');
+
+        $reviewsPerDay = [];
+        $maxReviewsDay = 1;
+        for ($i = 6; $i >= 0; $i--) {
+            $day = now()->subDays($i);
+            $count = UserCharacter::whereDate('last_reviewed_at', $day->toDateString())->count();
+            $reviewsPerDay[] = [
+                'label' => $day->format('d.m'),
+                'count' => $count,
+            ];
+            $maxReviewsDay = max($maxReviewsDay, $count);
+        }
+
+        $hskRaw = DB::table('user_characters')
+            ->join('characters', 'user_characters.character_id', '=', 'characters.id')
+            ->select('characters.hsk_level', DB::raw('COUNT(*) as cnt'))
+            ->groupBy('characters.hsk_level')
+            ->orderBy('characters.hsk_level')
+            ->pluck('cnt', 'hsk_level');
+
+        $hskDistribution = [];
+        $maxHskCount = 1;
+        for ($level = 1; $level <= 6; $level++) {
+            $cnt = (int) ($hskRaw[$level] ?? 0);
+            $hskDistribution[$level] = $cnt;
+            $maxHskCount = max($maxHskCount, $cnt);
+        }
+
         return view('admin.dashboard', compact(
             'totalCharacters',
             'totalUsers',
-            'recentCharacters'
+            'totalArticles',
+            'recentCharacters',
+            'newUsersWeek',
+            'activeTodayUsers',
+            'learnedGlyphRecords',
+            'totalReviews',
+            'reviewsPerDay',
+            'maxReviewsDay',
+            'hskDistribution',
+            'maxHskCount',
         ));
     }
     

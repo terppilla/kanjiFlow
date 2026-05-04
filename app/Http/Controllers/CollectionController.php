@@ -19,7 +19,9 @@ class CollectionController extends Controller
         $collections = Auth::user()
             ->collections()
             ->withCount('characters')
-            ->latest()
+            ->orderByDesc('is_builtin')
+            ->orderBy('builtin_slug')
+            ->latest('id')
             ->get();
 
         return view('user.collections.index', compact('collections'));
@@ -86,6 +88,12 @@ class CollectionController extends Controller
     public function destroy(Collection $collection)
     {
         $this->authorizeCollection($collection);
+
+        if ($collection->is_builtin) {
+            return redirect()
+                ->route('collections.index')
+                ->withErrors('Встроенные подборки нельзя удалить.');
+        }
 
         $collection->delete();
 

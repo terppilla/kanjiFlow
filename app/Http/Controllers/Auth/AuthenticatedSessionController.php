@@ -57,15 +57,21 @@ public function store(LoginRequest $request): RedirectResponse
     // Сбрасываем счетчик попыток при успешном вводе пароля
     $user->update([
         'login_attempts' => 0,
-        'locked_until' => null
+        'locked_until' => null,
     ]);
 
+    if (! $user->two_factor_enabled) {
+        $request->session()->regenerate();
+
+        return redirect()->intended(route('dashboard'));
+    }
+
     // Генерируем 2FA код
-    $twoFactorCode = sprintf("%06d", mt_rand(1, 999999));
+    $twoFactorCode = sprintf('%06d', mt_rand(1, 999999));
 
     $user->update([
         'two_factor_code' => $twoFactorCode,
-        'two_factor_expires_at' => Carbon::now()->addMinutes(5)
+        'two_factor_expires_at' => Carbon::now()->addMinutes(5),
     ]);
 
     // Логируем код (временно)
@@ -82,26 +88,24 @@ public function store(LoginRequest $request): RedirectResponse
 }
 
 
-    private function handleFailedLogin(User $user) {
-
-
+    private function handleFailedLogin(User $user): void
+    {
         $attempts = $user->login_attempts + 1;
+        $maxAttempts = 8;
+        $lockoutMinutes = 15;
         $lockoutTime = null;
 
-
-
-        if ($attempts >= 2) {
-            $lockoutTime = Carbon::now()->addMinutes(30);
-            Log::warning("Пользователь  {$user->email} заблокирован до {$lockoutTime} из-за {$attempts} неудачных попыток входа");
-        } elseif ($attempts >= 3) {
-            Log::info("Пользователь {$user->email} имеет {$attempts} неудачных попыток входа");
+        if ($attempts >= $maxAttempts) {
+            $lockoutTime = Carbon::now()->addMinutes($lockoutMinutes);
+            Log::warning("Пользователь {$user->email} заблокирован до {$lockoutTime} (попыток: {$attempts})");
+        } elseif ($attempts >= 4) {
+            Log::info("Пользователь {$user->email}: неудачных попыток входа: {$attempts}");
         }
 
         $user->update([
             'login_attempts' => $attempts,
             'locked_until' => $lockoutTime,
         ]);
-
     }
     /**
      * Destroy an authenticated session.

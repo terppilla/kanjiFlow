@@ -36,6 +36,7 @@
             min-height: 100vh;
             background: linear-gradient(135deg, rgba(243, 202, 165, 0.1) 0%, rgba(214, 155, 100, 0.05) 100%);
             font-family: 'Noto Sans SC', sans-serif;
+            overflow-x: hidden;
         }
 
         /* ===== ШАПКА ДАШБОРДА ===== */
@@ -122,17 +123,18 @@
         /* ===== ОСНОВНОЙ КОНТЕНТ ===== */
         .dashboard-main {
             display: grid;
-            grid-template-columns: 300px 1fr 320px;
+            grid-template-columns: 300px minmax(0, 1fr) 320px;
             gap: 2rem;
             padding: 2.5rem 3rem;
             max-width: 1920px;
             margin: 0 auto;
             min-height: calc(100vh - 180px);
+            min-width: 0;
         }
 
         @media (max-width: 1400px) {
             .dashboard-main {
-                grid-template-columns: 280px 1fr;
+                grid-template-columns: 280px minmax(0, 1fr);
             }
             
             .right-sidebar {
@@ -145,7 +147,7 @@
 
         @media (max-width: 1024px) {
             .dashboard-main {
-                grid-template-columns: 1fr;
+                grid-template-columns: minmax(0, 1fr);
             }
             
             .sidebar {
@@ -269,6 +271,8 @@
             display: flex;
             flex-direction: column;
             gap: 2rem;
+            min-width: 0;
+            max-width: 100%;
         }
 
         .welcome-section {
@@ -616,6 +620,7 @@
             display: flex;
             flex-direction: column;
             gap: 2rem;
+            min-width: 0;
         }
 
         .collections-section {
@@ -1046,6 +1051,164 @@
             }
         }
 
+        /* Достижения (горизонтальный скролл только внутри блока) */
+        .achievements-section {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(15, 23, 42, 0.06);
+            border: 1px solid rgba(214, 155, 100, 0.2);
+            min-width: 0;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        .achievements-section h3 {
+            margin-bottom: 0.75rem;
+            color: var(--color-dark-blue);
+            font-size: 1.25rem;
+        }
+
+        .achievements-slider-wrap {
+            position: relative;
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        .achievements-slider-wrap::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 8px;
+            width: 40px;
+            pointer-events: none;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.95));
+            border-radius: 0 12px 12px 0;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .achievements-slider-wrap.is-scrollable::after {
+            opacity: 1;
+        }
+
+        .achievements-slider {
+            display: flex;
+            gap: 1rem;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            overflow-x: auto;
+            overflow-y: hidden;
+            overscroll-behavior-x: contain;
+            scroll-snap-type: x mandatory;
+            scroll-padding-inline: 0.25rem;
+            padding: 0.25rem 0 0.75rem;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(193, 18, 31, 0.35) rgba(15, 23, 42, 0.06);
+        }
+
+        .achievements-slider::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .achievements-slider::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.06);
+            border-radius: 4px;
+        }
+
+        .achievements-slider::-webkit-scrollbar-thumb {
+            background: rgba(193, 18, 31, 0.35);
+            border-radius: 4px;
+        }
+
+        .achievement-slide {
+            flex: 0 0 260px;
+            width: 260px;
+            max-width: min(260px, 100%);
+            scroll-snap-align: start;
+            box-sizing: border-box;
+        }
+
+        @media (min-width: 1200px) {
+            .achievement-slide {
+                flex-basis: 280px;
+                width: 280px;
+                max-width: min(280px, 100%);
+            }
+        }
+
+        .achievement-card {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            height: 100%;
+            padding: 1rem 1rem 0.85rem;
+            border-radius: 10px;
+            border: 1px solid rgba(31, 41, 51, 0.12);
+            background: #fafafa;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .achievement-card.earned {
+            border-color: rgba(16, 185, 129, 0.35);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(243, 202, 165, 0.15) 100%);
+        }
+
+        .achievement-card.locked {
+            opacity: 0.58;
+        }
+
+        .achievement-card.earned:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.1);
+        }
+
+        .achievement-card.locked:hover {
+            opacity: 0.72;
+        }
+
+        .achievement-card-top {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+        }
+
+        .achievement-icon {
+            font-size: 2rem;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        .achievement-name {
+            font-weight: 700;
+            color: var(--color-dark-blue);
+            margin-bottom: 0.35rem;
+        }
+
+        .achievement-desc {
+            font-size: 0.85rem;
+            color: #4b5563;
+            line-height: 1.4;
+        }
+
+        .achievement-date {
+            font-size: 0.72rem;
+            color: #6b7280;
+            margin-top: auto;
+            padding-top: 0.35rem;
+            border-top: 1px solid rgba(31, 41, 51, 0.08);
+        }
+
+        .achievement-date--pending {
+            font-style: italic;
+            color: #9ca3af;
+            border-top-color: rgba(31, 41, 51, 0.06);
+        }
+
     </style>
 
     <div class="dashboard-container">
@@ -1058,13 +1221,16 @@
                     <h3>Быстрые действия</h3>
                     <a href="{{ route('learning.review.due') }}" class="action-btn primary">
                         <span class="action-icon">⏱</span>
-                        <span class="action-text">Повторить иероглифы ({{ $dueCards->count() }})</span>
+                        <span class="action-text">Повторить иероглифы ({{ $dueCardsTotal }})</span>
                     </a>
                     <a href="{{ route('learning.select-level') }}" class="action-btn">
                         <span class="action-text">Изучать новые</span>
                     </a>
                     <a href="{{ route('collections.index') }}" class="action-btn">
                         <span class="action-text">Мои коллекции</span>
+                    </a>
+                    <a href="{{ route('articles.index') }}" class="action-btn">
+                        <span class="action-text">Читать статьи</span>
                     </a>
                 </div>
 
@@ -1083,6 +1249,10 @@
                         <span class="stat-label">Точность:</span>
                         <span class="stat-value">{{ round($reviewStats['average_success_rate'] ?? 0) }}%</span>
                     </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Серия дней:</span>
+                        <span class="stat-value">{{ (int) (Auth::user()->study_streak ?? 0) }}</span>
+                    </div>
                 </div>
             </aside>
 
@@ -1091,7 +1261,7 @@
                 <!-- Приветствие -->
                 <div class="welcome-section">
                     <h2>Добро пожаловать, {{ Auth::user()->name }}!</h2>
-                    <p>Сегодня у вас <strong>{{ $dueCards->count() }}</strong> иероглифов для повторения</p>
+                    <p>Сегодня у вас <strong>{{ $dueCardsTotal }}</strong> иероглифов для повторения</p>
                 </div>
 
                 <!-- Прогресс по уровням HSK -->
@@ -1121,6 +1291,8 @@
                         @endfor
                     </div>
                 </div>
+
+              
 
                 <!-- Иероглифы для повторения сегодня -->
                 <div class="due-cards-section">
@@ -1201,24 +1373,52 @@
                     @endif
                 </div>
 
-                <!-- Последняя активность -->
-                <div class="recent-activity">
-                    <h3>Последняя активность</h3>
-                    {{-- <div class="activity-list">
-                        <div class="activity-item">
-                            <span class="activity-text">Начали изучение HSK 1</span>
-                            <span class="activity-time">2 часа назад</span>
+                @if(isset($sortedAchievements) && $sortedAchievements->isNotEmpty())
+                <div class="achievements-section">
+                    <h3>Достижения</h3>
+                    <div class="achievements-slider-wrap" id="achievementsSliderWrap">
+                        <div class="achievements-slider" id="achievementsSlider" role="list">
+                            @foreach($sortedAchievements as $achievement)
+                                @php
+                                    $earnedAt = $earnedAtByAchievementId[$achievement->id] ?? null;
+                                    $isEarned = $earnedAt !== null;
+                                @endphp
+                                <div class="achievement-slide" role="listitem">
+                                    <article class="achievement-card {{ $isEarned ? 'earned' : 'locked' }}">
+                                        <div class="achievement-card-top">
+                                            <div class="achievement-icon" aria-hidden="true">{{ $achievement->icon }}</div>
+                                            <div class="achievement-body">
+                                                <div class="achievement-name">{{ $achievement->name }}</div>
+                                                <div class="achievement-desc">{{ $achievement->description }}</div>
+                                            </div>
+                                        </div>
+                                        @if($isEarned)
+                                            <div class="achievement-date">
+                                                Получено {{ \Illuminate\Support\Carbon::parse($earnedAt)->format('d.m.Y') }}
+                                            </div>
+                                        @else
+                                            <div class="achievement-date achievement-date--pending">Ещё не получено</div>
+                                        @endif
+                                    </article>
+                                </div>
+                            @endforeach
                         </div>
-                        <div class="activity-item">
-                            <span class="activity-text">Выучили 5 новых иероглифов</span>
-                            <span class="activity-time">Вчера</span>
-                        </div>
-                        <div class="activity-item">
-                            <span class="activity-text">Достигли точности 85%</span>
-                            <span class="activity-time">3 дня назад</span>
-                        </div> --}}
                     </div>
                 </div>
+                <script>
+                    (function () {
+                        var wrap = document.getElementById('achievementsSliderWrap');
+                        var el = document.getElementById('achievementsSlider');
+                        if (!wrap || !el) return;
+                        function sync() {
+                            wrap.classList.toggle('is-scrollable', el.scrollWidth > el.clientWidth + 2);
+                        }
+                        sync();
+                        el.addEventListener('scroll', sync);
+                        window.addEventListener('resize', sync);
+                    })();
+                </script>
+            @endif
             </aside>
         </main>
 
