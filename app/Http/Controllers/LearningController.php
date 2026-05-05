@@ -37,18 +37,10 @@ class LearningController extends Controller
                 ->where('is_learned', true)
                 ->count();
 
-            $practicedInLevel = UserCharacter::where('user_id', $user->id)
-                ->whereHas('character', function ($query) use ($level) {
-                    $query->where('hsk_level', $level);
-                })
-                ->where('total_reviews', '>', 0)
-                ->count();
-
             $hskStats[$level] = [
                 'total' => $totalInLevel,
                 'learned' => $learnedInLevel,
-                'practiced' => $practicedInLevel,
-                'progress' => $totalInLevel > 0 ? round(($practicedInLevel / $totalInLevel) * 100) : 0,
+                'progress' => $totalInLevel > 0 ? round(($learnedInLevel / $totalInLevel) * 100) : 0,
             ];
         }
 
@@ -61,6 +53,37 @@ class LearningController extends Controller
             ->withCount('characters')
             ->orderBy('builtin_slug')
             ->get();
+
+        if ($builtinCollections->isNotEmpty()) {
+            $collectionIds = $builtinCollections->pluck('id')->all();
+            $charsByCollection = DB::table('collection_character')
+                ->whereIn('collection_id', $collectionIds)
+                ->select('collection_id', 'character_id')
+                ->get()
+                ->groupBy('collection_id');
+
+            $learnedSet = array_fill_keys(
+                UserCharacter::where('user_id', $user->id)
+                    ->where('is_learned', true)
+                    ->pluck('character_id')
+                    ->all(),
+                true
+            );
+            foreach ($builtinCollections as $collection) {
+                $ids = ($charsByCollection[$collection->id] ?? collect())->pluck('character_id')->all();
+                $total = count($ids);
+                $learned = 0;
+                foreach ($ids as $characterId) {
+                    if (isset($learnedSet[$characterId])) {
+                        $learned++;
+                    }
+                }
+                $collection->select_level_total = $total > 0 ? $total : (int) $collection->characters_count;
+                $collection->select_level_learned = $learned;
+                $t = $collection->select_level_total;
+                $collection->select_level_progress = $t > 0 ? (int) round(($learned / $t) * 100) : 0;
+            }
+        }
 
         return view('user.learning.select-level', compact('hskStats', 'builtinCollections'));
     }

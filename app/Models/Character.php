@@ -39,6 +39,21 @@ class Character extends Model
         return '/storage/' . ltrim($path, '/');
     }
 
+    /**
+     * Текст для TTS примера: для zh-CN надёжнее китайское предложение, чем латинский пиньинь.
+     */
+    public function exampleSpeechForTts(): ?string
+    {
+        $hanzi = trim((string) $this->example_hanzi);
+        if ($hanzi !== '') {
+            return $hanzi;
+        }
+
+        $pinyin = trim((string) $this->example_pinyin);
+
+        return $pinyin !== '' ? $pinyin : null;
+    }
+
     public function collections()
     {
         return $this->belongsToMany(Collection::class, 'collection_character')->withTimestamps();

@@ -47,7 +47,6 @@
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-            border-bottom: 3px solid var(--color-primary);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -436,7 +435,6 @@
         .hsk-action-btn,
         .hsk-review-btn {
             display: inline-block;
-            width: calc(50% - 0.35rem);
             text-align: center;
             padding: 0.6rem;
             border-radius: 8px;
@@ -706,42 +704,61 @@
         .collection-actions {
             display: flex;
             gap: 0.75rem;
+            align-items: stretch;
         }
 
-        .collection-view-btn,
-        .collection-review-btn {
+        /* Одна высота/типографика с «Открыть», без разметки карточек quick-actions */
+        .collection-actions .collection-view-btn,
+        .collection-actions .collection-review-btn,
+        .collection-actions .action-btn {
             flex: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             text-align: center;
-            padding: 0.6rem;
-            border-radius: 6px;
+            padding: 0.65rem 1rem;
+            min-height: 2.75rem;
+            border-radius: 8px;
             text-decoration: none;
-            font-size: 0.85rem;
-            font-weight: 500;
-            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease, transform 0.2s ease, box-shadow 0.25s ease;
+            margin-bottom: 0;
+            gap: 0;
+            box-sizing: border-box;
+            border-width: 1px;
+            border-style: solid;
         }
 
-        .collection-view-btn {
+        .collection-actions .action-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .collection-actions .collection-view-btn {
             background: rgba(214, 155, 100, 0.1);
             color: var(--color-gold);
-            border: 1px solid rgba(214, 155, 100, 0.2);
+            border-color: rgba(214, 155, 100, 0.25);
         }
 
-        .collection-view-btn:hover {
+        .collection-actions .collection-view-btn:hover {
             background: var(--color-white-gold);
             color: var(--color-dark-red);
             border-color: var(--color-gold);
+            box-shadow: 0 4px 12px rgba(214, 155, 100, 0.15);
         }
 
-        .collection-review-btn {
+        .collection-actions .collection-review-btn {
             background: var(--color-success);
             color: white;
-            border: 1px solid var(--color-success);
+            border-color: var(--color-success);
         }
 
-        .collection-review-btn:hover {
-            background: #0da271;
-            border-color: #0da271;
-            transform: translateY(-2px);
+        .collection-actions .action-btn.primary {
+            border-color: var(--color-primary);
+        }
+
+        .collection-actions .action-btn.primary:hover {
+            box-shadow: 0 4px 14px rgba(193, 18, 31, 0.28);
         }
 
         .no-collections {
@@ -1029,7 +1046,8 @@
             }
             
             .collection-view-btn,
-            .collection-review-btn {
+            .collection-review-btn,
+            .collection-actions .action-btn {
                 width: 100%;
                 text-align: center;
             }
@@ -1053,7 +1071,6 @@
 
         /* Достижения (горизонтальный скролл только внутри блока) */
         .achievements-section {
-            margin-top: 2rem;
             padding: 1.5rem;
             background: white;
             border-radius: 12px;
@@ -1066,6 +1083,7 @@
 
         .achievements-section h3 {
             margin-bottom: 0.75rem;
+            font-family: 'Noto Serif SC', serif;
             color: var(--color-dark-blue);
             font-size: 1.25rem;
         }
@@ -1096,7 +1114,7 @@
 
         .achievements-slider {
             display: flex;
-            gap: 1rem;
+            gap: 0.65rem;
             width: 100%;
             max-width: 100%;
             box-sizing: border-box;
@@ -1125,28 +1143,21 @@
             border-radius: 4px;
         }
 
+        /* Уже базовой ширины: правая колонка ~320px минус padding секции */
         .achievement-slide {
-            flex: 0 0 260px;
-            width: 260px;
-            max-width: min(260px, 100%);
+            flex: 0 0 min(204px, 100%);
+            width: min(220px, 100%);
+            max-width: 100%;
             scroll-snap-align: start;
             box-sizing: border-box;
-        }
-
-        @media (min-width: 1200px) {
-            .achievement-slide {
-                flex-basis: 280px;
-                width: 280px;
-                max-width: min(280px, 100%);
-            }
         }
 
         .achievement-card {
             display: flex;
             flex-direction: column;
-            gap: 0.75rem;
+            gap: 0.55rem;
             height: 100%;
-            padding: 1rem 1rem 0.85rem;
+            padding: 0.75rem 0.8rem 0.7rem;
             border-radius: 10px;
             border: 1px solid rgba(31, 41, 51, 0.12);
             background: #fafafa;
@@ -1173,26 +1184,28 @@
 
         .achievement-card-top {
             display: flex;
-            gap: 0.75rem;
+            gap: 0.5rem;
             align-items: flex-start;
         }
 
         .achievement-icon {
-            font-size: 2rem;
+            font-size: 1.65rem;
             line-height: 1;
             flex-shrink: 0;
         }
 
         .achievement-name {
             font-weight: 700;
+            font-size: 0.92rem;
             color: var(--color-dark-blue);
-            margin-bottom: 0.35rem;
+            margin-bottom: 0.25rem;
+            line-height: 1.25;
         }
 
         .achievement-desc {
-            font-size: 0.85rem;
+            font-size: 0.78rem;
             color: #4b5563;
-            line-height: 1.4;
+            line-height: 1.35;
         }
 
         .achievement-date {
@@ -1219,7 +1232,7 @@
             <aside class="sidebar">
                 <div class="quick-actions">
                     <h3>Быстрые действия</h3>
-                    <a href="{{ route('learning.review.due') }}" class="action-btn primary">
+                    <a href="{{ route('learning.review.due') }}" class="btn action-btn primary">
                         <span class="action-icon">⏱</span>
                         <span class="action-text">Повторить иероглифы ({{ $dueCardsTotal }})</span>
                     </a>
@@ -1254,6 +1267,40 @@
                         <span class="stat-value">{{ (int) (Auth::user()->study_streak ?? 0) }}</span>
                     </div>
                 </div>
+
+                @if(isset($sortedAchievements) && $sortedAchievements->isNotEmpty())
+                <div class="achievements-section">
+                    <h3>Достижения</h3>
+                    <div class="achievements-slider-wrap" id="achievementsSliderWrap">
+                        <div class="achievements-slider" id="achievementsSlider" role="list">
+                            @foreach($sortedAchievements as $achievement)
+                                @php
+                                    $earnedAt = $earnedAtByAchievementId[$achievement->id] ?? null;
+                                    $isEarned = $earnedAt !== null;
+                                @endphp
+                                <div class="achievement-slide" role="listitem">
+                                    <article class="achievement-card {{ $isEarned ? 'earned' : 'locked' }}">
+                                        <div class="achievement-card-top">
+                                            <div class="achievement-icon" aria-hidden="true">{{ $achievement->icon }}</div>
+                                            <div class="achievement-body">
+                                                <div class="achievement-name">{{ $achievement->name }}</div>
+                                                <div class="achievement-desc">{{ $achievement->description }}</div>
+                                            </div>
+                                        </div>
+                                        @if($isEarned)
+                                            <div class="achievement-date">
+                                                Получено {{ \Illuminate\Support\Carbon::parse($earnedAt)->format('d.m.Y') }}
+                                            </div>
+                                        @else
+                                            <div class="achievement-date achievement-date--pending">Ещё не получено</div>
+                                        @endif
+                                    </article>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+
             </aside>
 
             <!-- Центральная колонка: Основная информация -->
@@ -1358,7 +1405,7 @@
                                         <a href="{{ route('collections.show', $collection) }}" 
                                            class="collection-view-btn">Открыть</a>
                                         <a href="{{ route('collections.review', $collection) }}" 
-                                           class="collection-review-btn">Повторить</a>
+                                           class="action-btn primary">Повторить</a>
                                     </div>
                                 </div>
                             @endforeach
@@ -1373,38 +1420,7 @@
                     @endif
                 </div>
 
-                @if(isset($sortedAchievements) && $sortedAchievements->isNotEmpty())
-                <div class="achievements-section">
-                    <h3>Достижения</h3>
-                    <div class="achievements-slider-wrap" id="achievementsSliderWrap">
-                        <div class="achievements-slider" id="achievementsSlider" role="list">
-                            @foreach($sortedAchievements as $achievement)
-                                @php
-                                    $earnedAt = $earnedAtByAchievementId[$achievement->id] ?? null;
-                                    $isEarned = $earnedAt !== null;
-                                @endphp
-                                <div class="achievement-slide" role="listitem">
-                                    <article class="achievement-card {{ $isEarned ? 'earned' : 'locked' }}">
-                                        <div class="achievement-card-top">
-                                            <div class="achievement-icon" aria-hidden="true">{{ $achievement->icon }}</div>
-                                            <div class="achievement-body">
-                                                <div class="achievement-name">{{ $achievement->name }}</div>
-                                                <div class="achievement-desc">{{ $achievement->description }}</div>
-                                            </div>
-                                        </div>
-                                        @if($isEarned)
-                                            <div class="achievement-date">
-                                                Получено {{ \Illuminate\Support\Carbon::parse($earnedAt)->format('d.m.Y') }}
-                                            </div>
-                                        @else
-                                            <div class="achievement-date achievement-date--pending">Ещё не получено</div>
-                                        @endif
-                                    </article>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
+
                 <script>
                     (function () {
                         var wrap = document.getElementById('achievementsSliderWrap');
@@ -1425,7 +1441,7 @@
         <!-- Подвал -->
         <footer class="dashboard-footer">
             <div class="footer-content">
-                <p>KanjiFlow © 2024 - Система изучения китайских иероглифов</p>
+                <p>KanjiFlow © 2026 - Система изучения китайских иероглифов</p>
                 <div class="footer-links">
                     <a href="#">Помощь</a>
                     <a href="#">О проекте</a>

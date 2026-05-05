@@ -267,7 +267,7 @@
 
         /* Тематические коллекции */
         .select-level-collections {
-            margin-bottom: 2.75rem;
+            margin: 5rem 0;
         }
 
         .select-level-collections-header {
@@ -293,56 +293,9 @@
 
         .select-level-collections-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 1.1rem;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
             margin-bottom: 1rem;
-        }
-
-        .select-level-collection-card {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            padding: 1.35rem 1.4rem;
-            background: white;
-            border-radius: 12px;
-            border: 1px solid rgba(214, 155, 100, 0.22);
-            border-left: 4px solid var(--color-gold);
-            text-decoration: none;
-            color: inherit;
-            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
-            transition: all 0.2s ease;
-        }
-
-        .select-level-collection-card:hover {
-            border-color: rgba(214, 155, 100, 0.45);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
-        }
-
-        .select-level-collection-badge {
-            align-self: flex-start;
-            font-size: 0.72rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            color: var(--color-primary);
-            background: rgba(193, 18, 31, 0.08);
-            padding: 0.25rem 0.55rem;
-            border-radius: 6px;
-        }
-
-        .select-level-collection-card h3 {
-            font-size: 1.15rem;
-            color: var(--color-dark-blue);
-            font-weight: 600;
-            margin: 0;
-            line-height: 1.3;
-        }
-
-        .select-level-collection-meta {
-            font-size: 0.88rem;
-            color: #64748b;
-            margin: 0;
         }
 
         .select-level-collections-empty {
@@ -441,30 +394,7 @@
             $builtinCollections = $builtinCollections ?? collect();
         @endphp
 
-        <section class="select-level-collections" aria-labelledby="select-level-collections-heading">
-            <div class="select-level-collections-header">
-                <h2 id="select-level-collections-heading" class="select-level-collections-title">Тематические подборки</h2>
-              
-            </div>
-            <div class="select-level-collections-grid">
-                @forelse ($builtinCollections as $collection)
-                    <a href="{{ route('learning.collection.level', $collection) }}" class="select-level-collection-card">
-                        <span class="select-level-collection-badge">Базовая подборка</span>
-                        <h3>{{ $collection->name }}</h3>
-                        <p class="select-level-collection-meta">{{ $collection->characters_count }} иероглифов в наборе</p>
-                    </a>
-                @empty
-                    <p class="select-level-collections-empty">
-                        Встроенные подборки ещё не созданы для вашего аккаунта. Администратор может выполнить команду
-                        <code>php artisan collections:sync-builtin</code>
-                        или зарегистрируйтесь заново после обновления приложения.
-                    </p>
-                @endforelse
-            </div>
-            <div class="select-level-collections-footer">
-                <a href="{{ route('collections.index') }}" class="select-level-collections-all-link">Все мои коллекции →</a>
-            </div>
-        </section>
+ 
         
         <div class="hsk-levels-grid">
             @for($level = 1; $level <= 6; $level++)
@@ -522,18 +452,11 @@
                     
                     <div class="hsk-actions">
                         <span class="action-btn learn-btn">Изучать</span>
-                        <span class="action-btn review-btn">Повторить</span>
                     </div>
                 </a>
             @endfor
         </div>
-        
-        <div class="quick-start">
-            <a href="{{ route('learning.level', 1) }}" class="quick-start-btn">
-                Начать с HSK 1 (рекомендуется для новичков)
-            </a>
-        </div>
-        
+
         <div class="info-section">
             <h3 class="info-title">Что такое HSK?</h3>
             <p class="info-text">
@@ -547,6 +470,74 @@
                 некоторые знания. Это поможет систематизировать обучение и заполнить пробелы.
             </p>
         </div>
+   
+        
+
+        <section class="select-level-collections" aria-labelledby="select-level-collections-heading">
+            <div class="select-level-collections-header">
+                <h2 id="select-level-collections-heading" class="select-level-collections-title">Тематические подборки</h2>
+              
+            </div>
+            <div class="select-level-collections-grid">
+                @forelse ($builtinCollections as $collection)
+                    @php
+                        $cTotal = $collection->select_level_total ?? (int) $collection->characters_count;
+                        $cLearned = $collection->select_level_learned ?? 0;
+                        $cProgress = $collection->select_level_progress ?? 0;
+                        $cRemaining = max(0, $cTotal - $cLearned);
+                    @endphp
+                    <a href="{{ route('learning.collection.level', $collection) }}" class="hsk-card">
+                        <div class="hsk-card-header">
+                            <div class="hsk-title">{{ $collection->name }}</div>
+                            <div class="hsk-count">{{ $cLearned }}/{{ $cTotal }}</div>
+                        </div>
+
+                        <div class="hsk-description">
+                            Тематическая подборка из {{ $cTotal }} иероглифов. Можно проходить параллельно с уровнями HSK.
+                        </div>
+
+                        <div class="progress-container">
+                            <div class="progress-header">
+                                <span class="progress-label">Ваш прогресс</span>
+                                <span class="progress-percent">{{ $cProgress }}%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: {{ $cProgress }}%"></div>
+                            </div>
+                        </div>
+
+                        <div class="hsk-stats">
+                            <div class="stat">
+                                <span class="stat-value">{{ $cTotal }}</span>
+                                <span class="stat-label">Всего</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value">{{ $cLearned }}</span>
+                                <span class="stat-label">Выучено</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value">{{ $cRemaining }}</span>
+                                <span class="stat-label">Осталось</span>
+                            </div>
+                        </div>
+
+                        <div class="hsk-actions">
+                            <span class="action-btn learn-btn">Изучать</span>
+                        </div>
+                    </a>
+                @empty
+                    <p class="select-level-collections-empty">
+                        Встроенные подборки ещё не созданы для вашего аккаунта. Администратор может выполнить команду
+                        <code>php artisan collections:sync-builtin</code>
+                        или зарегистрируйтесь заново после обновления приложения.
+                    </p>
+                @endforelse
+            </div>
+            <div class="select-level-collections-footer">
+                <a href="{{ route('collections.index') }}" class="select-level-collections-all-link">Все мои коллекции →</a>
+            </div>
+        </section>
+  
         </div>
     </div>
 

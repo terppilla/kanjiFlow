@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout :hide-footer="true">
     <style>
         /* Переменные цветов в стиле сайта */
         :root {
@@ -34,55 +34,6 @@
             margin: 0 auto;
             padding: 12px 14px 24px;
             min-height: auto;
-        }
-
-        /* Навигационная панель */
-        .nav-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--color-dark-blue);
-            padding: 0.6rem 1rem;
-            border-radius: 8px;
-            margin-bottom: 0.85rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            border-left: 4px solid var(--color-primary);
-        }
-
-        .nav-btn {
-            padding: 0.5rem 1rem;
-            background: var(--color-white-gold);
-            color: var(--color-dark-red);
-            text-decoration: none;
-            border-radius: 6px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            border: 1px solid rgba(214, 155, 100, 0.3);
-            font-size: 0.9rem;
-        }
-
-        .nav-btn:hover {
-            background: var(--color-gold);
-            color: white;
-            transform: translateY(-1px);
-        }
-
-        .nav-center {
-            text-align: center;
-            color: white;
-        }
-
-        .nav-title {
-            font-size: 1.15rem;
-            font-weight: 600;
-            margin-bottom: 0.15rem;
-            letter-spacing: 0.5px;
-        }
-
-        .nav-subtitle {
-            font-size: 0.78rem;
-            opacity: 0.9;
-            color: var(--color-white-gold);
         }
 
         /* Прогресс уровня */
@@ -745,17 +696,6 @@
 
         /* Адаптивность */
         @media (max-width: 768px) {
-            .nav-bar {
-                flex-direction: column;
-                gap: 1rem;
-                text-align: center;
-                padding: 1rem;
-            }
-            
-            .nav-btn {
-                width: 100%;
-            }
-            
             .character-char {
                 font-size: 4rem;
             }
@@ -817,6 +757,7 @@
         }
     </style>
 
+    <div class="page-learning-show">
     <div class="learning-container">
         <div class="nav-bar">
             <a href="{{ $backUrl }}" class="nav-btn" id="navBackLink">
@@ -991,6 +932,7 @@
                 </button>
             </div>
         </div>
+    </div>
     </div>
     
     <script>

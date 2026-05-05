@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Character;
 use Bestmomo\LaravelEdgeTts\Contracts\TtsSynthesizer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class AudioController extends Controller
 {
@@ -30,6 +31,7 @@ class AudioController extends Controller
         $filename = 'audio/' . $character->character . '.mp3';
         $fullPath = storage_path('app/public/' . $filename);
 
+        $this->forgetEdgeTtsCache($character->pinyin);
         $this->tts->toFile(
             $character->pinyin,
             'zh-CN-XiaoxiaoNeural',
@@ -63,19 +65,21 @@ class AudioController extends Controller
     public function generateExampleAudio($characterId)
     {
         $character = Character::findOrFail($characterId);
-        
-        if (empty($character->example_pinyin)) {
+
+        $speech = $character->exampleSpeechForTts();
+        if ($speech === null || $speech === '') {
             return response()->json([
-                'success' => false, 
-                'message' => 'У этого иероглифа нет примера для озвучки'
+                'success' => false,
+                'message' => 'У этого иероглифа нет текста примера для озвучки',
             ]);
         }
-        
+
         $filename = 'audio/' . $character->character . '_example.mp3';
         $fullPath = storage_path('app/public/' . $filename);
 
+        $this->forgetEdgeTtsCache($speech);
         $this->tts->toFile(
-            $character->example_pinyin,
+            $speech,
             'zh-CN-XiaoxiaoNeural',
             $fullPath
         );
@@ -118,15 +122,17 @@ class AudioController extends Controller
     {
         $character = Character::findOrFail($characterId);
 
-        if (empty($character->example_pinyin)) {
+        $speech = $character->exampleSpeechForTts();
+        if ($speech === null || $speech === '') {
             return response()->json([
-                'success' => false, 
-                'message' => 'Нет текста для озвучки'
+                'success' => false,
+                'message' => 'Нет текста для озвучки',
             ]);
         }
 
+        $this->forgetEdgeTtsCache($speech);
         $base64Audio = $this->tts->toBase64(
-            $character->example_pinyin,
+            $speech,
             'zh-CN-XiaoxiaoNeural'
         );
 
@@ -134,5 +140,10 @@ class AudioController extends Controller
             'success' => true, 
             'base64' => $base64Audio
         ]);
+    }
+
+    private function forgetEdgeTtsCache(string $text, array $options = []): void
+    {
+        Cache::forget(md5(serialize([$text, 'zh-CN-XiaoxiaoNeural', $options])));
     }
 }

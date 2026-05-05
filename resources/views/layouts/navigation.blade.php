@@ -22,7 +22,6 @@
             align-items: center;
             padding: 1rem 2rem;
             background: var(--color-dark-blue);
-            border-bottom: 3px solid var(--color-primary);
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             position: sticky;
             top: 0;

@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\Character;
 use Bestmomo\LaravelEdgeTts\Contracts\TtsSynthesizer;
+use Illuminate\Support\Facades\Cache;
 class GenerateCharacterAudio extends Command
 {
     protected $signature = 'characters:generate-audio';
@@ -35,9 +36,10 @@ class GenerateCharacterAudio extends Command
                 }
             }
 
-            // 2. Генерация аудио для примера предложения
-            if (! empty($character->example_pinyin) && $this->needsExampleAudioRefresh($character)) {
-                $audioPath = $this->generateAudio($character->example_pinyin, $character->character . '_example');
+            // 2. Генерация аудио для примера (китайский текст из example_hanzi — надёжнее для zh-CN)
+            $exampleSpeech = $character->exampleSpeechForTts();
+            if ($exampleSpeech !== null && $exampleSpeech !== '' && $this->needsExampleAudioRefresh($character)) {
+                $audioPath = $this->generateAudio($exampleSpeech, $character->character . '_example');
                 if ($audioPath) {
                     $character->audio_example = $audioPath;
                     $this->info('  ✓ Аудио примера создано или обновлено');
@@ -57,6 +59,7 @@ class GenerateCharacterAudio extends Command
             $filename = 'audio/' . $identifier . '.mp3';
             $fullPath = storage_path('app/public/' . $filename);
 
+            Cache::forget(md5(serialize([$text, 'zh-CN-XiaoxiaoNeural', []])));
             $this->tts->toFile($text, 'zh-CN-XiaoxiaoNeural', $fullPath);
 
             if (! is_file($fullPath) || filesize($fullPath) < 1) {

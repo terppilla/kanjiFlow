@@ -1363,7 +1363,6 @@ nav .nav {
     align-items: center;
     padding: 1rem 2rem;
     background: var(--color-dark-blue);
-    border-bottom: 3px solid var(--color-primary);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     position: sticky;
     top: 0;
@@ -1475,17 +1474,6 @@ nav .nav button.text-lg:hover {
 .page-learning-select-level .collections-shortlist-count { color: var(--color-gray); font-size: 0.9rem; }
 
 /* Learning level */
-.learning-level-page {
-    min-height: calc(100vh - 100px);
-    background: linear-gradient(
-        165deg,
-        rgba(243, 202, 165, 0.1) 0%,
-        rgba(255, 255, 255, 0.96) 45%,
-        #0f172a0a 100%
-    );
-    padding: 1rem 0 2.75rem;
-}
-
 .learning-level-shell {
     max-width: 1120px;
     margin: 0 auto;
@@ -1519,21 +1507,13 @@ nav .nav button.text-lg:hover {
 
 .page-learning-level .level-navigation-bar {
     position: relative;
-    overflow: hidden;
+    overflow: visible;
     padding: 1rem 1.15rem;
     margin-bottom: 1.15rem;
     background: var(--color-dark-blue);
     border-radius: 14px;
-    border: 1px solid rgba(243, 202, 165, 0.2);
-    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.25);
-}
-
-.page-learning-level .level-navigation-bar::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at top right, rgba(243, 202, 165, 0.18), transparent 45%);
-    pointer-events: none;
+    border: none;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .page-learning-level .level-navigation {
@@ -1547,35 +1527,36 @@ nav .nav button.text-lg:hover {
 .page-learning-level .level-navigation-bar .nav-btn {
     position: relative;
     z-index: 1;
-    padding: 0.55rem 1.05rem;
-    border-radius: 10px;
-    font-weight: 600;
-    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.45rem 0.95rem;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.95rem;
     text-decoration: none;
-    background: rgba(243, 202, 165, 0.14);
-    color: var(--color-white-gold);
-    border: 1px solid rgba(243, 202, 165, 0.35);
-    transition: background 0.2s ease, transform 0.15s ease, border-color 0.15s ease, box-shadow 0.2s ease;
+    background: transparent;
+    color: rgba(243, 202, 165, 0.95);
+    border: 1px solid rgba(214, 155, 100, 0.35);
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 .page-learning-level .level-navigation-bar .nav-btn:hover {
-    background: var(--color-primary);
+    background: rgba(214, 155, 100, 0.15);
     color: #fff;
-    border-color: var(--color-primary);
-    transform: translateY(-1px);
-    box-shadow: 0 8px 18px rgba(193, 18, 31, 0.35);
+    border-color: rgba(214, 155, 100, 0.45);
 }
 
 .page-learning-level .level-navigation-bar .nav-btn--accent {
-    background: linear-gradient(135deg, #c1121f 0%, #8e1b1b 100%);
-    border-color: rgba(243, 202, 165, 0.45);
+    background: var(--color-primary);
+    border: 2px solid var(--color-primary);
     color: #fff;
 }
 
 .page-learning-level .level-navigation-bar .nav-btn--accent:hover {
-    background: linear-gradient(135deg, #7a1414 0%, #c1121f 100%);
+    background: var(--color-red);
+    border-color: var(--color-red);
     color: #fff;
-    border-color: rgba(243, 202, 165, 0.6);
 }
 
 .page-learning-level .level-header {
@@ -1641,6 +1622,15 @@ nav .nav button.text-lg:hover {
     .page-learning-level .level-navigation-bar {
         padding: 0.85rem 0.95rem;
     }
+
+    .page-learning-level .level-navigation {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .page-learning-level .level-navigation-bar .nav-btn {
+        width: 100%;
+    }
 }
 .page-learning-level .learning-level-panel--search .search-box {
     max-width: none;
@@ -1703,6 +1693,80 @@ nav .nav button.text-lg:hover {
     margin: 0 auto;
     padding: 12px 14px 24px;
 }
+
+.page-learning-show .nav-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    background: var(--color-dark-blue);
+    padding: 1rem 1.15rem;
+    border-radius: 14px;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border: none;
+    position: relative;
+    overflow: visible;
+}
+
+.page-learning-show .nav-bar::before {
+    display: none;
+}
+
+.page-learning-show .nav-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.45rem 0.95rem;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    text-decoration: none;
+    background: transparent;
+    color: rgba(243, 202, 165, 0.95);
+    border: 1px solid rgba(214, 155, 100, 0.35);
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.page-learning-show .nav-btn:hover {
+    background: rgba(214, 155, 100, 0.15);
+    color: #fff;
+    border-color: rgba(214, 155, 100, 0.45);
+}
+
+.page-learning-show .nav-center {
+    text-align: center;
+    flex: 1;
+    min-width: 140px;
+    padding: 0 0.75rem;
+}
+
+.page-learning-show .nav-title {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 0.15rem;
+    letter-spacing: 0.02em;
+    color: var(--color-white-gold);
+}
+
+.page-learning-show .nav-subtitle {
+    font-size: 0.82rem;
+    color: rgba(243, 202, 165, 0.88);
+}
+
+@media (max-width: 768px) {
+    .page-learning-show .nav-bar {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .page-learning-show .nav-btn {
+        width: 100%;
+    }
+}
+
 .page-learning-show .level-progress,
 .page-learning-show .character-card {
     background: #fff;
@@ -2324,11 +2388,13 @@ nav .nav button.text-lg:hover {
     }
 }
 
-/* Articles + единый фон пользовательских разделов (кроме дашборда и карточки иероглифа в сессии) */
+/* Articles + единый фон пользовательских разделов (кроме дашборда) */
 .articles-page,
 .article-show-page,
 .profile-page,
-.collections-page {
+.collections-page,
+.learning-level-page,
+.page-learning-show {
     min-height: calc(100vh - 120px);
     background: linear-gradient(165deg, rgba(243, 202, 165, 0.08) 0%, rgba(255, 255, 255, 0.95) 42%, rgba(15, 23, 42, 0.03) 100%);
     padding: 1.25rem 0 2.5rem;
@@ -3072,4 +3138,94 @@ nav .nav button.text-lg:hover {
         flex-direction: column;
         align-items: stretch;
     }
+}
+
+/* ===== App layout: футер (layouts/app.blade.php) ===== */
+.layout-app-body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.layout-app-wrap {
+    flex: 1 0 auto;
+}
+
+.layout-app-main {
+    min-width: 0;
+}
+
+.site-footer {
+    flex-shrink: 0;
+    background: var(--color-dark-blue);
+    color: rgba(243, 202, 165, 0.88);
+    padding: 2rem 1.25rem 1.5rem;
+    border-top: 1px solid rgba(214, 155, 100, 0.22);
+}
+
+.site-footer-inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    display: grid;
+    gap: 1.35rem;
+    grid-template-columns: 1fr;
+}
+
+@media (min-width: 720px) {
+    .site-footer-inner {
+        grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+        align-items: start;
+    }
+
+    .site-footer-bottom {
+        grid-column: 1 / -1;
+    }
+}
+
+.site-footer-title {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--color-white-gold);
+    margin: 0 0 0.35rem;
+    letter-spacing: 0.02em;
+}
+
+.site-footer-tagline {
+    margin: 0;
+    font-size: 0.88rem;
+    line-height: 1.45;
+    color: rgba(243, 202, 165, 0.72);
+    max-width: 28rem;
+}
+
+.site-footer-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem 1.15rem;
+    align-items: center;
+}
+
+.site-footer-nav a {
+    color: rgba(243, 202, 165, 0.95);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.site-footer-nav a:hover {
+    color: #fff;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.site-footer-bottom {
+    padding-top: 1.15rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 0.8rem;
+    color: rgba(243, 202, 165, 0.55);
+}
+
+.site-footer-bottom p {
+    margin: 0;
 }
