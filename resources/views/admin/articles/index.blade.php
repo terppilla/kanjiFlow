@@ -26,7 +26,7 @@
                         <td>{{ $article->subtitle ?: '—' }}</td>
                         <td>{{ $article->images->count() }}</td>
                         <td>{{ $article->created_at->format('d.m.Y H:i') }}</td>
-                        <td>
+                        <td class="characters-index__actions">
                             <a href="{{ route('admin.articles.edit', $article) }}" class="table-actions">Редактировать</a>
                             <form action="{{ route('admin.articles.destroy', $article) }}" method="POST" class="table-actions" onsubmit="return confirm('Удалить статью?');">
                                 @csrf
