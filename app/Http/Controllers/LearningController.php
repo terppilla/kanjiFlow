@@ -611,11 +611,11 @@ class LearningController extends Controller
             'pinyin' => $character->pinyin,
             'meaning' => $character->meaning,
             'hsk_level' => $character->hsk_level,
-            'audio_character' => $character->audio_character,
+            'audio_character' => Character::publicAudioUrl($character->audio_character),
             'example_hanzi' => $character->example_hanzi,
             'example_pinyin' => $character->example_pinyin,
             'example_translation' => $character->example_translation,
-            'audio_example' => $character->audio_example,
+            'audio_example' => Character::publicAudioUrl($character->audio_example),
             'has_example' => (bool) $character->example_hanzi,
         ];
     }

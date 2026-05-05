@@ -855,7 +855,7 @@
                 
                 <button type="button" class="audio-btn" id="audioCharacterBtn" 
                 style="{{ $character->audio_character ? '' : 'display:none' }}" 
-                data-audio-url="{{ $character->audio_character ?? '' }}">
+                data-audio-url="{{ \App\Models\Character::publicAudioUrl($character->audio_character) ?? '' }}">
                 <img src="{{ asset('img/voice-icon.svg') }}" alt="Произношение" class="audio-icon">
             </button>
             </div>
@@ -869,7 +869,7 @@
                         <div class="example-translation" id="exTranslation">{{ $character->example_translation }}</div>
                         <button type="button" class="audio-btn" id="audioExampleBtn" 
                         style="{{ $character->audio_example ? '' : 'display:none' }}" 
-                        data-audio-url="{{ $character->audio_example ?? '' }}">
+                        data-audio-url="{{ \App\Models\Character::publicAudioUrl($character->audio_example) ?? '' }}">
                         <img src="{{ asset('img/voice-icon.svg') }}" alt="Произношение" class="audio-icon">
                     </button>
                     </div>

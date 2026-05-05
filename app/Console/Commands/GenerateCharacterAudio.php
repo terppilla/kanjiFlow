@@ -5,8 +5,6 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\Character;
 use Bestmomo\LaravelEdgeTts\Contracts\TtsSynthesizer;
-use Illuminate\Support\Facades\Storage;
-
 class GenerateCharacterAudio extends Command
 {
     protected $signature = 'characters:generate-audio';
@@ -28,21 +26,21 @@ class GenerateCharacterAudio extends Command
         foreach ($characters as $character) {
             $this->line("Обработка: {$character->character}");
 
-            // 1. Генерация аудио для самого иероглифа
-            if (empty($character->audio_character) && !empty($character->pinyin)) {
+            // 1. Генерация аудио для самого иероглифа (в т.ч. перезапись пустых файлов на диске)
+            if (! empty($character->pinyin) && $this->needsCharacterAudioRefresh($character)) {
                 $audioPath = $this->generateAudio($character->pinyin, $character->character);
                 if ($audioPath) {
                     $character->audio_character = $audioPath;
-                    $this->info("  ✓ Аудио иероглифа создано");
+                    $this->info('  ✓ Аудио иероглифа создано или обновлено');
                 }
             }
 
             // 2. Генерация аудио для примера предложения
-            if (empty($character->audio_example) && !empty($character->example_pinyin)) {
+            if (! empty($character->example_pinyin) && $this->needsExampleAudioRefresh($character)) {
                 $audioPath = $this->generateAudio($character->example_pinyin, $character->character . '_example');
                 if ($audioPath) {
                     $character->audio_example = $audioPath;
-                    $this->info("  ✓ Аудио примера создано");
+                    $this->info('  ✓ Аудио примера создано или обновлено');
                 }
             }
 
@@ -61,10 +59,53 @@ class GenerateCharacterAudio extends Command
 
             $this->tts->toFile($text, 'zh-CN-XiaoxiaoNeural', $fullPath);
 
+            if (! is_file($fullPath) || filesize($fullPath) < 1) {
+                $this->error('  Ошибка: TTS записал пустой файл');
+
+                return null;
+            }
+
             return '/storage/' . $filename;
         } catch (\Exception $e) {
             $this->error("  Ошибка: {$e->getMessage()}");
+
             return null;
         }
+    }
+
+    private function needsCharacterAudioRefresh(Character $character): bool
+    {
+        if (empty($character->audio_character)) {
+            return true;
+        }
+
+        $abs = $this->absoluteStoragePath($character->audio_character);
+
+        return ! is_file($abs) || filesize($abs) < 1;
+    }
+
+    private function needsExampleAudioRefresh(Character $character): bool
+    {
+        if (empty($character->audio_example)) {
+            return true;
+        }
+
+        $abs = $this->absoluteStoragePath($character->audio_example);
+
+        return ! is_file($abs) || filesize($abs) < 1;
+    }
+
+    /**
+     * Значение из БД: /storage/audio/我.mp3 или audio/我.mp3
+     */
+    private function absoluteStoragePath(string $stored): string
+    {
+        $rel = $stored;
+        if (str_starts_with($rel, '/storage/')) {
+            $rel = substr($rel, strlen('/storage/'));
+        }
+        $rel = ltrim($rel, '/');
+
+        return storage_path('app/public/' . $rel);
     }
 }

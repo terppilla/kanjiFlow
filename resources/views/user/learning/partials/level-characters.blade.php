@@ -24,7 +24,7 @@
             <div class="character-meaning">{{ $character->meaning }}</div>
             <button type="button" class="audio-btn" id="audioExampleBtn" 
             style="{{ $character->audio_example ? '' : 'display:none' }}" 
-            data-audio-url="{{ $character->audio_example ?? '' }}">
+            data-audio-url="{{ \App\Models\Character::publicAudioUrl($character->audio_example) ?? '' }}">
             <img src="{{ asset('img/voice-icon.svg') }}" alt="Произношение" class="audio-icon">
         </button>
         </div>

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Character;
-use Illuminate\Support\Facades\Storage;
 use Bestmomo\LaravelEdgeTts\Contracts\TtsSynthesizer;
 use Illuminate\Http\Request;
 
@@ -16,20 +15,35 @@ class AudioController extends Controller
         $this->tts = $tts;
     }
 
+    /**
+     * Имя маршрута: generateCharacterAudio
+     */
+    public function generateCharacterAudio($characterId)
+    {
+        return $this->generateAndSave($characterId);
+    }
+
     public function generateAndSave($characterId)
     {
         $character = Character::findOrFail($characterId);
-        
+
         $filename = 'audio/' . $character->character . '.mp3';
         $fullPath = storage_path('app/public/' . $filename);
 
         $this->tts->toFile(
-                 $character->pinyin,
-                 'zh-CN-XiaoxiaoNeural',   
-                 $fullPath
+            $character->pinyin,
+            'zh-CN-XiaoxiaoNeural',
+            $fullPath
         );
 
-        $character->audio_character = $filename;
+        if (! is_file($fullPath) || filesize($fullPath) < 1) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Не удалось сохранить озвучку (пустой файл). Повторите попытку.',
+            ], 422);
+        }
+
+        $character->audio_character = '/storage/' . $filename;
         $character->save();
 
         return response()->json(['success' => true, 'path' => $character->audio_character]);
@@ -62,9 +76,16 @@ class AudioController extends Controller
 
         $this->tts->toFile(
             $character->example_pinyin,
-            'zh-CN-XiaoxiaoNeural',   
+            'zh-CN-XiaoxiaoNeural',
             $fullPath
         );
+
+        if (! is_file($fullPath) || filesize($fullPath) < 1) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Не удалось сохранить озвучку примера (пустой файл). Повторите попытку.',
+            ], 422);
+        }
 
         // Сохраняем путь в поле audio_example
         $character->audio_example = '/storage/' . $filename;
