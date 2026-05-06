@@ -1,5 +1,6 @@
 <?php
 
+<<<<<<< HEAD
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\BuiltinCollectionTemplateController;
@@ -14,6 +15,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
+=======
+use Illuminate\Support\Facades\Route;
+>>>>>>> e3a0717bac623e7789a121de1a25aa2df13d4476
 
 /*
 |--------------------------------------------------------------------------
@@ -29,6 +33,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 Route::get('/', function () {
     return view('welcome');
 });
+<<<<<<< HEAD
 
 Route::middleware('guest')->group(function () {
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
@@ -153,3 +158,5 @@ Route::middleware(['auth'])->group(function () {
 });
 
 require __DIR__.'/auth.php';
+=======
+>>>>>>> e3a0717bac623e7789a121de1a25aa2df13d4476

@@ -28,65 +28,68 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-public function store(LoginRequest $request): RedirectResponse
-{
-    $user = User::where('email', $request->email)->first();
+    public function store(LoginRequest $request): RedirectResponse
+    {
+        $user = User::where('email', $request->email)->first();
 
-    // Проверка блокировки аккаунта
-    if ($user && $user->locked_until && Carbon::parse($user->locked_until)->isFuture()) {
-        $minutes = Carbon::now()->diffInMinutes($user->locked_until);
-        return back()->withErrors([
-            'email' => "Слишком много попыток входа. Аккаунт заблокирован на {$minutes} мин.",
-        ]);
-    }
+        // Проверка блокировки аккаунта
+        if ($user && $user->locked_until && Carbon::parse($user->locked_until)->isFuture()) {
+            $minutes = Carbon::now()->diffInMinutes($user->locked_until);
 
-    // Проверка пароля
-    if (!Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
-        if ($user) {
-            $this->handleFailedLogin($user);
+            return back()->withErrors([
+                'email' => "Слишком много попыток входа. Аккаунт заблокирован на {$minutes} мин.",
+            ]);
         }
 
-        return back()->withErrors([
-            'email' => 'Неверный email или пароль.',
+        // Проверка пароля
+        if (! Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
+            if ($user) {
+                $this->handleFailedLogin($user);
+            }
+
+            return back()->withErrors([
+                'email' => 'Неверный email или пароль.',
+            ]);
+        }
+
+        // Успешная аутентификация - получаем пользователя
+        $user = Auth::user();
+
+        // Сбрасываем счетчик попыток при успешном вводе пароля
+        $user->update([
+            'login_attempts' => 0,
+            'locked_until' => null,
         ]);
-    }
 
-    // Успешная аутентификация - получаем пользователя
-    $user = Auth::user();
+        if (! $user->two_factor_enabled) {
+            $request->session()->regenerate();
 
-    // Сбрасываем счетчик попыток при успешном вводе пароля
-    $user->update([
-        'login_attempts' => 0,
-        'locked_until' => null,
-    ]);
+            return redirect()->intended(route('dashboard'));
+        }
 
-    if (! $user->two_factor_enabled) {
+        // Новый идентификатор сессии до записи two_factor_user_id / logout — защита от fixation.
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard'));
+        // Генерируем 2FA код
+        $twoFactorCode = sprintf('%06d', mt_rand(1, 999999));
+
+        $user->update([
+            'two_factor_code' => $twoFactorCode,
+            'two_factor_expires_at' => Carbon::now()->addMinutes(5),
+        ]);
+
+        // Логируем код (временно)
+        Log::info("2FA код для пользователя {$user->email}: {$twoFactorCode}");
+
+        // Разлогиниваем временно
+        Auth::logout();
+
+        // Сохраняем ID пользователя в сессии
+        Session::put('two_factor_user_id', $user->id);
+
+        // Перенаправляем на страницу ввода 2FA кода
+        return redirect()->route('two-factor.verify');
     }
-
-    // Генерируем 2FA код
-    $twoFactorCode = sprintf('%06d', mt_rand(1, 999999));
-
-    $user->update([
-        'two_factor_code' => $twoFactorCode,
-        'two_factor_expires_at' => Carbon::now()->addMinutes(5),
-    ]);
-
-    // Логируем код (временно)
-    Log::info("2FA код для пользователя {$user->email}: {$twoFactorCode}");
-
-    // Разлогиниваем временно
-    Auth::logout();
-
-    // Сохраняем ID пользователя в сессии
-    Session::put('two_factor_user_id', $user->id);
-
-    // Перенаправляем на страницу ввода 2FA кода
-    return redirect()->route('two-factor.verify');
-}
-
 
     private function handleFailedLogin(User $user): void
     {

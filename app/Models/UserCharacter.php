@@ -10,6 +10,13 @@ class UserCharacter extends Model
 {
     use HasFactory;
 
+    /**
+     * Минимальный интервал до следующего повторения (минуты), при котором карточка
+     * может считаться выученной. Совпадает с тем, как хранится {@see $interval}
+     * и выставляется через {@see processReview()} → {@see addMinutes()}.
+     */
+    private const LEARNED_MIN_INTERVAL_MINUTES = 30 * 24 * 60;
+
     protected $table = 'user_characters';
 
     protected $fillable = [
@@ -143,7 +150,7 @@ class UserCharacter extends Model
 
         if (
             $this->repetitions >= 3
-            && $this->interval >= 43_200
+            && $this->interval >= self::LEARNED_MIN_INTERVAL_MINUTES
             && (float) $this->success_rate >= 90.0
         ) {
             $this->is_learned = true;
