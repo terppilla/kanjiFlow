@@ -4,7 +4,6 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-<<<<<<< HEAD
     "content-hash": "af27ae87975a1178de7c4d24438f5baf",
     "packages": [
         {
@@ -113,11 +112,6 @@
             "time": "2025-10-05T11:47:52+00:00"
         },
         {
-=======
-    "content-hash": "9c491b8531eec05ba41a11d9276a5749",
-    "packages": [
-        {
->>>>>>> e3a0717bac623e7789a121de1a25aa2df13d4476
             "name": "brick/math",
             "version": "0.12.3",
             "source": {
@@ -620,7 +614,6 @@
             "time": "2025-03-06T22:45:56+00:00"
         },
         {
-<<<<<<< HEAD
             "name": "evenement/evenement",
             "version": "v3.0.2",
             "source": {
@@ -668,8 +661,6 @@
             "time": "2023-08-08T05:53:35+00:00"
         },
         {
-=======
->>>>>>> e3a0717bac623e7789a121de1a25aa2df13d4476
             "name": "fruitcake/php-cors",
             "version": "v1.4.0",
             "source": {
@@ -3321,7 +3312,6 @@
             "time": "2025-12-14T04:43:48+00:00"
         },
         {
-<<<<<<< HEAD
             "name": "ratchet/pawl",
             "version": "v0.4.3",
             "source": {
@@ -3961,8 +3951,6 @@
             "time": "2024-06-11T12:45:25+00:00"
         },
         {
-=======
->>>>>>> e3a0717bac623e7789a121de1a25aa2df13d4476
             "name": "symfony/console",
             "version": "v6.4.31",
             "source": {
@@ -6620,7 +6608,6 @@
             "time": "2025-04-30T06:54:44+00:00"
         },
         {
-<<<<<<< HEAD
             "name": "laravel/breeze",
             "version": "v1.29.1",
             "source": {
@@ -6683,8 +6670,6 @@
             "time": "2024-03-04T14:35:21+00:00"
         },
         {
-=======
->>>>>>> e3a0717bac623e7789a121de1a25aa2df13d4476
             "name": "laravel/pint",
             "version": "v1.20.0",
             "source": {
@@ -9063,20 +9048,12 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-<<<<<<< HEAD
     "stability-flags": [],
-=======
-    "stability-flags": {},
->>>>>>> e3a0717bac623e7789a121de1a25aa2df13d4476
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": "^8.1"
     },
-<<<<<<< HEAD
     "platform-dev": [],
-=======
-    "platform-dev": {},
->>>>>>> e3a0717bac623e7789a121de1a25aa2df13d4476
     "plugin-api-version": "2.6.0"
 }
