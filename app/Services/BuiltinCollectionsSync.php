@@ -2,33 +2,48 @@
 
 namespace App\Services;
 
+use App\Models\BuiltinCollectionTemplate;
 use App\Models\Character;
 use App\Models\Collection;
 use App\Models\User;
-use Illuminate\Support\Collection as SupportCollection;
+use Illuminate\Support\Facades\Schema;
 
 class BuiltinCollectionsSync
 {
-    // #region agent log
-    private function agentDebugLog(string $hypothesisId, string $location, string $message, array $data = []): void
-    {
-        $path = base_path('debug-37bbcf.log');
-        $line = json_encode([
-            'sessionId' => '37bbcf',
-            'hypothesisId' => $hypothesisId,
-            'location' => $location,
-            'message' => $message,
-            'data' => $data,
-            'timestamp' => (int) round(microtime(true) * 1000),
-        ], JSON_UNESCAPED_UNICODE);
-        file_put_contents($path, $line."\n", FILE_APPEND | LOCK_EX);
-    }
-    // #endregion
-
     /**
      * @return array<string, array{name: string, characters: list<string>}>
      */
     public function definitions(): array
+    {
+        if (! Schema::hasTable('builtin_collection_templates')) {
+            return $this->fallbackDefinitions();
+        }
+
+        $templates = BuiltinCollectionTemplate::query()
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->with(['characters'])
+            ->get();
+
+        if ($templates->isEmpty()) {
+            return $this->fallbackDefinitions();
+        }
+
+        $out = [];
+        foreach ($templates as $template) {
+            $out[$template->slug] = [
+                'name' => $template->name,
+                'characters' => $template->characters->pluck('character')->all(),
+            ];
+        }
+
+        return $out;
+    }
+
+    /**
+     * @return array<string, array{name: string, characters: list<string>}>
+     */
+    private function fallbackDefinitions(): array
     {
         return [
             'people' => [
@@ -52,7 +67,9 @@ class BuiltinCollectionsSync
 
     public function syncForUser(User $user): void
     {
-        $glyphs = SupportCollection::make($this->definitions())
+        $definitions = $this->definitions();
+
+        $glyphs = collect($definitions)
             ->pluck('characters')
             ->flatten()
             ->unique()
@@ -60,16 +77,6 @@ class BuiltinCollectionsSync
             ->all();
 
         $charactersReady = Character::query()->exists();
-        $totalCharsInDb = Character::query()->count();
-
-        // #region agent log
-        $this->agentDebugLog('H1', 'BuiltinCollectionsSync::syncForUser', 'characters table state', [
-            'userId' => $user->id,
-            'charactersReady' => $charactersReady,
-            'totalCharsInDb' => $totalCharsInDb,
-            'glyphsRequested' => count($glyphs),
-        ]);
-        // #endregion
 
         $byChar = $charactersReady
             ? Character::query()
@@ -77,14 +84,7 @@ class BuiltinCollectionsSync
                 ->pluck('id', 'character')
             : collect();
 
-        // #region agent log
-        $this->agentDebugLog('H2', 'BuiltinCollectionsSync::syncForUser', 'whereIn pluck result', [
-            'byCharCount' => $byChar->count(),
-            'sampleKeysFromDb' => $byChar->keys()->take(5)->values()->all(),
-        ]);
-        // #endregion
-
-        foreach ($this->definitions() as $slug => $def) {
+        foreach ($definitions as $slug => $def) {
             $collection = Collection::query()->firstOrCreate(
                 [
                     'user_id' => $user->id,
@@ -100,6 +100,10 @@ class BuiltinCollectionsSync
                 $collection->update(['is_builtin' => true]);
             }
 
+            if ($collection->name !== $def['name']) {
+                $collection->update(['name' => $def['name']]);
+            }
+
             if (! $charactersReady) {
                 continue;
             }
@@ -113,14 +117,15 @@ class BuiltinCollectionsSync
             }
 
             $collection->characters()->sync($ids);
-
-            // #region agent log
-            $this->agentDebugLog('H3', 'BuiltinCollectionsSync::syncForUser', 'collection synced', [
-                'slug' => $slug,
-                'collectionId' => $collection->id,
-                'idsAttachedCount' => count($ids),
-            ]);
-            // #endregion
         }
+
+        // Убрать у пользователя встроенные подборки, которых больше нет в шаблонах
+        $allowedSlugs = array_keys($definitions);
+        Collection::query()
+            ->where('user_id', $user->id)
+            ->where('is_builtin', true)
+            ->whereNotNull('builtin_slug')
+            ->whereNotIn('builtin_slug', $allowedSlugs)
+            ->delete();
     }
 }

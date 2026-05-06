@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Admin\BuiltinCollectionTemplateController;
 use App\Http\Controllers\Admin\CharacterController;
 use App\Http\Controllers\Admin\ArticleController as AdminArticleController;
 use App\Http\Controllers\LearningController;
@@ -55,6 +56,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
 // Админка 
 Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'adminIndex'])->name('admin.dashboard');
+    Route::post('/builtin-collections/sync-all', [BuiltinCollectionTemplateController::class, 'syncAll'])
+        ->name('admin.builtin-collections.sync-all');
+    Route::get('/builtin-collections/characters/search', [BuiltinCollectionTemplateController::class, 'searchCharacters'])
+        ->name('admin.builtin-collections.characters.search');
+    Route::post('/builtin-collections/characters/resolve', [BuiltinCollectionTemplateController::class, 'resolveCharacters'])
+        ->name('admin.builtin-collections.characters.resolve');
+    Route::post('/builtin-collections/glyphs-json-import', [BuiltinCollectionTemplateController::class, 'importGlyphsJson'])
+        ->name('admin.builtin-collections.glyphs-json-import');
+    Route::resource('/builtin-collections', BuiltinCollectionTemplateController::class)
+        ->parameters(['builtin-collections' => 'template'])
+        ->except(['show'])
+        ->names('admin.builtin-collections');
+    Route::post('/characters/import-json', [CharacterController::class, 'importJson'])
+        ->name('admin.characters.import-json');
     Route::resource('/characters', CharacterController::class)->names('admin.characters');
     Route::resource('/articles', AdminArticleController::class)->except(['show'])->names('admin.articles');
 });

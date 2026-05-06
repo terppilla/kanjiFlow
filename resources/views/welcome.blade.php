@@ -11,7 +11,7 @@
             <span>Бесплатная платформа с методом интервальных повторений.</span>
             <div class="hero-buttons">
               <a href="{{ route('register') }}" class="btn btn--gold-filled">Начать обучение</a>
-              <a href="{{ route('login') }}" class=" btn btn--outline">У меня уже есть аккаунт</a>
+              <a href="{{ route('login') }}" class="btn btn-primary">У меня уже есть аккаунт</a>
             </div>
         </div>
 </div>
@@ -150,14 +150,16 @@
 </section>
 </main>
 
-<footer>
-
+<footer class="landing-footer">
+    <div class="landing-footer-inner">
+        <p class="landing-footer-copy">&copy; {{ date('Y') }} {{ config('app.name', 'KanjiFlow') }}. Все права защищены.</p>
+    </div>
 </footer>
 
 <script>
 // Анимация появления при прокрутке для блока "Почему"
 document.addEventListener('DOMContentLoaded', function() {
-    const whyElements = document.querySelectorAll('.why li, .why h2');
+    const whyElements = document.querySelectorAll('.why h2, .why .step');
     
     function checkVisibility() {
         whyElements.forEach(el => {
@@ -181,4 +183,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+<noscript>
+    <style>
+        .why h2,
+        .why .step {
+            opacity: 1 !important;
+            transform: none !important;
+            filter: none !important;
+        }
+    </style>
+</noscript>
 </x-guest-layout>

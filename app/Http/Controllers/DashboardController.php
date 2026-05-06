@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Achievement;
 use App\Models\Article;
+use App\Models\BuiltinCollectionTemplate;
 use App\Models\Character;
 use App\Models\Collection;
 use App\Models\User;
@@ -12,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class DashboardController extends Controller
 {
@@ -112,7 +114,6 @@ public function index()
     {
         $totalCharacters = Character::count();
         $totalUsers = User::count();
-        $recentCharacters = Character::latest()->take(5)->get();
         $totalArticles = Article::query()->count();
 
         $newUsersWeek = User::where('created_at', '>=', now()->subDays(7))->count();
@@ -153,11 +154,14 @@ public function index()
             $maxHskCount = max($maxHskCount, $cnt);
         }
 
+        $builtinTemplatesCount = Schema::hasTable('builtin_collection_templates')
+            ? BuiltinCollectionTemplate::query()->count()
+            : 0;
+
         return view('admin.dashboard', compact(
             'totalCharacters',
             'totalUsers',
             'totalArticles',
-            'recentCharacters',
             'newUsersWeek',
             'activeTodayUsers',
             'learnedGlyphRecords',
@@ -166,6 +170,7 @@ public function index()
             'maxReviewsDay',
             'hskDistribution',
             'maxHskCount',
+            'builtinTemplatesCount',
         ));
     }
     

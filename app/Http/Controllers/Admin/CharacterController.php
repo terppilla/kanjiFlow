@@ -4,13 +4,19 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Character;
+use App\Services\CharacterJsonImport;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CharacterController extends Controller
 {
     public function index() {
-        $characters = Character::all();
-        return view('admin.characters.index',  compact('characters'));
+        $characters = Character::query()
+            ->orderBy('hsk_level')
+            ->orderBy('character')
+            ->get();
+
+        return view('admin.characters.index', compact('characters'));
     }
 
     public function create() {
@@ -22,7 +28,7 @@ class CharacterController extends Controller
             'character'=>'required',
             'pinyin' => 'required',
             'hsk_level' => 'required|integer',
-            'example_hanzi' => 'nullable|dtring',
+            'example_hanzi' => 'nullable|string',
             'example_pinyin' => 'nullable|string',
             'example_translation' => 'nullable|string',
             'audio_character' => 'nullable|string',
@@ -57,7 +63,7 @@ class CharacterController extends Controller
             'character'=>'required',
             'pinyin' => 'required',
             'hsk_level' => 'required|integer',
-            'example_hanzi' => 'nullable|dtring',
+            'example_hanzi' => 'nullable|string',
             'example_pinyin' => 'nullable|string',
             'example_translation' => 'nullable|string',
             'audio_character' => 'nullable|string',
@@ -79,6 +85,77 @@ class CharacterController extends Controller
         ]);
 
         return redirect()->route('admin.characters.index');
+    }
+
+    public function importJson(Request $request, CharacterJsonImport $importer)
+    {
+        $request->validate([
+            'json_file' => ['required', 'file', 'max:5120'],
+        ]);
+
+        $file = $request->file('json_file');
+        $ext = strtolower((string) $file->getClientOriginalExtension());
+        if (! in_array($ext, ['json', 'txt'], true)) {
+            return back()->withErrors([
+                'json_file' => 'Разрешены только файлы с расширением .json или .txt.',
+            ]);
+        }
+
+        $contents = file_get_contents($file->getRealPath());
+        if ($contents === false) {
+            return back()->withErrors(['json_file' => 'Не удалось прочитать файл.']);
+        }
+
+        $result = $importer->decodeAndValidate($contents);
+
+        if (! $result['ok']) {
+            return back()->with('import_errors', $result['errors']);
+        }
+
+        $created = 0;
+        $updated = 0;
+
+        DB::transaction(function () use ($result, &$created, &$updated): void {
+            foreach ($result['items'] as $item) {
+                $model = Character::firstOrNew(['character' => $item['character']]);
+                $wasExisting = $model->exists;
+
+                $payload = [
+                    'pinyin' => $item['pinyin'],
+                    'meaning' => $item['meaning'],
+                    'hsk_level' => $item['hsk_level'],
+                    'example_hanzi' => $item['example_hanzi'],
+                    'example_pinyin' => $item['example_pinyin'],
+                    'example_translation' => $item['example_translation'],
+                ];
+
+                if ($item['audio_raw'] !== null) {
+                    $payload['audio_character'] = $item['audio_raw'];
+                } elseif (! $wasExisting) {
+                    $payload['audio_character'] = null;
+                }
+
+                if (! $wasExisting) {
+                    $payload['audio_example'] = null;
+                }
+
+                $model->fill($payload);
+                $model->save();
+
+                if ($wasExisting) {
+                    $updated++;
+                } else {
+                    $created++;
+                }
+            }
+        });
+
+        return redirect()
+            ->route('admin.characters.index')
+            ->with(
+                'success',
+                "Импорт выполнен: добавлено новых — {$created}, обновлено существующих — {$updated}. Записи из файла обработаны в порядке уровня HSK (1→6), внутри уровня — по иероглифу."
+            );
     }
 
     public function destroy($id) {

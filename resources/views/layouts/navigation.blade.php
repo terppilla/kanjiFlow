@@ -160,7 +160,7 @@
                 <a href="{{ route('articles.index') }}" class="text-lg">Статьи</a>
                 <a href="{{ route('articles.favorites') }}" class="text-lg">Избранные статьи</a>
                 @if(auth()->user()->isAdmin())
-                    <a href="{{ route('admin.articles.index') }}" class="text-lg">Админ: статьи</a>
+                    <a href="{{ route('admin.dashboard') }}" class="text-lg">Админ-панель</a>
                 @endif
                 <a href="{{ route('profile.edit') }}" class="text-lg">Профиль</a>
                 <form method="POST" action="{{ route('logout') }}" style="display: inline;">

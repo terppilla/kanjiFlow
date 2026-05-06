@@ -1,0 +1,82 @@
+[
+    {
+        "character": "饿",
+        "pinyin": "è",
+        "meaning": "голодный, хотеть есть",
+        "hsk_level": 2,
+        "example_hanzi": "我有点饿了。",
+        "example_pinyin": "Wǒ yǒudiǎn è le.",
+        "example_translation": "Я немного проголодался.",
+        "audio": null
+    },
+    {
+        "character": "渴",
+        "pinyin": "kě",
+        "meaning": "хотеть пить",
+        "hsk_level": 2,
+        "example_hanzi": "我很渴，想喝水。",
+        "example_pinyin": "Wǒ hěn kě, xiǎng hē shuǐ.",
+        "example_translation": "Я очень хочу пить, хочу воды.",
+        "audio": null
+    },
+    {
+        "character": "机场",
+        "pinyin": "jīchǎng",
+        "meaning": "аэропорт",
+        "hsk_level": 3,
+        "example_hanzi": "我们去机场接朋友。",
+        "example_pinyin": "Wǒmen qù jīchǎng jiē péngyou.",
+        "example_translation": "Мы поехали в аэропорт встречать друга.",
+        "audio": null
+    },
+    {
+        "character": "微笑",
+        "pinyin": "wēixiào",
+        "meaning": "улыбаться",
+        "hsk_level": 3,
+        "example_hanzi": "她对我微笑。",
+        "example_pinyin": "Tā duì wǒ wēixiào.",
+        "example_translation": "Она улыбнулась мне.",
+        "audio": null
+    },
+    {
+        "character": "着急",
+        "pinyin": "zháojí",
+        "meaning": "волноваться, торопиться",
+        "hsk_level": 3,
+        "example_hanzi": "别着急，慢慢说。",
+        "example_pinyin": "Bié zháojí, mànman shuō.",
+        "example_translation": "Не волнуйся, говори спокойно.",
+        "audio": null
+    },
+    {
+        "character": "水果",
+        "pinyin": "shuǐguǒ",
+        "meaning": "фрукты",
+        "hsk_level": 2,
+        "example_hanzi": "我喜欢吃水果。",
+        "example_pinyin": "Wǒ xǐhuan chī shuǐguǒ.",
+        "example_translation": "Я люблю есть фрукты.",
+        "audio": null
+    },
+    {
+        "character": "安静",
+        "pinyin": "ānjìng",
+        "meaning": "тихий, спокойный",
+        "hsk_level": 3,
+        "example_hanzi": "这里很安静。",
+        "example_pinyin": "Zhèlǐ hěn ānjìng.",
+        "example_translation": "Здесь очень тихо.",
+        "audio": null
+    },
+    {
+        "character": "干净",
+        "pinyin": "gānjìng",
+        "meaning": "чистый",
+        "hsk_level": 2,
+        "example_hanzi": "房间很干净。",
+        "example_pinyin": "Fángjiān hěn gānjìng.",
+        "example_translation": "Комната очень чистая.",
+        "audio": null
+    }
+]

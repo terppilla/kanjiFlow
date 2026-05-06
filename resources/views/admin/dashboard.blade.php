@@ -1,33 +1,17 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="header admin">
-            {{ __('Админ панель') }}
-        </h2>
-    </x-slot>
-
     <div class="admin-layout">
         <div class="admin-container">
             <div class="admin-hero">
-                <h1>Панель управления</h1>
+                <h1>Админ-панель</h1>
                 <p>
-                    В базе: <strong>{{ number_format($totalUsers, 0, ',', ' ') }}</strong> пользователей,
+                    В базе:
+                    <strong>{{ number_format($totalUsers, 0, ',', ' ') }}</strong> пользователей,
                     <strong>{{ number_format($totalCharacters, 0, ',', ' ') }}</strong> иероглифов,
-                    <strong>{{ number_format($totalArticles, 0, ',', ' ') }}</strong> статей.
+                    <strong>{{ number_format($totalArticles, 0, ',', ' ') }}</strong> статей,
+                    <strong>{{ number_format($builtinTemplatesCount, 0, ',', ' ') }}</strong> шаблонов тематических подборок.
                 </p>
             </div>
 
-            <!-- Навигация -->
-            <nav class="admin-nav">
-                <ul>
-                    <li><a href="{{ route('admin.characters.index') }}">Иероглифы</a></li>
-                    <li><a href="{{ route('admin.articles.index') }}">Статьи</a></li>
-                    <li><a href="#">Пользователи</a></li>
-                    <li><a href="#">Статистика</a></li>
-                    <li><a href="#">Настройки</a></li>
-                </ul>
-            </nav>
-
-            <!-- Статистика -->
             <div class="admin-stats">
                 <div class="stat-card">
                     <div class="stat-value">{{ number_format($totalUsers, 0, ',', ' ') }}</div>
@@ -54,7 +38,6 @@
                 </div>
             </div>
 
-            <!-- Графики (данные из БД) -->
             <div class="admin-charts">
                 <div class="chart-container">
                     <div class="chart-header">
@@ -102,35 +85,41 @@
                 </div>
             </div>
 
-            <!-- Быстрые действия -->
             <div class="quick-actions">
-                <h3>Быстрые действия</h3>
+                <h3>Управление контентом</h3>
                 <div class="action-buttons">
+                    <a href="{{ route('admin.builtin-collections.index') }}" class="action-btn">
+                        <div class="action-text">
+                            <div class="action-title">Тематические подборки</div>
+                            <div class="action-desc">Шаблоны коллекций для пользователей</div>
+                        </div>
+                    </a>
+
+                    <a href="{{ route('admin.characters.index') }}" class="action-btn">
+                        <div class="action-text">
+                            <div class="action-title">Иероглифы</div>
+                            <div class="action-desc">Список, редактирование и удаление</div>
+                        </div>
+                    </a>
+
+                    <a href="{{ route('admin.articles.index') }}" class="action-btn">
+                        <div class="action-text">
+                            <div class="action-title">Статьи</div>
+                            <div class="action-desc">Материалы раздела статей</div>
+                        </div>
+                    </a>
+
                     <a href="{{ route('admin.characters.create') }}" class="action-btn">
                         <div class="action-text">
                             <div class="action-title">Добавить иероглиф</div>
-                            <div class="action-desc">Создать новый иероглиф</div>
+                            <div class="action-desc">Новая карточка в базе</div>
                         </div>
                     </a>
 
                     <a href="{{ route('admin.articles.create') }}" class="action-btn">
                         <div class="action-text">
                             <div class="action-title">Добавить статью</div>
-                            <div class="action-desc">Материал для раздела статей</div>
-                        </div>
-                    </a>
-
-                    <a href="{{ route('admin.characters.index') }}" class="action-btn">
-                        <div class="action-text">
-                            <div class="action-title">Список иероглифов</div>
-                            <div class="action-desc">Редактирование и удаление</div>
-                        </div>
-                    </a>
-
-                    <a href="{{ route('admin.articles.index') }}" class="action-btn">
-                        <div class="action-text">
-                            <div class="action-title">Список статей</div>
-                            <div class="action-desc">Управление публикациями</div>
+                            <div class="action-desc">Новый материал</div>
                         </div>
                     </a>
                 </div>
