@@ -36,7 +36,7 @@
                         @foreach($article->images as $image)
                             <figure>
                                 <div class="article-gallery-media">
-                                    <img src="{{ Storage::url($image->image_path) }}" alt="{{ $article->title }}">
+                                    <img src="{{ $image->image_url }}" alt="{{ $article->title }}">
                                 </div>
                                 @if($image->caption)
                                     <figcaption>{{ $image->caption }}</figcaption>

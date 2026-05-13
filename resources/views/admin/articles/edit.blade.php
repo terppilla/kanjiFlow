@@ -36,7 +36,7 @@
                     <div class="admin-article-images-grid">
                         @foreach($article->images as $image)
                             <label class="admin-article-image-card">
-                                <img src="{{ Storage::url($image->image_path) }}" alt="article image">
+                                <img src="{{ $image->image_url }}" alt="article image">
                                 <span>{{ $image->caption ?: 'Без подписи' }}</span>
                                 <span class="remove-check">
                                     <input type="checkbox" name="remove_images[]" value="{{ $image->id }}">

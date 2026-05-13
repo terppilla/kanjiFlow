@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             CharacterSeeder::class,
             ArticleSeeder::class,
             AchievementSeeder::class,
+            DemoUsersSeeder::class,
         ]);
 
         $sync = app(BuiltinCollectionsSync::class);

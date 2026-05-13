@@ -4,7 +4,7 @@
             @if($article->images->first())
                 <a href="{{ route('articles.show', $article) }}">
                     <div class="article-card-image-wrap">
-                        <img src="{{ Storage::url($article->images->first()->image_path) }}" alt="{{ $article->title }}" class="article-card-image">
+                        <img src="{{ $article->images->first()->image_url }}" alt="{{ $article->title }}" class="article-card-image">
                     </div>
                 </a>
             @endif
