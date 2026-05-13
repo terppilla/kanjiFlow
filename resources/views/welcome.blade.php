@@ -3,7 +3,7 @@
 <header class="header">    
 <div class="hero">
         <div class="hero-big-title">
-        <img src="img/KANJIFLOW.svg" alt="KANJIFLOW">
+        <img src="img/new-hero.svg" alt="KANJIFLOW">
     </div>
 
         <div class="hero-text">
