@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Регистрация | KanjiFlow</title>
+    <title>Регистрация | {{ config('app.name') }}</title>
+    @include('layouts.partials.fonts')
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-   <link rel="stylesheet" href="{{ asset('css/forms.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/forms.css') }}?v=2">
 
 </head>
 <body>
@@ -19,13 +20,19 @@
             <p class="auth-subtitle">Создайте аккаунт для изучения китайских иероглифов</p>
         </div>
         
+        @if ($errors->any())
+            <div class="auth-alert auth-alert-error" role="alert">
+                <strong class="auth-alert-title">Проверьте форму</strong>
+                <p class="auth-alert-text">Исправьте указанные поля и попробуйте снова.</p>
+            </div>
+        @endif
+
         <form method="POST" action="{{ route('register') }}" class="auth-form">
             @csrf
-            
-            <!-- Имя -->
+
             <div class="form-group">
                 <label for="name" class="form-label">Имя</label>
-                <input id="name" type="text" name="name" value="{{ old('name') }}"  min="3"required autofocus autocomplete="name" class="form-input">
+                <input id="name" type="text" name="name" value="{{ old('name') }}" minlength="3" maxlength="255" required autofocus autocomplete="name" class="form-input @error('name') error @enderror">
                 @error('name')
                     <div class="form-error">{{ $message }}</div>
                 @enderror
@@ -34,7 +41,7 @@
             <!-- Email -->
             <div class="form-group">
                 <label for="email" class="form-label">Email</label>
-                <input id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="email" class="form-input">
+                <input id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="email" class="form-input @error('email') error @enderror">
                 @error('email')
                     <div class="form-error">{{ $message }}</div>
                 @enderror
@@ -43,7 +50,7 @@
             <!-- Пароль -->
             <div class="form-group">
                 <label for="password" class="form-label">Пароль</label>
-                <input id="password" type="password" name="password" required autocomplete="new-password" class="form-input">
+                <input id="password" type="password" name="password" required autocomplete="new-password" class="form-input @error('password') error @enderror">
                 @error('password')
                     <div class="form-error">{{ $message }}</div>
                 @enderror
@@ -52,7 +59,7 @@
             <!-- Подтверждение пароля -->
             <div class="form-group">
                 <label for="password_confirmation" class="form-label">Подтверждение пароля</label>
-                <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password" class="form-input">
+                <input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password" class="form-input @error('password_confirmation') error @enderror">
                 @error('password_confirmation')
                     <div class="form-error">{{ $message }}</div>
                 @enderror

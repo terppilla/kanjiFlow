@@ -1,8 +1,8 @@
 <x-app-layout>
-    <link href="{{ asset('css/forms.css') }}" rel="stylesheet">
-    
-    <div class="form-container">
+    <div class="form-container admin-article-form-page">
+        @include('admin.partials.form-back-bar')
         <h1 class="form-title">Редактировать иероглиф</h1>
+        <p class="admin-form-subtitle">Измените данные иероглифа и при необходимости пример использования.</p>
 
         @if(session('success'))
             <div class="success-message">
@@ -53,12 +53,16 @@
                 </select>
             </div>
             
-            <div class="form-group">
-                <label for="audio_character" class="optional">Аудио иероглифа</label>
-                <input type="text" id="audio_character" name="audio_character" class="form-control" 
-                       value="{{ old('audio_character', $character->audio_character) }}">
-                <div class="form-hint">Ссылка на аудиофайл</div>
-            </div>
+            @include('admin.characters.partials.audio-field', [
+                'label' => 'Аудио иероглифа',
+                'inputId' => 'audio_character',
+                'inputName' => 'audio_character',
+                'kind' => 'character',
+                'textSourceId' => 'pinyin',
+                'glyphSourceId' => 'character',
+                'value' => old('audio_character', $character->audio_character),
+                'character' => $character,
+            ])
 
             <div class="form-group">
                 <fieldset>
@@ -79,12 +83,25 @@
                         <textarea name="example_translation" id="example_translation" class="form-control">{{ old('example_translation', $character->example_translation) }}</textarea>
                     </div>
                             
-                    <div class="fieldset-group">
-                        <label for="audio_example" class="optional">Аудио примера</label>
-                        <input type="text" id="audio_example" name="audio_example" class="form-control" 
-                               value="{{ old('audio_example', $character->audio_example) }}">
-                    </div>
+                    @include('admin.characters.partials.audio-field', [
+                        'label' => 'Аудио примера',
+                        'inputId' => 'audio_example',
+                        'inputName' => 'audio_example',
+                        'kind' => 'example',
+                        'textSourceId' => 'example_hanzi',
+                        'textSourceFallback' => 'example_pinyin',
+                        'glyphSourceId' => 'character',
+                        'value' => old('audio_example', $character->audio_example),
+                        'character' => $character,
+                    ])
                 </fieldset>
+            </div>
+
+            <div class="form-group admin-generate-audio-option">
+                <label class="admin-checkbox-label">
+                    <input type="checkbox" name="generate_audio" value="1" {{ old('generate_audio') ? 'checked' : '' }}>
+                    Сгенерировать недостающее аудио при сохранении
+                </label>
             </div>
 
             <div class="form-actions">
@@ -93,4 +110,6 @@
             </div>
         </form>
     </div>
+
+    <script src="{{ asset('js/admin-character-audio.js') }}" defer></script>
 </x-app-layout>

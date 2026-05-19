@@ -9,13 +9,35 @@ use Illuminate\Support\Facades\Storage;
 
 class ArticleController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $articles = Article::with('images')
-            ->latest()
-            ->paginate(12);
+        $q = trim((string) $request->get('q', ''));
+        $sort = (string) $request->get('sort', 'newest');
 
-        return view('admin.articles.index', compact('articles'));
+        $query = Article::query()->withCount('images');
+
+        if ($q !== '') {
+            $query->where(function ($builder) use ($q) {
+                $builder->where('title', 'like', '%' . $q . '%')
+                    ->orWhere('subtitle', 'like', '%' . $q . '%')
+                    ->orWhere('content', 'like', '%' . $q . '%');
+            });
+        }
+
+        match ($sort) {
+            'oldest' => $query->orderBy('id'),
+            'title_asc' => $query->orderBy('title'),
+            'title_desc' => $query->orderByDesc('title'),
+            default => $query->orderByDesc('id'),
+        };
+
+        $articles = $query->paginate(15)->withQueryString();
+
+        if ($request->ajax()) {
+            return view('admin.articles.partials.list-content', compact('articles', 'q', 'sort'));
+        }
+
+        return view('admin.articles.index', compact('articles', 'q', 'sort'));
     }
 
     public function create()

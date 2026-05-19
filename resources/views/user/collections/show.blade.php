@@ -27,6 +27,24 @@
                     <input type="search" id="charSearch" autocomplete="off" placeholder="Начните вводить…" data-url="{{ route('collections.characters.search', $collection) }}">
                 </div>
                 <div class="suggest" id="searchSuggest"></div>
+
+                <div class="char-suggest-panel" id="charSuggestPanel" hidden>
+                    <p class="char-suggest-lead">Не нашли нужный иероглиф? Предложите слово — администратор добавит его в базу.</p>
+                    <form action="{{ route('collections.character-suggestions.store', $collection) }}" method="post" class="char-suggest-form">
+                        @csrf
+                        <input type="hidden" name="search_query" id="charSuggestSearchQuery" value="{{ old('search_query') }}">
+                        <label class="char-suggest-label" for="charSuggestWords">Слова или иероглифы</label>
+                        <textarea name="words" id="charSuggestWords" rows="3" class="char-suggest-textarea" required
+                            placeholder="По одному на строку, можно на русском&#10;например: благодарность&#10;или: 谢谢">{{ old('words') }}</textarea>
+                        @error('words')
+                            <p class="char-suggest-error">{{ $message }}</p>
+                        @enderror
+                        <label class="char-suggest-label" for="charSuggestNote">Комментарий (необязательно)</label>
+                        <input type="text" name="note" id="charSuggestNote" class="char-suggest-input" maxlength="500"
+                            value="{{ old('note') }}" placeholder="Контекст, уровень HSK, пример…">
+                        <button type="submit" class="btn btn-primary char-suggest-submit">Отправить предложение</button>
+                    </form>
+                </div>
             </section>
 
             <section class="collections-panel">
@@ -76,8 +94,28 @@
         (function() {
             const input = document.getElementById('charSearch');
             const box = document.getElementById('searchSuggest');
+            const suggestPanel = document.getElementById('charSuggestPanel');
+            const suggestQuery = document.getElementById('charSuggestSearchQuery');
             const url = input.dataset.url;
             let t;
+
+            function showSuggestPanel(query) {
+                if (!suggestPanel) return;
+                suggestPanel.hidden = false;
+                if (suggestQuery) {
+                    suggestQuery.value = query;
+                }
+            }
+
+            function hideSuggestPanel() {
+                if (suggestPanel) {
+                    suggestPanel.hidden = true;
+                }
+            }
+
+            @if($errors->has('words'))
+            showSuggestPanel(@json(old('search_query', '')));
+            @endif
 
             input.addEventListener('input', function() {
                 clearTimeout(t);
@@ -85,6 +123,7 @@
                 if (q.length < 1) {
                     box.style.display = 'none';
                     box.innerHTML = '';
+                    hideSuggestPanel();
                     return;
                 }
                 t = setTimeout(async function() {
@@ -97,8 +136,10 @@
                         if (!data.characters || !data.characters.length) {
                             box.style.display = 'block';
                             box.innerHTML = '<div class="collections-empty-search">Ничего не найдено</div>';
+                            showSuggestPanel(q);
                             return;
                         }
+                        hideSuggestPanel();
                         data.characters.forEach(function(ch) {
                             const b = document.createElement('button');
                             b.type = 'button';
@@ -129,6 +170,9 @@
             }
 
             document.addEventListener('click', function(e) {
+                if (suggestPanel && suggestPanel.contains(e.target)) {
+                    return;
+                }
                 if (!input.contains(e.target) && !box.contains(e.target)) {
                     box.style.display = 'none';
                 }

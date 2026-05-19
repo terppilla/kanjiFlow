@@ -4,23 +4,67 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Character;
+use App\Models\CharacterSuggestion;
+use App\Services\CharacterAudioService;
 use App\Services\CharacterJsonImport;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class CharacterController extends Controller
 {
-    public function index() {
-        $characters = Character::query()
-            ->orderBy('hsk_level')
-            ->orderBy('character')
-            ->get();
+    public function __construct(
+        private readonly CharacterAudioService $audio,
+    ) {}
 
-        return view('admin.characters.index', compact('characters'));
+    public function index(Request $request)
+    {
+        $q = trim((string) $request->get('q', ''));
+        $hsk = $request->get('hsk', '');
+        $sort = (string) $request->get('sort', 'hsk_asc');
+
+        $query = Character::query();
+
+        if ($q !== '') {
+            $query->where(function ($builder) use ($q) {
+                $builder->where('character', 'like', '%' . $q . '%')
+                    ->orWhere('pinyin', 'like', '%' . $q . '%')
+                    ->orWhere('meaning', 'like', '%' . $q . '%');
+            });
+        }
+
+        if ($hsk !== '' && $hsk !== null && in_array((int) $hsk, range(1, 6), true)) {
+            $query->where('hsk_level', (int) $hsk);
+        }
+
+        match ($sort) {
+            'hsk_desc' => $query->orderByDesc('hsk_level')->orderBy('character'),
+            'char_asc' => $query->orderBy('character'),
+            'char_desc' => $query->orderByDesc('character'),
+            'newest' => $query->orderByDesc('id'),
+            'oldest' => $query->orderBy('id'),
+            default => $query->orderBy('hsk_level')->orderBy('character'),
+        };
+
+        $characters = $query->paginate(30)->withQueryString();
+
+        if ($request->ajax()) {
+            return view('admin.characters.partials.list-content', compact('characters', 'q', 'hsk', 'sort'));
+        }
+
+        return view('admin.characters.index', compact('characters', 'q', 'hsk', 'sort'));
     }
 
-    public function create() {
-        return view('admin.characters.create');
+    public function create(Request $request) {
+        $suggestion = null;
+        if ($request->filled('suggestion')) {
+            $suggestion = CharacterSuggestion::query()
+                ->where('status', CharacterSuggestion::STATUS_PENDING)
+                ->with(['user:id,name,email', 'collection:id,name'])
+                ->find($request->integer('suggestion'));
+        }
+
+        return view('admin.characters.create', compact('suggestion'));
     }
 
     public function store(Request $request) {
@@ -34,9 +78,11 @@ class CharacterController extends Controller
             'audio_character' => 'nullable|string',
             'audio_example' => 'nullable|string',
             'meaning' => 'nullable|string',
+            'character_suggestion_id' => ['nullable', 'integer', 'exists:character_suggestions,id'],
+            'generate_audio' => ['sometimes', 'boolean'],
         ]);
 
-        Character::create([
+        $character = Character::create([
             'character'=> $request ->input('character'),
             'pinyin'=>$request ->input('pinyin'),
             'meaning'=>$request->input('meaning'),
@@ -46,9 +92,23 @@ class CharacterController extends Controller
             'example_translation'=>$request->input('example_translation'),
             'audio_character'=>$request->input('audio_character'),
             'audio_example'=>$request->input('audio_example'),
-
-
         ]);
+
+        if ($request->boolean('generate_audio')) {
+            $this->generateAudioForCharacter($character);
+            $character->refresh();
+        }
+
+        if ($request->filled('character_suggestion_id')) {
+            CharacterSuggestion::query()
+                ->where('id', $request->integer('character_suggestion_id'))
+                ->where('status', CharacterSuggestion::STATUS_PENDING)
+                ->update([
+                    'status' => CharacterSuggestion::STATUS_PROCESSED,
+                    'processed_at' => now(),
+                    'processed_by' => Auth::id(),
+                ]);
+        }
 
         return redirect()->route('admin.characters.index');
     }
@@ -68,7 +128,8 @@ class CharacterController extends Controller
             'example_translation' => 'nullable|string',
             'audio_character' => 'nullable|string',
             'audio_example' => 'nullable|string',
-            'meaning' => 'nullable|string'
+            'meaning' => 'nullable|string',
+            'generate_audio' => ['sometimes', 'boolean'],
         ]);
 
         $character = Character::findOrFail($id);
@@ -84,13 +145,39 @@ class CharacterController extends Controller
             'audio_example'=>$request->input('audio_example'),
         ]);
 
+        if ($request->boolean('generate_audio')) {
+            $this->generateAudioForCharacter($character);
+        }
+
         return redirect()->route('admin.characters.index');
+    }
+
+    public function generateMissingAudio(Request $request)
+    {
+        $stats = $this->audio->generateMissingBatch();
+
+        if ($request->expectsJson() || $request->wantsJson()) {
+            return response()->json($stats);
+        }
+
+        $message = "За этот запуск: иероглифов — {$stats['character']}, примеров — {$stats['example']}.";
+        if ($stats['remaining'] > 0) {
+            $message .= " Осталось иероглифов без озвучки: {$stats['remaining']} — нажмите кнопку ещё раз.";
+        }
+        if ($stats['errors'] !== []) {
+            $message .= ' Ошибки: ' . implode(' ', array_slice($stats['errors'], 0, 3));
+        }
+
+        return redirect()
+            ->route('admin.characters.index')
+            ->with('success', $message);
     }
 
     public function importJson(Request $request, CharacterJsonImport $importer)
     {
         $request->validate([
             'json_file' => ['required', 'file', 'max:5120'],
+            'generate_audio' => ['sometimes', 'boolean'],
         ]);
 
         $file = $request->file('json_file');
@@ -114,8 +201,9 @@ class CharacterController extends Controller
 
         $created = 0;
         $updated = 0;
+        $imported = [];
 
-        DB::transaction(function () use ($result, &$created, &$updated): void {
+        DB::transaction(function () use ($result, &$created, &$updated, &$imported): void {
             foreach ($result['items'] as $item) {
                 $model = Character::firstOrNew(['character' => $item['character']]);
                 $wasExisting = $model->exists;
@@ -141,6 +229,7 @@ class CharacterController extends Controller
 
                 $model->fill($payload);
                 $model->save();
+                $imported[] = $model->fresh();
 
                 if ($wasExisting) {
                     $updated++;
@@ -150,11 +239,22 @@ class CharacterController extends Controller
             }
         });
 
+        $audioNote = '';
+        if ($request->boolean('generate_audio')) {
+            $importAudioLimit = 20;
+            $toGenerate = array_slice($imported, 0, $importAudioLimit);
+            $stats = $this->audio->generateMissingForCharacters($toGenerate);
+            $audioNote = " Озвучка: иероглифов — {$stats['character']}, примеров — {$stats['example']}.";
+            if (count($imported) > $importAudioLimit) {
+                $audioNote .= ' Озвучены первые ' . $importAudioLimit . ' записей; остальные — кнопкой на странице списка.';
+            }
+        }
+
         return redirect()
             ->route('admin.characters.index')
             ->with(
                 'success',
-                "Импорт выполнен: добавлено новых — {$created}, обновлено существующих — {$updated}. Записи из файла обработаны в порядке уровня HSK (1→6), внутри уровня — по иероглифу."
+                "Импорт выполнен: добавлено новых — {$created}, обновлено существующих — {$updated}.{$audioNote}"
             );
     }
 
@@ -163,5 +263,18 @@ class CharacterController extends Controller
         $character->delete();
 
         return redirect()->route('admin.characters.index');
+    }
+
+    private function generateAudioForCharacter(Character $character): void
+    {
+        if ($this->audio->needsCharacterAudio($character)) {
+            $this->audio->generateCharacterAudio($character);
+        }
+
+        $character->refresh();
+
+        if ($this->audio->needsExampleAudio($character)) {
+            $this->audio->generateExampleAudio($character);
+        }
     }
 }

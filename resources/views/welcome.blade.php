@@ -1,20 +1,30 @@
-<x-guest-layout>
+<x-guest-layout assets="landing" class="page-welcome">
 
-<header class="header">    
-<div class="hero">
-        <div class="hero-big-title">
-        <img src="img/KANJIFLOW.svg" alt="KANJIFLOW">
-    </div>
+<header class="header">
+    <div class="hero">
+        <div class="hero__inner">
+            <div class="hero__brand">
+                <img
+                    src="{{ asset('img/KANJIFLOW.svg') }}"
+                    alt="KANJIFLOW"
+                    class="hero__logo"
+                    width="900"
+                    height="140"
+                    decoding="async"
+                    fetchpriority="high"
+                >
+            </div>
 
-        <div class="hero-text">
+            <div class="hero__content">
             <h1>Учите китайские иероглифы с умной системой</h1>
-            <span>Бесплатная платформа с методом интервальных повторений.</span>
-            <div class="hero-buttons">
-              <a href="{{ route('register') }}" class="btn btn--gold-filled">Начать обучение</a>
-              <a href="{{ route('login') }}" class="btn btn-primary">У меня уже есть аккаунт</a>
+            <p class="hero__lead">Бесплатная платформа с методом интервальных повторений.</p>
+                <div class="hero-buttons">
+                    <a href="{{ route('register') }}" class="btn btn--gold-filled">Начать обучение</a>
+                    <a href="{{ route('login') }}" class="btn btn-primary">У меня уже есть аккаунт</a>
+                </div>
             </div>
         </div>
-</div>
+    </div>
 </header>
 <main>
 <section class="how">
@@ -36,7 +46,7 @@
                 <div class="hover-glow"></div>
                 
                 <div class="icon-wrapper">
-                    <img src="img/book.svg" alt="book">
+                    <img src="{{ asset('img/book.svg') }}" alt="" width="120" height="120" loading="lazy" decoding="async">
                 </div>
                 
                 <h3>Изучение</h3>
@@ -50,7 +60,7 @@
                 <div class="hover-glow"></div>
                 
                 <div class="icon-wrapper">
-                    <img src="img/brain.svg" alt="brain">
+                    <img src="{{ asset('img/brain.svg') }}" alt="" width="120" height="120" loading="lazy" decoding="async">
                 </div>
                 
                 <h3>Проверка</h3>
@@ -63,7 +73,7 @@
                 <div class="hover-glow"></div>
                 
                 <div class="icon-wrapper">
-                    <img src="img/check.svg" alt="check">
+                    <img src="{{ asset('img/check.svg') }}" alt="" width="120" height="120" loading="lazy" decoding="async">
                 </div>
                 
                 <h3>Оценка</h3>
@@ -76,7 +86,7 @@
                 <div class="hover-glow"></div>
                 
                 <div class="icon-wrapper">
-                    <img src="img/retry.svg" alt="retry">
+                    <img src="{{ asset('img/retry.svg') }}" alt="" width="120" height="120" loading="lazy" decoding="async">
                 </div>
                 
                 <h3>Повторение</h3>
@@ -140,12 +150,17 @@
 
 
 <section class="sta">
-    <h2>Начните изучение китайских иероглифов уже сегодня</h2>
-    <p>Используйте умную систему повторений и отслеживайте свой прогресс</p>
-    
-    <div class="cta-buttons">
-        <a href="{{ route('register') }}" class="btn btn--primary">Начать обучение</a>
-        <a href="{{ route('login') }}" class="btn btn-filled">У меня уже есть аккаунт</a>
+    <div class="sta-pattern sta-pattern--1" aria-hidden="true">学</div>
+    <div class="sta-pattern sta-pattern--2" aria-hidden="true">習</div>
+
+    <div class="sta-inner">
+        <h2>Начните изучение китайских иероглифов уже сегодня</h2>
+        <p>Используйте умную систему повторений и отслеживайте свой прогресс</p>
+
+        <div class="sta-buttons">
+            <a href="{{ route('register') }}" class="btn btn--gold-filled">Начать обучение</a>
+            <a href="{{ route('login') }}" class="btn btn-primary">У меня уже есть аккаунт</a>
+        </div>
     </div>
 </section>
 </main>
@@ -157,30 +172,23 @@
 </footer>
 
 <script>
-// Анимация появления при прокрутке для блока "Почему"
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const whyElements = document.querySelectorAll('.why h2, .why .step');
-    
-    function checkVisibility() {
-        whyElements.forEach(el => {
-            const rect = el.getBoundingClientRect();
-            const windowHeight = window.innerHeight;
-            
-            if (rect.top <= windowHeight * 0.8) {
-                el.classList.add('visible');
+    if (!whyElements.length || !('IntersectionObserver' in window)) {
+        whyElements.forEach(function (el) { el.classList.add('visible'); });
+        return;
+    }
+
+    const observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                observer.unobserve(entry.target);
             }
         });
-    }
-    
-    checkVisibility();
-    window.addEventListener('scroll', checkVisibility);
-    
-    // Оптимизация с debounce
-    let scrollTimeout;
-    window.addEventListener('scroll', () => {
-        clearTimeout(scrollTimeout);
-        scrollTimeout = setTimeout(checkVisibility, 50);
-    });
+    }, { rootMargin: '0px 0px -15% 0px', threshold: 0 });
+
+    whyElements.forEach(function (el) { observer.observe(el); });
 });
 </script>
 <noscript>

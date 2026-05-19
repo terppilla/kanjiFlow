@@ -6,6 +6,7 @@ use App\Models\Achievement;
 use App\Models\User;
 use App\Models\UserCharacter;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class GamificationService
@@ -34,6 +35,59 @@ class GamificationService
 
         $user->last_study_date = $today->toDateString();
         $user->save();
+    }
+
+    /**
+     * @return array{
+     *     sortedAchievements: Collection<int, Achievement>,
+     *     earnedAtByAchievementId: array<int, string>,
+     *     earnedAchievements: Collection<int, Achievement>,
+     *     earnedCount: int,
+     *     totalCount: int,
+     * }
+     */
+    public function achievementDisplayData(User $user): array
+    {
+        $allAchievements = Achievement::query()
+            ->orderBy('category')
+            ->orderBy('id')
+            ->get();
+
+        $earnedById = $user->achievements()->get()->keyBy('id');
+
+        $sortedAchievements = $allAchievements
+            ->sort(function (Achievement $a, Achievement $b) use ($earnedById) {
+                $aEarned = $earnedById->has($a->id);
+                $bEarned = $earnedById->has($b->id);
+                if ($aEarned !== $bEarned) {
+                    return $aEarned ? -1 : 1;
+                }
+                if ($aEarned) {
+                    $ta = Carbon::parse($earnedById[$a->id]->pivot->earned_at)->timestamp;
+                    $tb = Carbon::parse($earnedById[$b->id]->pivot->earned_at)->timestamp;
+
+                    return $tb <=> $ta;
+                }
+
+                return ($a->category <=> $b->category) ?: ($a->id <=> $b->id);
+            })
+            ->values();
+
+        $earnedAtByAchievementId = $earnedById->mapWithKeys(
+            fn (Achievement $row) => [$row->id => $row->pivot->earned_at]
+        )->all();
+
+        $earnedAchievements = $sortedAchievements
+            ->filter(fn (Achievement $a) => isset($earnedAtByAchievementId[$a->id]))
+            ->values();
+
+        return [
+            'sortedAchievements' => $sortedAchievements,
+            'earnedAtByAchievementId' => $earnedAtByAchievementId,
+            'earnedAchievements' => $earnedAchievements,
+            'earnedCount' => $earnedAchievements->count(),
+            'totalCount' => $allAchievements->count(),
+        ];
     }
 
     /**

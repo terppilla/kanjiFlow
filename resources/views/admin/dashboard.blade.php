@@ -63,67 +63,92 @@
 
                 <div class="chart-container">
                     <div class="chart-header">
-                        <h3>Распределение по уровням HSK</h3>
-                        <span class="chart-badge">карты в обучении</span>
+                        <h3>Самые сложные иероглифы</h3>
+                        <span class="chart-badge">оценки Не помню и «Сложно»</span>
                     </div>
-                    <div class="admin-bar-chart admin-bar-chart--hsk">
-                        @foreach(range(1, 6) as $level)
-                            @php
-                                $cnt = $hskDistribution[$level] ?? 0;
-                                $pct = $maxHskCount > 0 ? round(($cnt / $maxHskCount) * 100) : 0;
-                            @endphp
-                            <div class="admin-bar-chart__col">
-                                <div class="admin-bar-chart__bar-wrap">
-                                    <div class="admin-bar-chart__bar admin-bar-chart__bar--hsk" style="height: {{ max($pct, $cnt > 0 ? 8 : 0) }}%;" title="HSK {{ $level }}: {{ $cnt }}"></div>
+                    @if(count($hardestCharacters) > 0)
+                        <div class="admin-bar-chart admin-bar-chart--hardest">
+                            @foreach($hardestCharacters as $item)
+                                @php
+                                    $cnt = $item['difficult_count'];
+                                    $pct = $maxHardestCount > 0 ? round(($cnt / $maxHardestCount) * 100) : 0;
+                                    $title = $item['character'] . ': ' . $cnt
+                                        . ' (снова: ' . $item['again_count'] . ', сложно: ' . $item['hard_count'] . ')';
+                                @endphp
+                                <div class="admin-bar-chart__col">
+                                    <div class="admin-bar-chart__bar-wrap">
+                                        <div class="admin-bar-chart__bar admin-bar-chart__bar--hardest" style="height: {{ max($pct, 8) }}%;" title="{{ $title }}"></div>
+                                    </div>
+                                    <span class="admin-bar-chart__label admin-bar-chart__label--glyph">{{ $item['character'] }}</span>
+                                    <span class="admin-bar-chart__count">{{ number_format($cnt, 0, ',', ' ') }}</span>
                                 </div>
-                                <span class="admin-bar-chart__label">HSK {{ $level }}</span>
-                                <span class="admin-bar-chart__count">{{ number_format($cnt, 0, ',', ' ') }}</span>
+                            @endforeach
+                        </div>
+                        <p class="chart-footnote">Топ по числу карт с последней оценкой «Снова» или «Сложно» у всех пользователей. Наведите на столбец — разбивка по типу оценки.</p>
+                    @else
+                        <p class="chart-placeholder">Пока нет данных: пользователи ещё не отмечали иероглифы как сложные при повторении.</p>
+                    @endif
+                </div>
+            </div>
+
+            <section class="admin-content-hub" aria-labelledby="admin-content-hub-title">
+                <header class="admin-content-hub-header">
+                    <h3 id="admin-content-hub-title">Управление контентом</h3>
+                    <p class="admin-content-hub-lead">Разделы базы: иероглифы для обучения, статьи для чтения и шаблоны тематических коллекций.</p>
+                </header>
+
+                <div class="admin-content-hub-grid">
+                    <article class="admin-content-group admin-content-group--glyphs">
+                        <header class="admin-content-group-head">
+                            <div>
+                                <h4 class="admin-content-group-title">Иероглифы</h4>
+                                <p class="admin-content-group-meta">{{ number_format($totalCharacters, 0, ',', ' ') }} в базе</p>
                             </div>
-                        @endforeach
-                    </div>
-                    <p class="chart-footnote">Количество связей пользователь ↔ иероглиф по уровню HSK иероглифа.</p>
+                        </header>
+                        <p class="admin-content-group-desc">Карточки HSK, импорт JSON, озвучка и правки.</p>
+                        <a href="{{ route('admin.characters.index') }}" class="admin-content-group-primary">Открыть список иероглифов</a>
+                        <ul class="admin-content-group-links">
+                            <li><a href="{{ route('admin.characters.create') }}">Добавить иероглиф</a></li>
+                            <li>
+                                <a href="{{ route('admin.character-suggestions.index') }}">
+                                    Предложения пользователей
+                                    @if(($pendingCharacterSuggestions ?? 0) > 0)
+                                        <span class="admin-pending-badge">{{ $pendingCharacterSuggestions }}</span>
+                                    @endif
+                                </a>
+                            </li>
+                        </ul>
+                    </article>
+
+                    <article class="admin-content-group admin-content-group--articles">
+                        <header class="admin-content-group-head">
+                            <div>
+                                <h4 class="admin-content-group-title">Статьи</h4>
+                                <p class="admin-content-group-meta">{{ number_format($totalArticles, 0, ',', ' ') }} опубликовано</p>
+                            </div>
+                        </header>
+                        <p class="admin-content-group-desc">Материалы о языке и культуре для раздела статей.</p>
+                        <a href="{{ route('admin.articles.index') }}" class="admin-content-group-primary">Открыть список статей</a>
+                        <ul class="admin-content-group-links">
+                            <li><a href="{{ route('admin.articles.create') }}">Добавить статью</a></li>
+                        </ul>
+                    </article>
+
+                    <article class="admin-content-group admin-content-group--templates">
+                        <header class="admin-content-group-head">
+                            <div>
+                                <h4 class="admin-content-group-title">Шаблоны подборок</h4>
+                                <p class="admin-content-group-meta">{{ number_format($builtinTemplatesCount, 0, ',', ' ') }} шаблонов</p>
+                            </div>
+                        </header>
+                        <p class="admin-content-group-desc">Тематические коллекции, синхронизируемые пользователям.</p>
+                        <a href="{{ route('admin.builtin-collections.index') }}" class="admin-content-group-primary">Открыть шаблоны</a>
+                        <ul class="admin-content-group-links">
+                            <li><a href="{{ route('admin.builtin-collections.create') }}">Создать шаблон</a></li>
+                        </ul>
+                    </article>
                 </div>
-            </div>
-
-            <div class="quick-actions">
-                <h3>Управление контентом</h3>
-                <div class="action-buttons">
-                    <a href="{{ route('admin.builtin-collections.index') }}" class="action-btn">
-                        <div class="action-text">
-                            <div class="action-title">Тематические подборки</div>
-                            <div class="action-desc">Шаблоны коллекций для пользователей</div>
-                        </div>
-                    </a>
-
-                    <a href="{{ route('admin.characters.index') }}" class="action-btn">
-                        <div class="action-text">
-                            <div class="action-title">Иероглифы</div>
-                            <div class="action-desc">Список, редактирование и удаление</div>
-                        </div>
-                    </a>
-
-                    <a href="{{ route('admin.articles.index') }}" class="action-btn">
-                        <div class="action-text">
-                            <div class="action-title">Статьи</div>
-                            <div class="action-desc">Материалы раздела статей</div>
-                        </div>
-                    </a>
-
-                    <a href="{{ route('admin.characters.create') }}" class="action-btn">
-                        <div class="action-text">
-                            <div class="action-title">Добавить иероглиф</div>
-                            <div class="action-desc">Новая карточка в базе</div>
-                        </div>
-                    </a>
-
-                    <a href="{{ route('admin.articles.create') }}" class="action-btn">
-                        <div class="action-text">
-                            <div class="action-title">Добавить статью</div>
-                            <div class="action-desc">Новый материал</div>
-                        </div>
-                    </a>
-                </div>
-            </div>
+            </section>
         </div>
     </div>
 </x-app-layout>

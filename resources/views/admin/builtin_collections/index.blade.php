@@ -1,59 +1,55 @@
 <x-app-layout>
-    <div class="characters-index admin-articles-page admin-builtin-templates-page">
-        <h1>Тематические подборки (шаблоны)</h1>
-        <p class="admin-page-subtitle">
-            Эти шаблоны копируются каждому пользователю как встроенные коллекции на странице выбора уровня.
-            После изменений нажмите «Обновить у всех пользователей» или выполните
-            <code>php artisan collections:sync-builtin</code>.
-        </p>
+    <div class="characters-index admin-articles-page admin-builtin-templates-page admin-list-page" data-admin-list-page="{{ parse_url(route('admin.builtin-collections.index'), PHP_URL_PATH) }}">
+        <header class="admin-list-header">
+            <h1>Тематические подборки (шаблоны)</h1>
+            <p class="admin-page-subtitle">
+                Шаблоны копируются пользователям как встроенные коллекции. После изменений — «Обновить у всех» или
+                <code>php artisan collections:sync-builtin</code>. Всего: <span data-admin-list-header-total>{{ $templates->total() }}</span>.
+            </p>
+        </header>
 
         @if(session('success'))
             <div class="success-message">{{ session('success') }}</div>
         @endif
 
-        <div class="admin-builtin-templates-toolbar">
-            <a href="{{ route('admin.builtin-collections.create') }}" class="add-new-link">Добавить шаблон</a>
-            <form action="{{ route('admin.builtin-collections.sync-all') }}" method="POST" class="admin-inline-form"
-                  onsubmit="return confirm('Синхронизировать встроенные подборки у всех пользователей?');">
-                @csrf
-                <button type="submit" class="btn-sync-all">Обновить у всех пользователей</button>
-            </form>
-            <a href="{{ route('admin.dashboard') }}" class="admin-back-dashboard">← Админ-панель</a>
-        </div>
+        @include('admin.partials.page-toolbar', [
+            'createUrl' => route('admin.builtin-collections.create'),
+            'createLabel' => 'Добавить шаблон',
+            'toolbarAppend' => view('admin.builtin_collections.partials.sync-form')->render(),
+        ])
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Порядок</th>
-                    <th>Код (slug)</th>
-                    <th>Название</th>
-                    <th>Иероглифов</th>
-                    <th>Действия</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($templates as $tpl)
-                    <tr>
-                        <td>{{ $tpl->sort_order }}</td>
-                        <td><code>{{ $tpl->slug }}</code></td>
-                        <td>{{ $tpl->name }}</td>
-                        <td>{{ $tpl->characters_count }}</td>
-                        <td class="characters-index__actions">
-                            <a href="{{ route('admin.builtin-collections.edit', $tpl) }}" class="table-actions">Изменить</a>
-                            <form action="{{ route('admin.builtin-collections.destroy', $tpl) }}" method="POST" class="table-actions"
-                                  onsubmit="return confirm('Удалить шаблон и все пользовательские копии этой подборки?');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit">Удалить</button>
-                            </form>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="5">Шаблонов нет. Запустите миграции или добавьте первый шаблон.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+        @include('admin.partials.list-filters', [
+            'action' => route('admin.builtin-collections.index'),
+            'fields' => [
+                [
+                    'type' => 'search',
+                    'name' => 'q',
+                    'value' => $q,
+                    'label' => 'Поиск',
+                    'placeholder' => 'Название или код (slug)…',
+                ],
+                [
+                    'type' => 'select',
+                    'name' => 'sort',
+                    'value' => $sort,
+                    'label' => 'Сортировка',
+                    'options' => [
+                        'sort_order' => 'Порядок в списке',
+                        'name_asc' => 'Название А→Я',
+                        'name_desc' => 'Название Я→А',
+                        'glyphs_desc' => 'Больше иероглифов',
+                        'glyphs_asc' => 'Меньше иероглифов',
+                        'newest' => 'Сначала новые',
+                        'oldest' => 'Сначала старые',
+                    ],
+                ],
+            ],
+        ])
+
+        <div id="admin-list-async" class="admin-list-async">
+            @include('admin.builtin_collections.partials.list-content')
+        </div>
     </div>
+
+    <script src="{{ asset('js/admin-list-async.js') }}" defer></script>
 </x-app-layout>

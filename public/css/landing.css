@@ -44,12 +44,19 @@ nav {
 
 /* hero */
 .hero {
-    display: flex;
-    align-items: center;
-    height: 100vh;  
-    color: white;
     position: relative;
+    min-height: 100vh;
+    min-height: 100dvh;
+    color: #fff;
     z-index: 15;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.hero__inner {
+    position: relative;
+    width: 100%;
+    min-height: inherit;
 }
 
 .hero::after {
@@ -111,53 +118,123 @@ nav {
     }
 }
 
-.hero-big-title {
-  position: absolute; 
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  padding: 5px 20px 0 20px;
-  top: 20px;
-  z-index: 25;
-  text-align: center;
+/* Десктоп: исходная вёрстка hero */
+@media (min-width: 993px) {
+    .hero {
+        display: flex;
+        align-items: center;
+    }
+
+    .hero__brand {
+        position: absolute;
+        top: 20px;
+        left: 0;
+        right: 0;
+        z-index: 25;
+        display: flex;
+        justify-content: center;
+        padding: 60px 20px 0;
+        pointer-events: none;
+    }
+
+    .hero__logo {
+        display: block;
+        width: 110%;
+        height: auto;
+        max-width: none;
+        object-fit: contain;
+    }
+
+    .hero__content {
+        position: relative;
+        z-index: 30;
+        max-width: 600px;
+        margin: 200px 0 0 60px;
+    }
 }
 
-.hero-big-title img { 
-    width: 110%; 
+/* Планшет и телефон: компактный центрированный hero */
+@media (max-width: 992px) {
+    .hero {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        padding: clamp(5.5rem, 16vw, 8rem) clamp(1rem, 4vw, 1.5rem) clamp(2rem, 6vw, 3rem);
+    }
+
+    .hero__brand {
+        position: relative;
+        top: auto;
+        width: 100%;
+        padding: 0 0 1rem;
+        display: flex;
+        justify-content: center;
+    }
+
+    .hero__logo {
+        display: block;
+        width: min(88vw, 20rem);
+        height: auto;
+        margin: 0 auto;
+        object-fit: contain;
+    }
+
+    .hero__content {
+        width: 100%;
+        max-width: 32rem;
+        margin: 0 auto;
+        text-align: center;
+    }
 }
 
-.hero-text {
-    max-width: 600px;
-    margin: 200px 0 0 60px;
+@media (max-width: 480px) {
+    .hero__logo {
+        width: min(90vw, 16rem);
+    }
 }
 
-.hero-text span {
-    font-weight: 100;
-    font-family:  'Noto Serif SC' ;
-    font-size: 0.5rem;
-    opacity: 0.7;
+.hero__lead {
+    display: block;
+    font-weight: 400;
+    font-family: 'Noto Serif SC', serif;
+    font-size: clamp(0.95rem, 2.4vw, 1.2rem);
+    line-height: 1.5;
+    opacity: 0.85;
+    margin-bottom: clamp(1.25rem, 4vw, 2.5rem);
+    letter-spacing: 0.04em;
 }
 
 .hero h1 {
-    font-family: 'Noto Serif SC';
-    font-size: 3rem;
+    font-family: 'Noto Serif SC', serif;
+    font-size: clamp(1.85rem, 5.5vw, 3rem);
     font-weight: 800;
-    margin-bottom: 20px;
-    letter-spacing: 4px;
+    margin-bottom: clamp(0.75rem, 2vw, 1.25rem);
+    letter-spacing: clamp(0.06em, 0.5vw, 0.12em);
+    line-height: 1.2;
+    text-wrap: balance;
 }
 
-.hero span {
-    display: block;
-    font-size: 1.2rem;
-    margin-bottom: 40px;
-    letter-spacing: 1px;
-
+.hero-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.85rem;
+    width: 100%;
+    max-width: 22rem;
 }
 
 .hero-buttons a {
-    display: block;
-    max-width: 350px;
-    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 3rem;
+    margin: 0;
+    padding: 0.9rem 1.25rem;
+    font-size: clamp(0.95rem, 2.2vw, 1.05rem);
+    text-align: center;
+    box-sizing: border-box;
 }
 
 .hero-buttons .btn--gold-filled {
@@ -187,7 +264,7 @@ nav {
 }
 
 /*
- * Вторичная кнопка в hero — тот же «объём», что у .sta .cta-buttons .btn-filled:
+ * Вторичная кнопка в hero — тот же «объём», что у .sta .sta-buttons .btn-primary:
  * нижняя грань + тень, hover приподнимает, active «нажимает» вниз.
  */
 .hero-buttons .btn-primary {
@@ -729,7 +806,7 @@ nav {
 }
 
 
-/* ===== БЛОК "ПОЧЕМУ KANJIFLOW" — лестница, свет, появление при скролле ===== */
+/* ===== БЛОК "ПОЧЕМУ ПОТОК ХАНЬЦЗЫ" — лестница, свет, появление при скролле ===== */
 
 .why {
     padding: clamp(72px, 12vw, 120px) clamp(18px, 4vw, 28px);
@@ -1179,128 +1256,225 @@ nav {
 
 
 
-/* ===== БЛОК CTA — без градиентов, ровный фон ===== */
+/* ===== БЛОК CTA — бежевый фон, карточка, кнопки как в hero ===== */
 
 .sta {
-    padding: clamp(72px, 14vw, 128px) clamp(18px, 5vw, 36px);
-    text-align: center;
+    padding: clamp(80px, 12vw, 120px) clamp(18px, 5vw, 32px);
     position: relative;
     overflow: hidden;
-    background: var(--color-white-gold);
+    text-align: center;
+    background:
+        radial-gradient(ellipse 75% 55% at 50% 0%, rgba(255, 255, 255, 0.65) 0%, transparent 58%),
+        radial-gradient(ellipse 50% 45% at 100% 90%, rgba(214, 155, 100, 0.22) 0%, transparent 52%),
+        radial-gradient(ellipse 45% 40% at 0% 70%, rgba(193, 18, 31, 0.06) 0%, transparent 50%),
+        linear-gradient(180deg, #faf5ee 0%, var(--color-white-gold) 42%, #efe0cc 100%);
+}
+
+.sta::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        repeating-linear-gradient(
+            -12deg,
+            transparent,
+            transparent 52px,
+            rgba(122, 20, 20, 0.025) 52px,
+            rgba(122, 20, 20, 0.025) 54px
+        );
+    pointer-events: none;
+    z-index: 0;
+}
+
+.sta::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 90% 50% at 50% 100%, rgba(214, 155, 100, 0.2) 0%, transparent 55%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.sta-pattern {
+    position: absolute;
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 700;
+    color: rgba(193, 18, 31, 0.07);
+    line-height: 1;
+    pointer-events: none;
+    z-index: 1;
+    user-select: none;
+}
+
+.sta-pattern--1 {
+    top: 8%;
+    right: 6%;
+    font-size: clamp(6rem, 18vw, 11rem);
+    transform: rotate(-12deg);
+}
+
+.sta-pattern--2 {
+    bottom: 10%;
+    left: 4%;
+    font-size: clamp(5rem, 14vw, 9rem);
+    transform: rotate(8deg);
+}
+
+.sta-inner {
+    position: relative;
+    z-index: 3;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: clamp(2rem, 5vw, 3rem) clamp(1.5rem, 4vw, 2.5rem);
+    border-radius: 28px;
+    border: 1px solid rgba(214, 155, 100, 0.45);
+    background: linear-gradient(155deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 248, 240, 0.88) 100%);
+    backdrop-filter: blur(12px) saturate(1.1);
+    -webkit-backdrop-filter: blur(12px) saturate(1.1);
+    box-shadow:
+        0 4px 0 rgba(255, 255, 255, 0.8) inset,
+        0 20px 48px rgba(122, 20, 20, 0.1),
+        0 0 0 1px rgba(255, 255, 255, 0.6) inset;
 }
 
 .sta h2 {
     font-family: 'Noto Serif SC', serif;
-    font-size: clamp(1.75rem, 4.5vw, 3rem);
-    color: var(--color-dark-red);
+    font-size: clamp(1.85rem, 4.5vw, 2.75rem);
+    font-weight: 600;
     margin: 0 auto 1rem;
-    font-weight: 700;
-    max-width: 920px;
-    line-height: 1.28;
-    letter-spacing: 0.02em;
+    max-width: 28ch;
+    line-height: 1.3;
+    letter-spacing: 0.06em;
+    background: linear-gradient(135deg, var(--color-dark-red) 0%, var(--color-primary) 55%, #8e1b1b 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 2px 8px rgba(193, 18, 31, 0.12));
+}
+
+.sta h2::after {
+    content: '';
+    display: block;
+    width: min(100px, 28vw);
+    height: 4px;
+    margin: 1rem auto 0;
+    border-radius: 4px;
+    background: linear-gradient(90deg, transparent, var(--color-gold), var(--color-primary), var(--color-gold), transparent);
+    box-shadow: 0 0 12px rgba(193, 18, 31, 0.15);
 }
 
 .sta p {
     font-family: 'Noto Sans SC', sans-serif;
-    font-size: clamp(1.05rem, 2.2vw, 1.35rem);
+    font-size: clamp(1rem, 2.2vw, 1.2rem);
     color: var(--color-calm-blue);
-    margin: 0 auto 2.5rem;
-    max-width: 560px;
-    line-height: 1.55;
-    opacity: 0.92;
+    margin: 0 auto 2rem;
+    max-width: 42ch;
+    line-height: 1.6;
+    opacity: 0.9;
 }
 
-.sta .cta-buttons {
+.sta-buttons {
     display: flex;
-    gap: clamp(12px, 3vw, 22px);
-    justify-content: center;
-    flex-wrap: wrap;
+    flex-direction: column;
     align-items: center;
-    margin-top: 0.5rem;
+    gap: 1rem;
 }
 
-/* Кнопки CTA (в разметке: btn btn--primary / btn btn-filled) */
-.sta .cta-buttons .btn {
-    min-width: min(280px, 88vw);
-    padding: 16px 32px;
-    font-size: clamp(1rem, 2.4vw, 1.15rem);
+.sta-buttons .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 340px;
+    padding: 16px 28px;
+    font-size: clamp(1rem, 2.4vw, 1.1rem);
     font-weight: 700;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.05em;
     border-radius: 14px;
+    text-decoration: none;
     transition:
         transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
         box-shadow 0.25s ease,
+        background 0.25s ease,
+        border-color 0.25s ease,
         filter 0.25s ease;
 }
 
-.sta .cta-buttons .btn--primary {
-    background: var(--color-primary);
-    color: #fff;
-    border: 2px solid rgba(255, 255, 255, 0.22);
-    box-shadow:
-        0 6px 0 rgba(58, 9, 12, 0.95),
-        0 18px 40px rgba(193, 18, 31, 0.35),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
-}
-
-.sta .cta-buttons .btn--primary:hover {
-    transform: translateY(-3px);
-    background: var(--color-red);
-    box-shadow:
-        0 8px 0 rgba(58, 9, 12, 0.95),
-        0 26px 48px rgba(193, 18, 31, 0.42),
-        inset 0 1px 0 rgba(255, 255, 255, 0.28);
-}
-
-.sta .cta-buttons .btn-filled {
-    background: rgba(255, 255, 255, 0.92);
+.sta-buttons .btn--gold-filled {
+    background: var(--color-white-gold);
     color: var(--color-dark-red);
-    border: 2px solid rgba(193, 18, 31, 0.35);
+    border: none;
     box-shadow:
-        0 5px 0 rgba(122, 20, 20, 0.35),
-        0 14px 32px rgba(15, 23, 42, 0.12);
+        0 10px 0 rgba(0, 0, 0, 0.4),
+        0 20px 36px rgba(0, 0, 0, 0.35);
 }
 
-.sta .cta-buttons .btn-filled:hover {
+.sta-buttons .btn--gold-filled:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.04);
+    box-shadow:
+        0 12px 0 rgba(0, 0, 0, 0.36),
+        0 26px 44px rgba(0, 0, 0, 0.38);
+}
+
+.sta-buttons .btn--gold-filled:active {
+    transform: translateY(5px);
+    box-shadow:
+        0 5px 0 rgba(0, 0, 0, 0.35),
+        0 12px 24px rgba(0, 0, 0, 0.3);
+}
+
+.sta-buttons .btn-primary {
+    background: rgba(112, 5, 5, 0.92);
+    color: var(--color-white-gold);
+    border: 1px solid rgba(158, 135, 120, 0.55);
+    box-shadow:
+        0 10px 0 rgba(0, 0, 0, 0.4),
+        0 20px 36px rgba(0, 0, 0, 0.35);
+}
+
+.sta-buttons .btn-primary:hover {
     transform: translateY(-3px);
-    border-color: var(--color-primary);
-    background: #fff;
+    background: var(--color-dark-red);
+    border-color: rgba(214, 155, 100, 0.45);
     box-shadow:
-        0 7px 0 rgba(122, 20, 20, 0.4),
-        0 20px 40px rgba(15, 23, 42, 0.14);
+        0 12px 0 rgba(0, 0, 0, 0.38),
+        0 24px 40px rgba(0, 0, 0, 0.38);
 }
 
-.sta .cta-buttons .btn:active {
-    transform: translateY(1px);
+.sta-buttons .btn-primary:active {
+    transform: translateY(4px);
+    box-shadow:
+        0 2px 0 rgba(122, 20, 20, 0.45),
+        0 8px 18px rgba(15, 23, 42, 0.1);
 }
 
-@media (max-width: 768px) {
-    .sta {
-        padding: 72px 18px 88px;
+@media (min-width: 640px) {
+    .sta-buttons {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1.25rem;
     }
 
-    .sta p {
-        margin-bottom: 2rem;
-    }
-
-    .sta .cta-buttons {
-        flex-direction: column;
-        gap: 14px;
-    }
-
-    .sta .cta-buttons .btn {
-        width: 100%;
-        max-width: 320px;
+    .sta-buttons .btn {
+        width: auto;
+        min-width: 260px;
     }
 }
 
 @media (max-width: 480px) {
+    .sta-inner {
+        padding: 1.75rem 1.25rem;
+        border-radius: 22px;
+    }
+
     .sta h2 {
-        margin-bottom: 0.75rem;
+        letter-spacing: 0.04em;
     }
 
     .sta p {
-        font-size: 1rem;
+        margin-bottom: 1.5rem;
     }
 }
 
@@ -1322,4 +1496,305 @@ nav {
     font-size: 0.85rem;
     color: rgba(255, 255, 255, 0.42);
     line-height: 1.55;
+}
+
+/* Welcome page: hide scrollbar while keeping scroll */
+html:has(body.page-welcome),
+body.page-welcome {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+html:has(body.page-welcome)::-webkit-scrollbar,
+body.page-welcome::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+/* ===== LANDING: оптимизированная адаптивность ===== */
+
+body.page-welcome {
+    overflow-x: clip;
+}
+
+body.page-welcome main {
+    overflow-x: clip;
+}
+
+/* --- Планшет landscape / узкий desktop --- */
+@media (max-width: 1200px) {
+    .header::before {
+        width: 115%;
+        left: 8%;
+        top: 10%;
+    }
+
+    .hero::after {
+        width: 62%;
+        left: 4%;
+        top: 18%;
+        opacity: 0.45;
+    }
+
+    .why .step:nth-child(2) {
+        margin-left: 56px;
+    }
+
+    .why .step:nth-child(3) {
+        margin-left: 112px;
+    }
+
+    .why .step:nth-child(4) {
+        margin-left: 168px;
+    }
+}
+
+/* --- Планшет portrait --- */
+@media (max-width: 992px) {
+    header {
+        padding: 12px 0 0;
+    }
+
+    .header::before {
+        width: 100%;
+        max-width: 36rem;
+        left: 50%;
+        transform: translateX(-50%);
+        top: 6%;
+        height: 55%;
+        opacity: 0.7;
+        animation: none;
+    }
+
+    .hero::after {
+        width: min(70%, 22rem);
+        left: 50%;
+        transform: translateX(-50%);
+        top: 14%;
+        height: 40%;
+        opacity: 0.28;
+    }
+
+    .hero-buttons {
+        margin: 0 auto;
+        max-width: 20rem;
+    }
+
+    .why {
+        min-height: auto;
+    }
+
+    .why .step:nth-child(n) {
+        margin-left: 0 !important;
+    }
+
+    .why .platform {
+        margin-left: 0;
+    }
+}
+
+/* --- Мобильные --- */
+@media (max-width: 768px) {
+    header {
+        overflow: hidden;
+    }
+
+    .header::before {
+        display: none;
+    }
+
+    .hero::after {
+        width: 85%;
+        max-width: 18rem;
+        top: 8%;
+        height: 32%;
+        opacity: 0.22;
+    }
+
+    .hero h1 {
+        letter-spacing: 0.05em;
+    }
+
+    .hero-buttons {
+        max-width: 100%;
+    }
+
+    .hero-buttons a {
+        min-height: 2.75rem;
+    }
+
+    .how .chinese-pattern {
+        font-size: clamp(3.5rem, 22vw, 6rem);
+        opacity: 0.035;
+    }
+
+    .how .pattern-1 {
+        right: -4%;
+        top: 4%;
+    }
+
+    .how .pattern-2 {
+        left: -6%;
+        bottom: 6%;
+    }
+
+    .why h2 {
+        font-size: clamp(1.65rem, 6vw, 2.25rem);
+        letter-spacing: 0.08em;
+        margin-bottom: clamp(2.5rem, 8vw, 3.5rem);
+    }
+
+    .why .staircase {
+        padding: 1.5rem 0;
+    }
+
+    .why .step-number {
+        margin-left: 0;
+    }
+
+    .why .platform {
+        padding: clamp(1.5rem, 5vw, 2.25rem) clamp(1.15rem, 4vw, 1.75rem);
+    }
+
+    .sta-pattern--1,
+    .sta-pattern--2 {
+        opacity: 0.5;
+    }
+
+    .sta-pattern--1 {
+        font-size: clamp(4rem, 28vw, 7rem);
+        right: -8%;
+    }
+
+    .sta-pattern--2 {
+        font-size: clamp(3.5rem, 24vw, 6rem);
+        left: -10%;
+    }
+
+    .landing-footer {
+        padding: 1.5rem 1rem 2rem;
+    }
+}
+
+/* --- Узкие телефоны --- */
+@media (max-width: 480px) {
+    .hero {
+        padding-left: 0.85rem;
+        padding-right: 0.85rem;
+    }
+
+    .hero-buttons {
+        gap: 0.65rem;
+    }
+
+    .hero-buttons .btn--gold-filled,
+    .hero-buttons .btn-primary,
+    .sta-buttons .btn {
+        padding-top: 0.85rem;
+        padding-bottom: 0.85rem;
+        font-size: 0.95rem;
+    }
+
+    .how h2::after {
+        letter-spacing: 0.2em;
+        font-size: 0.8rem;
+    }
+
+    .why .platform {
+        margin-left: 0;
+        border-radius: 18px;
+    }
+
+    .why .step {
+        margin-bottom: 1.75rem;
+    }
+
+    .sta {
+        padding: clamp(3.5rem, 12vw, 5rem) 0.85rem;
+    }
+
+    .sta-inner {
+        padding: 1.5rem 1rem;
+        border-radius: 20px;
+    }
+
+    .sta-buttons {
+        gap: 0.65rem;
+    }
+
+    .sta-buttons .btn {
+        max-width: 100%;
+        min-width: 0;
+    }
+}
+
+/* --- Очень узкие экраны --- */
+@media (max-width: 360px) {
+    .hero h1 {
+        font-size: 1.65rem;
+    }
+
+    .how li {
+        padding: 1.5rem 1.15rem;
+        min-height: auto;
+    }
+
+    .why h2 {
+        font-size: 1.5rem;
+    }
+
+    .sta h2 {
+        font-size: 1.55rem;
+    }
+}
+
+/* Кнопки в ряд на широких мобильных / планшетах */
+@media (min-width: 520px) and (max-width: 992px) {
+    .sta-buttons {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .sta-buttons .btn {
+        flex: 1 1 14rem;
+        max-width: calc(50% - 0.5rem);
+    }
+}
+
+/* Снижение нагрузки на слабых устройствах */
+@media (max-width: 768px) {
+    .how li {
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+
+    .sta-inner {
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .header::before {
+        animation: none !important;
+        opacity: 0.65;
+        transform: translateX(0);
+    }
+
+    .how .chinese-pattern,
+    .how .pattern-1,
+    .how .pattern-2 {
+        animation: none !important;
+    }
+
+    .how li {
+        animation: none !important;
+    }
+
+    .hero-buttons .btn,
+    .sta-buttons .btn {
+        transition-duration: 0.01ms !important;
+    }
 }

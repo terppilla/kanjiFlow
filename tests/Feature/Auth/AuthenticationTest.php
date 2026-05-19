@@ -60,6 +60,73 @@ class AuthenticationTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_account_is_locked_after_too_many_failed_login_attempts(): void
+    {
+        $user = User::factory()->create([
+            'two_factor_enabled' => false,
+        ]);
+
+        for ($i = 0; $i < 5; $i++) {
+            $response = $this->from('/login')->post('/login', [
+                'email' => $user->email,
+                'password' => 'wrong-password',
+            ]);
+
+            $this->assertGuest();
+        }
+
+        $user->refresh();
+
+        $this->assertNotNull($user->locked_until);
+        $this->assertTrue($user->locked_until->isFuture());
+
+        $response->assertRedirect(route('login'));
+        $response->assertSessionHas('account_locked', true);
+        $response->assertSessionHas('lockout_until');
+        $response->assertSessionMissing('login_error');
+
+        $response = $this->withSession([
+            'account_locked' => true,
+            'lockout_until' => $user->locked_until->toIso8601String(),
+            '_old_input' => ['email' => $user->email],
+        ])->get(route('login'));
+
+        $response->assertOk();
+        $response->assertSee('Аккаунт временно заблокирован', false);
+        $response->assertSee('lockout-timer', false);
+        $response->assertDontSee('Неверный email или пароль', false);
+        $response->assertDontSee('form-error', false);
+
+        $response = $this->from('/login')->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $this->assertGuest();
+        $response->assertSessionHas('account_locked', true);
+        $response->assertSessionMissing('errors');
+    }
+
+    public function test_existing_attempt_count_without_lockout_is_restored_on_login(): void
+    {
+        $user = User::factory()->create([
+            'two_factor_enabled' => false,
+            'login_attempts' => 6,
+            'locked_until' => null,
+        ]);
+
+        $response = $this->from('/login')->post('/login', [
+            'email' => $user->email,
+            'password' => 'wrong-password',
+        ]);
+
+        $user->refresh();
+
+        $this->assertNotNull($user->locked_until);
+        $this->assertTrue($user->locked_until->isFuture());
+        $response->assertSessionHas('account_locked', true);
+    }
+
     public function test_users_can_logout(): void
     {
         $user = User::factory()->create();

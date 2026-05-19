@@ -1,5 +1,6 @@
 <x-app-layout>
     <div class="form-container admin-article-form-page">
+        @include('admin.partials.form-back-bar')
         <h1 class="form-title">Создание статьи</h1>
         <p class="admin-form-subtitle">Форма оформлена в общей стилистике авторизации: светлый карточный блок и мягкие акценты.</p>
 

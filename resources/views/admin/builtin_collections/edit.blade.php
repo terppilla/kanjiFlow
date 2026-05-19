@@ -1,5 +1,6 @@
 <x-app-layout>
     <div class="form-container admin-article-form-page">
+        @include('admin.partials.form-back-bar')
         <h1 class="form-title">Шаблон: {{ $template->name }}</h1>
         <p class="admin-form-subtitle">
             Код <code>{{ $template->slug }}</code> менять нельзя (привязка к коллекциям пользователей). Измените название, порядок и состав иероглифов — через поиск или импорт JSON.

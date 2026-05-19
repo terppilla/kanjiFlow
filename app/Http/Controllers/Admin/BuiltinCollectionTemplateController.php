@@ -13,15 +13,37 @@ use Illuminate\Validation\Rule;
 
 class BuiltinCollectionTemplateController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $templates = BuiltinCollectionTemplate::query()
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->withCount('characters')
-            ->get();
+        $q = trim((string) $request->get('q', ''));
+        $sort = (string) $request->get('sort', 'sort_order');
 
-        return view('admin.builtin_collections.index', compact('templates'));
+        $query = BuiltinCollectionTemplate::query()->withCount('characters');
+
+        if ($q !== '') {
+            $query->where(function ($builder) use ($q) {
+                $builder->where('name', 'like', '%' . $q . '%')
+                    ->orWhere('slug', 'like', '%' . $q . '%');
+            });
+        }
+
+        match ($sort) {
+            'name_asc' => $query->orderBy('name'),
+            'name_desc' => $query->orderByDesc('name'),
+            'glyphs_desc' => $query->orderByDesc('characters_count')->orderBy('sort_order'),
+            'glyphs_asc' => $query->orderBy('characters_count')->orderBy('sort_order'),
+            'newest' => $query->orderByDesc('id'),
+            'oldest' => $query->orderBy('id'),
+            default => $query->orderBy('sort_order')->orderBy('id'),
+        };
+
+        $templates = $query->paginate(20)->withQueryString();
+
+        if ($request->ajax()) {
+            return view('admin.builtin_collections.partials.list-content', compact('templates', 'q', 'sort'));
+        }
+
+        return view('admin.builtin_collections.index', compact('templates', 'q', 'sort'));
     }
 
     public function create()

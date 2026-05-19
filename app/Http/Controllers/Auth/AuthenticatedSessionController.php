@@ -4,62 +4,61 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
-use App\Mail\TwoFactorCodeMail;
 use App\Models\User;
+use App\Services\LoginLockoutService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
 use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
 {
-    /**
-     * Display the login view.
-     */
-    public function create(): View
+    public function __construct(
+        private readonly LoginLockoutService $lockout
+    ) {}
+
+    public function create(Request $request): View
     {
-        return view('auth.login');
+        return view('auth.login', $this->buildLoginViewData(old('email')));
     }
 
-    /**
-     * Handle an incoming authentication request.
-     */
     public function store(LoginRequest $request): RedirectResponse
     {
         $user = User::where('email', $request->email)->first();
 
-        // Проверка блокировки аккаунта
-        if ($user && $user->locked_until && Carbon::parse($user->locked_until)->isFuture()) {
-            $minutes = Carbon::now()->diffInMinutes($user->locked_until);
+        if ($user) {
+            $user = $this->lockout->sync($user);
 
-            return back()->withErrors([
-                'email' => "Слишком много попыток входа. Аккаунт заблокирован на {$minutes} мин.",
-            ]);
+            if ($this->lockout->isLocked($user)) {
+                return $this->loginLockoutRedirect($request, $user);
+            }
         }
 
-        // Проверка пароля
         if (! Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
             if ($user) {
-                $this->handleFailedLogin($user);
+                $user = $this->lockout->recordFailedAttempt($user);
+
+                if ($this->lockout->isLocked($user)) {
+                    return $this->loginLockoutRedirect($request, $user);
+                }
+
+                $remaining = $this->lockout->remainingAttempts($user);
+                if ($remaining > 0 && $remaining <= 2) {
+                    return $this->loginErrorRedirect(
+                        $request,
+                        "Неверный email или пароль. Осталось попыток: {$remaining}."
+                    );
+                }
             }
 
-            return back()->withErrors([
-                'email' => 'Неверный email или пароль.',
-            ]);
+            return $this->loginErrorRedirect($request, 'Неверный email или пароль.');
         }
 
-        // Успешная аутентификация - получаем пользователя
         $user = Auth::user();
-
-        // Сбрасываем счетчик попыток при успешном вводе пароля
-        $user->update([
-            'login_attempts' => 0,
-            'locked_until' => null,
-        ]);
+        $this->lockout->clear($user);
 
         if (! $user->two_factor_enabled) {
             $request->session()->regenerate();
@@ -67,10 +66,8 @@ class AuthenticatedSessionController extends Controller
             return redirect()->intended(route('dashboard'));
         }
 
-        // Новый идентификатор сессии до записи two_factor_user_id / logout — защита от fixation.
         $request->session()->regenerate();
 
-        // Генерируем 2FA код
         $twoFactorCode = sprintf('%06d', mt_rand(1, 999999));
 
         $user->update([
@@ -78,41 +75,15 @@ class AuthenticatedSessionController extends Controller
             'two_factor_expires_at' => Carbon::now()->addMinutes(5),
         ]);
 
-        // Логируем код (временно)
         Log::info("2FA код для пользователя {$user->email}: {$twoFactorCode}");
 
-        // Разлогиниваем временно
         Auth::logout();
 
-        // Сохраняем ID пользователя в сессии
         Session::put('two_factor_user_id', $user->id);
 
-        // Перенаправляем на страницу ввода 2FA кода
         return redirect()->route('two-factor.verify');
     }
 
-    private function handleFailedLogin(User $user): void
-    {
-        $attempts = $user->login_attempts + 1;
-        $maxAttempts = 8;
-        $lockoutMinutes = 15;
-        $lockoutTime = null;
-
-        if ($attempts >= $maxAttempts) {
-            $lockoutTime = Carbon::now()->addMinutes($lockoutMinutes);
-            Log::warning("Пользователь {$user->email} заблокирован до {$lockoutTime} (попыток: {$attempts})");
-        } elseif ($attempts >= 4) {
-            Log::info("Пользователь {$user->email}: неудачных попыток входа: {$attempts}");
-        }
-
-        $user->update([
-            'login_attempts' => $attempts,
-            'locked_until' => $lockoutTime,
-        ]);
-    }
-    /**
-     * Destroy an authenticated session.
-     */
     public function destroy(Request $request): RedirectResponse
     {
         Auth::guard('web')->logout();
@@ -122,5 +93,54 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/');
+    }
+
+    private function buildLoginViewData(?string $email): array
+    {
+        $accountLocked = (bool) session('account_locked');
+        $lockoutUntil = session('lockout_until');
+        $loginError = session('login_error');
+
+        if ($email) {
+            $user = User::where('email', $email)->first();
+            if ($user) {
+                $user = $this->lockout->sync($user);
+                $lockoutEndsAt = $this->lockout->lockoutEndsAt($user);
+
+                if ($lockoutEndsAt !== null) {
+                    $accountLocked = true;
+                    $lockoutUntil = $lockoutEndsAt->toIso8601String();
+                    $loginError = null;
+                }
+            }
+        }
+
+        return [
+            'accountLocked' => $accountLocked,
+            'lockoutUntil' => $lockoutUntil,
+            'loginError' => $loginError,
+        ];
+    }
+
+    private function loginErrorRedirect(LoginRequest $request, string $message): RedirectResponse
+    {
+        return redirect()
+            ->route('login')
+            ->withInput($request->only('email'))
+            ->with('login_error', $message);
+    }
+
+    private function loginLockoutRedirect(LoginRequest $request, User $user): RedirectResponse
+    {
+        $lockoutEndsAt = $this->lockout->lockoutEndsAt($user);
+
+        return redirect()
+            ->route('login')
+            ->withInput($request->only('email'))
+            ->with([
+                'account_locked' => true,
+                'lockout_until' => $lockoutEndsAt?->toIso8601String(),
+                'login_error' => null,
+            ]);
     }
 }

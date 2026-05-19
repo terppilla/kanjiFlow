@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Повторение - Выбор уровня - KanjiFlow</title>
+    <title>Повторение — выбор уровня | {{ config('app.name') }}</title>
     <style>
         * {
             margin: 0;

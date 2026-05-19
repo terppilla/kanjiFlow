@@ -1,5 +1,6 @@
 <x-app-layout>
     <div class="form-container admin-article-form-page">
+        @include('admin.partials.form-back-bar')
         <h1 class="form-title">Новый шаблон подборки</h1>
         <p class="admin-form-subtitle">
             Код латиницей (например <code>travel</code>). Состав подберите поиском по базе (как у пользователя в коллекции) или импортируйте список из JSON.

@@ -1,9 +1,13 @@
 <?php
 
+use App\Http\Controllers\AchievementController;
+use App\Http\Controllers\CharacterSuggestionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\BuiltinCollectionTemplateController;
+use App\Http\Controllers\Admin\CharacterAudioController;
 use App\Http\Controllers\Admin\CharacterController;
+use App\Http\Controllers\Admin\CharacterSuggestionController as AdminCharacterSuggestionController;
 use App\Http\Controllers\Admin\ArticleController as AdminArticleController;
 use App\Http\Controllers\LearningController;
 use App\Http\Controllers\ReviewController;
@@ -49,6 +53,7 @@ Route::middleware('guest')->group(function () {
 // Главный дашборд
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/achievements', [AchievementController::class, 'index'])->name('achievements.index');
 });
 
 // Админка
@@ -68,7 +73,19 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->group(functio
         ->names('admin.builtin-collections');
     Route::post('/characters/import-json', [CharacterController::class, 'importJson'])
         ->name('admin.characters.import-json');
+    Route::post('/characters/audio/preview', [CharacterAudioController::class, 'preview'])
+        ->name('admin.characters.audio.preview');
+    Route::post('/characters/{character}/audio/character', [CharacterAudioController::class, 'generateCharacter'])
+        ->name('admin.characters.audio.character');
+    Route::post('/characters/{character}/audio/example', [CharacterAudioController::class, 'generateExample'])
+        ->name('admin.characters.audio.example');
+    Route::post('/characters/generate-missing-audio', [CharacterController::class, 'generateMissingAudio'])
+        ->name('admin.characters.audio.bulk');
     Route::resource('/characters', CharacterController::class)->names('admin.characters');
+    Route::get('/character-suggestions', [AdminCharacterSuggestionController::class, 'index'])
+        ->name('admin.character-suggestions.index');
+    Route::post('/character-suggestions/{characterSuggestion}/dismiss', [AdminCharacterSuggestionController::class, 'dismiss'])
+        ->name('admin.character-suggestions.dismiss');
     Route::resource('/articles', AdminArticleController::class)->except(['show'])->names('admin.articles');
 });
 
@@ -110,6 +127,8 @@ Route::middleware(['auth'])->prefix('collections')->name('collections.')->group(
     Route::get('/create', [CollectionController::class, 'create'])->name('create');
     Route::post('/', [CollectionController::class, 'store'])->name('store');
     Route::get('/{collection}/characters/search', [CollectionController::class, 'searchCharacters'])->name('characters.search');
+    Route::post('/{collection}/character-suggestions', [CharacterSuggestionController::class, 'store'])
+        ->name('character-suggestions.store');
     Route::get('/{collection}', [CollectionController::class, 'show'])->name('show');
     Route::get('/{collection}/edit', [CollectionController::class, 'edit'])->name('edit');
     Route::put('/{collection}', [CollectionController::class, 'update'])->name('update');

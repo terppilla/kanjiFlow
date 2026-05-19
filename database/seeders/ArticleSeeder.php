@@ -14,7 +14,7 @@ class ArticleSeeder extends Seeder
         $author = User::firstOrCreate(
             ['email' => 'admin@kanjiflow.local'],
             [
-                'name' => 'KanjiFlow Admin',
+                'name' => 'Админ Поток Ханьцзы',
                 'password' => Hash::make('password'),
                 'role' => 'admin',
                 'email_verified_at' => now(),

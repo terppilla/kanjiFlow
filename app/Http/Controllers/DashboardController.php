@@ -2,23 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Achievement;
 use App\Models\Article;
 use App\Models\BuiltinCollectionTemplate;
 use App\Models\Character;
+use App\Models\CharacterSuggestion;
 use App\Models\Collection;
 use App\Models\User;
 use App\Models\UserCharacter;
+use App\Services\GamificationService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class DashboardController extends Controller
 {
-    public function __construct()
-    {
+    public function __construct(
+        private readonly GamificationService $gamification,
+    ) {
         $this->middleware('auth');
     }
     
@@ -31,7 +32,6 @@ public function index()
     }
     
     $collections = $user->collections()->withCount('characters')->get();
-    $allCharacters = Character::all();
     $reviewStats = $user->getReviewStats();
     
     // Получаем иероглифы для повторения сегодня
@@ -47,34 +47,11 @@ public function index()
             ->where('is_learned', false)
             ->count();
 
-        $allAchievements = Achievement::query()
-            ->orderBy('category')
-            ->orderBy('id')
-            ->get();
-
-        $earnedById = $user->achievements()->get()->keyBy('id');
-
-        $sortedAchievements = $allAchievements
-            ->sort(function (Achievement $a, Achievement $b) use ($earnedById) {
-                $aEarned = $earnedById->has($a->id);
-                $bEarned = $earnedById->has($b->id);
-                if ($aEarned !== $bEarned) {
-                    return $aEarned ? -1 : 1;
-                }
-                if ($aEarned) {
-                    $ta = Carbon::parse($earnedById[$a->id]->pivot->earned_at)->timestamp;
-                    $tb = Carbon::parse($earnedById[$b->id]->pivot->earned_at)->timestamp;
-
-                    return $tb <=> $ta;
-                }
-
-                return ($a->category <=> $b->category) ?: ($a->id <=> $b->id);
-            })
-            ->values();
-
-        $earnedAtByAchievementId = $earnedById->mapWithKeys(
-            fn (Achievement $row) => [$row->id => $row->pivot->earned_at]
-        )->all();
+        $achievementData = $this->gamification->achievementDisplayData($user);
+        $sidebarAchievements = $achievementData['earnedAchievements']->take(4);
+        $earnedAtByAchievementId = $achievementData['earnedAtByAchievementId'];
+        $earnedCount = $achievementData['earnedCount'];
+        $totalAchievementsCount = $achievementData['totalCount'];
 
     // Статистика по уровням HSK
     $hskStats = [];
@@ -97,13 +74,14 @@ public function index()
 
     return view('user.dashboard', compact(
         'collections',
-        'allCharacters',
         'reviewStats',
         'dueCards',
         'hskStats',
         'dueCardsTotal',
-        'sortedAchievements',
+        'sidebarAchievements',
         'earnedAtByAchievementId',
+        'earnedCount',
+        'totalAchievementsCount',
     ));
 }
 
@@ -139,23 +117,44 @@ public function index()
             $maxReviewsDay = max($maxReviewsDay, $count);
         }
 
-        $hskRaw = DB::table('user_characters')
+        $hardestCharacters = DB::table('user_characters')
             ->join('characters', 'user_characters.character_id', '=', 'characters.id')
-            ->select('characters.hsk_level', DB::raw('COUNT(*) as cnt'))
-            ->groupBy('characters.hsk_level')
-            ->orderBy('characters.hsk_level')
-            ->pluck('cnt', 'hsk_level');
+            ->whereIn('user_characters.last_result', ['again', 'hard'])
+            ->select(
+                'characters.id',
+                'characters.character',
+                'characters.meaning',
+                DB::raw("SUM(CASE WHEN user_characters.last_result = 'again' THEN 1 ELSE 0 END) as again_count"),
+                DB::raw("SUM(CASE WHEN user_characters.last_result = 'hard' THEN 1 ELSE 0 END) as hard_count"),
+                DB::raw('COUNT(*) as difficult_count')
+            )
+            ->groupBy('characters.id', 'characters.character', 'characters.meaning')
+            ->orderByDesc('difficult_count')
+            ->limit(8)
+            ->get()
+            ->map(fn ($row) => [
+                'id' => (int) $row->id,
+                'character' => $row->character,
+                'meaning' => $row->meaning,
+                'again_count' => (int) $row->again_count,
+                'hard_count' => (int) $row->hard_count,
+                'difficult_count' => (int) $row->difficult_count,
+            ])
+            ->all();
 
-        $hskDistribution = [];
-        $maxHskCount = 1;
-        for ($level = 1; $level <= 6; $level++) {
-            $cnt = (int) ($hskRaw[$level] ?? 0);
-            $hskDistribution[$level] = $cnt;
-            $maxHskCount = max($maxHskCount, $cnt);
+        $maxHardestCount = 1;
+        foreach ($hardestCharacters as $item) {
+            $maxHardestCount = max($maxHardestCount, $item['difficult_count']);
         }
 
         $builtinTemplatesCount = Schema::hasTable('builtin_collection_templates')
             ? BuiltinCollectionTemplate::query()->count()
+            : 0;
+
+        $pendingCharacterSuggestions = Schema::hasTable('character_suggestions')
+            ? CharacterSuggestion::query()
+                ->where('status', CharacterSuggestion::STATUS_PENDING)
+                ->count()
             : 0;
 
         return view('admin.dashboard', compact(
@@ -168,9 +167,10 @@ public function index()
             'totalReviews',
             'reviewsPerDay',
             'maxReviewsDay',
-            'hskDistribution',
-            'maxHskCount',
+            'hardestCharacters',
+            'maxHardestCount',
             'builtinTemplatesCount',
+            'pendingCharacterSuggestions',
         ));
     }
     

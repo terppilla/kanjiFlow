@@ -5,20 +5,22 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>{{ config('app.name') }}</title>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200..900&family=Noto+Sans+SC:wght@100..900&display=swap" rel="stylesheet">
+        @include('layouts.partials.fonts')
 
-<link rel="stylesheet" href="{{ asset('css/app.css') }}">
-<link rel="stylesheet" href="{{ asset('css/landing.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/forms.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/user.css') }}">
+        @if ($assets === 'landing')
+            <link rel="preload" href="{{ asset('img/KANJIFLOW.svg') }}" as="image" type="image/svg+xml" fetchpriority="high">
+            <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+            <link rel="stylesheet" href="{{ asset('css/landing.css') }}">
+        @else
+            <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+            <link rel="stylesheet" href="{{ asset('css/forms.css') }}">
+        @endif
 
-
+        @stack('styles')
     </head>
-    <body>
+    <body {{ $attributes }}>
         {{ $slot }}
     </body>
 </html>

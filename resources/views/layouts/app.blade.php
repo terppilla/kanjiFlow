@@ -5,15 +5,17 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
         
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200..900&family=Noto+Sans+SC:wght@100..900&display=swap" rel="stylesheet">
+        @include('layouts.partials.fonts')
 
-        <title>{{ config('app.name', 'KanjiFlow') }}</title>      
+        <title>{{ config('app.name') }}</title>
         <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-        <link rel="stylesheet" href="{{ asset('css/forms.css') }}">
-        <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
         <link rel="stylesheet" href="{{ asset('css/user.css') }}">
+        @auth
+            @if (auth()->user()?->isAdmin())
+                <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+            @endif
+        @endauth
+        @stack('styles')
         
     
     </head>
@@ -38,7 +40,7 @@
             <footer class="site-footer" role="contentinfo">
                 <div class="site-footer-inner">
                     <div class="site-footer-brand">
-                        <p class="site-footer-title">{{ config('app.name', 'KanjiFlow') }}</p>
+                        <p class="site-footer-title">{{ config('app.name') }}</p>
                         <p class="site-footer-tagline">Изучение китайских иероглифов по уровням HSK и в ваших коллекциях.</p>
                     </div>
 
@@ -56,7 +58,7 @@
                     @endauth
 
                     <div class="site-footer-bottom">
-                        <p>&copy; {{ date('Y') }} {{ config('app.name', 'KanjiFlow') }}. Все права защищены.</p>
+                        <p>&copy; {{ date('Y') }} {{ config('app.name') }}. Все права защищены.</p>
                     </div>
                 </div>
             </footer>

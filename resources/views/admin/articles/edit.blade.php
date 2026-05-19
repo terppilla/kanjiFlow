@@ -1,5 +1,6 @@
 <x-app-layout>
     <div class="form-container admin-article-form-page">
+        @include('admin.partials.form-back-bar')
         <h1 class="form-title">Редактирование статьи</h1>
         <p class="admin-form-subtitle">Обновите заголовки, контент и фотографии в едином светлом стиле формы.</p>
 
