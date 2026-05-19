@@ -1,12 +1,36 @@
-<IfModule mod_rewrite.c>
-    Options +FollowSymLinks
-    RewriteEngine On
+# Document root = project root (public_html), Laravel in public/
+# Run once on server: bash scripts/link-public-assets.sh
 
-    # Когда корень сайта в панели = корень Laravel (не public/), запросы /storage/*
-    # иначе попадают в storage/framework|logs|... на диске. Перенаправляем в public/storage
-    # (симлинк на storage/app/public), где лежат articles/ и др.
+# Do not run PHP on static assets (common cause of 500 on .css / .svg)
+<FilesMatch "\.(css|js|svg|png|jpe?g|gif|webp|ico|woff2?|ttf|eot|map)$">
+    <IfModule mod_php.c>
+        php_flag engine off
+    </IfModule>
+    SetHandler default-handler
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+    Options +FollowSymLinks -MultiViews
+    RewriteEngine On
+    RewriteBase /
 
     RewriteRule ^storage/(framework|logs)(/|$) - [F,L]
-
     RewriteRule ^storage/(.*)$ public/storage/$1 [L]
+
+    # css/img/js symlinks at project root — serve file as-is
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^ - [L]
+
+    # Static file exists only under public/
+    RewriteCond %{DOCUMENT_ROOT}/public/$1 -f
+    RewriteRule ^(.+\.(css|js|svg|png|jpe?g|gif|webp|ico|woff2?|ttf|eot|map))$ public/$1 [L]
+
+    RewriteCond %{DOCUMENT_ROOT}/public/$1 -f
+    RewriteRule ^(css|js|img)/(.*)$ public/$1/$2 [L]
+
+    RewriteCond %{DOCUMENT_ROOT}/public/$1 -d
+    RewriteRule ^(.*)$ public/$1 [L]
+
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>

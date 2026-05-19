@@ -7,7 +7,11 @@
 
         <title>{{ config('app.name') }}</title>
 
-        @include('layouts.partials.fonts')
+        @if ($assets === 'landing')
+            @include('layouts.partials.fonts-landing')
+        @else
+            @include('layouts.partials.fonts')
+        @endif
 
         @if ($assets === 'landing')
             <link rel="preload" href="{{ asset('img/KANJIFLOW.svg') }}" as="image" type="image/svg+xml" fetchpriority="high">
