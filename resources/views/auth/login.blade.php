@@ -6,7 +6,7 @@
     <title>Вход | {{ config('app.name') }}</title>
     @include('layouts.partials.fonts')
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/forms.css') }}?v=2">
+    <link rel="stylesheet" href="{{ asset('css/forms.css') }}?v={{ filemtime(public_path('css/forms.css')) }}">
 </head>
 <body class="auth-layout">
     <div class="auth-decoration top-left">入</div>

@@ -419,6 +419,8 @@
             text-align: left;
             transition: all 0.2s ease;
             position: relative;
+            min-height: auto;
+            gap: 0.25rem;
         }
 
         .option-btn:hover:not(:disabled) {
@@ -703,9 +705,30 @@
             .character-info {
                 grid-template-columns: 1fr;
             }
-            
+
             .mode-selector {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 0.35rem;
+                margin: 0.5rem 0;
+            }
+
+            .mode-btn {
+                padding: 0.5rem 0.35rem;
+                font-size: 0.78rem;
+                gap: 0.25rem;
+                border-radius: 8px;
+                border-width: 1px;
+            }
+
+            .mode-btn:hover,
+            .mode-btn.active {
+                transform: none;
+            }
+
+            .mode-label {
+                font-size: 0.72rem;
+                line-height: 1.25;
+                text-align: center;
             }
             
             .keyboard-input {
@@ -713,7 +736,34 @@
             }
             
             .options-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 0.4rem;
+                max-width: 100%;
+            }
+
+            .option-btn {
+                padding: 0.45rem 0.5rem;
+                border-width: 1px;
+                border-radius: 8px;
+            }
+
+            .option-text {
+                font-size: 0.82rem;
+                margin-right: 1.35rem;
+                line-height: 1.3;
+            }
+
+            .option-pinyin {
+                font-size: 0.72rem;
+                margin-top: 0.15rem;
+            }
+
+            .option-number {
+                top: 0.35rem;
+                right: 0.35rem;
+                width: 18px;
+                height: 18px;
+                font-size: 0.65rem;
             }
             
             .character-navigation {
@@ -747,6 +797,34 @@
             
             .character-char {
                 font-size: 3rem;
+            }
+
+            .mode-selector {
+                gap: 0.3rem;
+            }
+
+            .mode-btn {
+                padding: 0.46rem 0.28rem;
+            }
+
+            .mode-label {
+                font-size: 0.68rem;
+            }
+
+            .options-grid {
+                gap: 0.35rem;
+            }
+
+            .option-btn {
+                padding: 0.4rem 0.42rem;
+            }
+
+            .option-text {
+                font-size: 0.76rem;
+            }
+
+            .option-pinyin {
+                font-size: 0.68rem;
             }
 
             .notification {
