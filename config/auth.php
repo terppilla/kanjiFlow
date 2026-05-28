@@ -112,4 +112,15 @@ return [
 
     'password_timeout' => 10800,
 
+    /*
+    |--------------------------------------------------------------------------
+    | Two-Factor Authentication Switch
+    |--------------------------------------------------------------------------
+    |
+    | Temporary global switch to disable 2FA for all users.
+    | Set to false to re-enable regular 2FA behavior.
+    |
+    */
+    'two_factor_globally_disabled' => true,
+
 ];
