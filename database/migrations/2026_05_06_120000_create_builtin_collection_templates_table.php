@@ -23,7 +23,7 @@ return new class extends Migration
             $table->unsignedBigInteger('character_id');
             $table->unsignedSmallInteger('sort_order')->default(0);
 
-            /* Короткие имена: лимит MySQL ~64 символа на идентификатор */
+            
             $table->foreign('builtin_collection_template_id', 'bcc_tpl_fk')
                 ->references('id')
                 ->on('builtin_collection_templates')

@@ -31,16 +31,6 @@ header {
 }
 
 
-nav {
-    display: flex;
-    justify-content: center;
-    padding: 25px 0;
-    align-items: center;
-    width: 100%;
-    position: relative;
-    z-index: 20;
-} 
-
 
 /* hero */
 .hero {
@@ -51,6 +41,10 @@ nav {
     z-index: 15;
     overflow: hidden;
     box-sizing: border-box;
+}
+
+.hero h1 {
+    padding-top: 100px;
 }
 
 .hero__inner {
@@ -79,33 +73,33 @@ nav {
     display: flex;
     align-items: center;
     top: 15%;
-    left: 12%;
+    left: 20%;
     width: 140%;
     height: 140%;
-    background: url('/img/hero-dragon.svg') no-repeat center center/contain;
+    background: url('/img/hero-dragon.png') no-repeat center center/contain;
     z-index: 50; 
     animation: 
         dragonSlideIn 1.5s ease-out forwards,
         dragonBreathing 4s ease-in-out 1.5s infinite;
     opacity: 0;
-    transform: translateX(100px); 
+    transform: translate3d(100px, 0, 0);
+    backface-visibility: hidden;
+    will-change: transform, opacity;
     pointer-events: none;
 }
 
 @keyframes dragonSlideIn {
     0% {
         opacity: 0;
-        transform: translateX(150px);
-        filter: blur(10px);
+        transform: translate3d(150px, 0, 0);
     }
     70% {
         opacity: 0.8;
-        transform: translateX(-20px);
+        transform: translate3d(-20px, 0, 0);
     }
     100% {
         opacity: 1;
-        transform: translateX(0) scale(1);
-        filter: blur(0);
+        transform: translate3d(0, 0, 0) scale(1);
     }
 }
 
@@ -1531,7 +1525,7 @@ body.page-welcome main {
 @media (max-width: 1200px) {
     .header::before {
         width: 115%;
-        left: 8%;
+        left: 10%;
         top: 10%;
     }
 
@@ -1564,7 +1558,7 @@ body.page-welcome main {
     .header::before {
         width: 100%;
         max-width: 36rem;
-        left: 50%;
+        left: 52%;
         transform: translateX(-50%);
         top: 6%;
         height: 55%;
