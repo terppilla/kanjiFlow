@@ -60,7 +60,7 @@ class AuthenticatedSessionController extends Controller
         $user = Auth::user();
         $this->lockout->clear($user);
 
-        if (! $user->two_factor_enabled) {
+        if ($this->isTwoFactorGloballyDisabled() || ! $user->two_factor_enabled) {
             $request->session()->regenerate();
 
             return redirect()->intended(route('dashboard'));
@@ -142,5 +142,10 @@ class AuthenticatedSessionController extends Controller
                 'lockout_until' => $lockoutEndsAt?->toIso8601String(),
                 'login_error' => null,
             ]);
+    }
+
+    private function isTwoFactorGloballyDisabled(): bool
+    {
+        return (bool) config('auth.two_factor_globally_disabled', false);
     }
 }

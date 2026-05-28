@@ -6,14 +6,13 @@
     <title>Регистрация | {{ config('app.name') }}</title>
     @include('layouts.partials.fonts')
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/forms.css') }}?v=2">
+    <link rel="stylesheet" href="{{ asset('css/forms.css') }}?v={{ filemtime(public_path('css/forms.css')) }}">
 
 </head>
-<body>
-   <div class="auth-layout">
-     <div class="auth-decoration top-left">学</div>
+<body class="auth-layout">
+    <div class="auth-decoration top-left">学</div>
     <div class="auth-decoration bottom-right">会</div>
-    
+
     <div class="auth-container">
         <div class="auth-header">
             <h1 class="auth-title">Регистрация</h1>
@@ -78,6 +77,5 @@
             </div>
         </form>
     </div>
-   </div>
 </body>
 </html>

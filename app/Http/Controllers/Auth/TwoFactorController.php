@@ -15,6 +15,12 @@ use App\Mail\TwoFactorCodeMail;
 class TwoFactorController extends Controller
 {
     public function showVerifyForm() {
+        if ($this->isTwoFactorGloballyDisabled()) {
+            Session::forget('two_factor_user_id');
+
+            return redirect()->route('login');
+        }
+
         if (!Session::has('two_factor_user_id')) {
             return redirect()->route('login');
         }
@@ -22,6 +28,12 @@ class TwoFactorController extends Controller
     }
 
     public function verify(Request $request) {
+        if ($this->isTwoFactorGloballyDisabled()) {
+            Session::forget('two_factor_user_id');
+
+            return redirect()->route('login');
+        }
+
         $request->validate([
             'code' => 'required|string|size:6'
         ]);
@@ -67,6 +79,12 @@ class TwoFactorController extends Controller
     }
 
     public function resend() {
+        if ($this->isTwoFactorGloballyDisabled()) {
+            Session::forget('two_factor_user_id');
+
+            return redirect()->route('login');
+        }
+
         if(!Session::has('two_factor_user_id')) {
             return redirect()->route('login');
         }
@@ -99,5 +117,10 @@ class TwoFactorController extends Controller
     private function handleFailed2FAAttempt(User $user) {
 
     Log::warning("Неудачная попытка 2FA для пользователя {$user->email}");
+    }
+
+    private function isTwoFactorGloballyDisabled(): bool
+    {
+        return (bool) config('auth.two_factor_globally_disabled', false);
     }
 }
