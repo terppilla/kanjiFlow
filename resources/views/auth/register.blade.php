@@ -49,7 +49,17 @@
             <!-- Пароль -->
             <div class="form-group">
                 <label for="password" class="form-label">Пароль</label>
-                <input id="password" type="password" name="password" required autocomplete="new-password" class="form-input @error('password') error @enderror">
+                <input
+                    id="password"
+                    type="password"
+                    name="password"
+                    minlength="8"
+                    required
+                    autocomplete="new-password"
+                    class="form-input @error('password') error @enderror"
+                    aria-describedby="password-hint"
+                >
+                <p id="password-hint" class="form-hint" role="status">Не менее 8 символов</p>
                 @error('password')
                     <div class="form-error">{{ $message }}</div>
                 @enderror
@@ -77,5 +87,55 @@
             </div>
         </form>
     </div>
+
+    <script>
+        (function () {
+            var input = document.getElementById('password');
+            var hint = document.getElementById('password-hint');
+            if (!input || !hint) {
+                return;
+            }
+
+            var minLength = 8;
+
+            function pluralizeSymbols(count) {
+                var mod10 = count % 10;
+                var mod100 = count % 100;
+
+                if (mod10 === 1 && mod100 !== 11) {
+                    return 'символ';
+                }
+
+                if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
+                    return 'символа';
+                }
+
+                return 'символов';
+            }
+
+            function updateHint() {
+                var length = input.value.length;
+
+                if (length === 0) {
+                    hint.className = 'form-hint';
+                    hint.textContent = 'Не менее ' + minLength + ' символов';
+                    return;
+                }
+
+                if (length < minLength) {
+                    var remaining = minLength - length;
+                    hint.className = 'form-hint is-invalid';
+                    hint.textContent = 'Ещё ' + remaining + ' ' + pluralizeSymbols(remaining);
+                    return;
+                }
+
+                hint.className = 'form-hint is-valid';
+                hint.textContent = 'Длина пароля подходит';
+            }
+
+            input.addEventListener('input', updateHint);
+            input.addEventListener('blur', updateHint);
+        })();
+    </script>
 </body>
 </html>

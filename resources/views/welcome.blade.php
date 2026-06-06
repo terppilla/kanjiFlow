@@ -99,7 +99,7 @@
 </section>
 
 <section class="why">
-    <h2>ПОЧЕМУ KANJIFLOW</h2>
+    <h2>ПОЧЕМУ "ПОТОК ХАНЬЦЗЫ"</h2>
     
     <div class="staircase">
         <!-- Ступень 1 -->

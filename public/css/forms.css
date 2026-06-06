@@ -377,6 +377,21 @@
     min-width: 0;
 }
 
+.auth-layout .form-hint {
+    margin-top: 8px;
+    margin-bottom: 0;
+}
+
+.auth-layout .form-hint.is-valid {
+    color: #0f766e;
+    border-left-color: #10b981;
+}
+
+.auth-layout .form-hint.is-invalid {
+    color: var(--color-primary);
+    border-left-color: var(--color-primary);
+}
+
 .form-container {
     max-width: 800px;
     margin: 2rem auto;
