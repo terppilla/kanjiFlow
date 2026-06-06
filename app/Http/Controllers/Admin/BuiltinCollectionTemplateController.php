@@ -37,7 +37,7 @@ class BuiltinCollectionTemplateController extends Controller
             default => $query->orderBy('sort_order')->orderBy('id'),
         };
 
-        $templates = $query->paginate(20)->withQueryString();
+        $templates = $query->paginate(10)->withQueryString();
 
         if ($request->ajax()) {
             return view('admin.builtin_collections.partials.list-content', compact('templates', 'q', 'sort'));

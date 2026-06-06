@@ -41,10 +41,27 @@
             <div class="admin-charts">
                 <div class="chart-container">
                     <div class="chart-header">
-                        <h3>Активность: повторения по дням</h3>
-                        <span class="chart-badge">7 дней</span>
+                        <h3>{{ $activityChart['title'] }}</h3>
+                        <div class="chart-header__controls">
+                            <div class="chart-period-filter" role="group" aria-label="Период статистики активности">
+                                <a href="{{ route('admin.dashboard', ['activity_period' => 'day']) }}"
+                                   class="chart-period-btn {{ $activityPeriod === 'day' ? 'is-active' : '' }}">
+                                    День
+                                </a>
+                                <a href="{{ route('admin.dashboard', ['activity_period' => 'week']) }}"
+                                   class="chart-period-btn {{ $activityPeriod === 'week' ? 'is-active' : '' }}">
+                                    Неделя
+                                </a>
+                                <a href="{{ route('admin.dashboard', ['activity_period' => 'month']) }}"
+                                   class="chart-period-btn {{ $activityPeriod === 'month' ? 'is-active' : '' }}">
+                                    Месяц
+                                </a>
+                            </div>
+                            <span class="chart-badge">{{ $activityChart['badge'] }}</span>
+                        </div>
                     </div>
-                    <div class="admin-bar-chart">
+                    <div class="chart-container__body">
+                        <div class="admin-bar-chart {{ $activityChart['chartClass'] }}">
                         @foreach($reviewsPerDay as $day)
                             @php
                                 $pct = $maxReviewsDay > 0 ? round(($day['count'] / $maxReviewsDay) * 100) : 0;
@@ -57,36 +74,65 @@
                                 <span class="admin-bar-chart__count">{{ $day['count'] }}</span>
                             </div>
                         @endforeach
+                        </div>
                     </div>
-                    <p class="chart-footnote">По числу записей с обновлённым полем «последнее повторение» в этот календарный день.</p>
+                    <p class="chart-footnote">{{ $activityChart['footnote'] }}</p>
                 </div>
 
                 <div class="chart-container">
                     <div class="chart-header">
                         <h3>Самые сложные иероглифы</h3>
-                        <span class="chart-badge">оценки Не помню и «Сложно»</span>
+                        <span class="chart-badge">топ-12 · «Снова» / «Сложно»</span>
                     </div>
                     @if(count($hardestCharacters) > 0)
-                        <div class="admin-bar-chart admin-bar-chart--hardest">
-                            @foreach($hardestCharacters as $item)
-                                @php
-                                    $cnt = $item['difficult_count'];
-                                    $pct = $maxHardestCount > 0 ? round(($cnt / $maxHardestCount) * 100) : 0;
-                                    $title = $item['character'] . ': ' . $cnt
-                                        . ' (снова: ' . $item['again_count'] . ', сложно: ' . $item['hard_count'] . ')';
-                                @endphp
-                                <div class="admin-bar-chart__col">
-                                    <div class="admin-bar-chart__bar-wrap">
-                                        <div class="admin-bar-chart__bar admin-bar-chart__bar--hardest" style="height: {{ max($pct, 8) }}%;" title="{{ $title }}"></div>
-                                    </div>
-                                    <span class="admin-bar-chart__label admin-bar-chart__label--glyph">{{ $item['character'] }}</span>
-                                    <span class="admin-bar-chart__count">{{ number_format($cnt, 0, ',', ' ') }}</span>
+                        <div class="chart-container__body">
+                            <div class="admin-hardest-chart">
+                                <div class="admin-hardest-chart__legend" aria-hidden="true">
+                                    <span class="admin-hardest-chart__legend-item">
+                                        <span class="admin-hardest-chart__legend-dot admin-hardest-chart__legend-dot--again"></span>
+                                        Снова
+                                    </span>
+                                    <span class="admin-hardest-chart__legend-item">
+                                        <span class="admin-hardest-chart__legend-dot admin-hardest-chart__legend-dot--hard"></span>
+                                        Сложно
+                                    </span>
                                 </div>
-                            @endforeach
+
+                                <ol class="admin-hardest-chart__list">
+                                    @foreach($hardestCharacters as $index => $item)
+                                        @php
+                                            $total = $item['difficult_count'];
+                                            $again = $item['again_count'];
+                                            $hard = $item['hard_count'];
+                                            $fillPct = $maxHardestCount > 0 ? round(($total / $maxHardestCount) * 100) : 0;
+                                            $againShare = $total > 0 ? round(($again / $total) * 100) : 0;
+                                            $hardShare = $total > 0 ? 100 - $againShare : 0;
+                                            $rowTitle = $item['meaning'] . ' — Снова: ' . $again . ', Сложно: ' . $hard;
+                                        @endphp
+                                        <li class="admin-hardest-chart__row" title="{{ $rowTitle }}">
+                                            <span class="admin-hardest-chart__rank">{{ $index + 1 }}</span>
+                                            <span class="admin-hardest-chart__glyph">{{ $item['character'] }}</span>
+                                            <div class="admin-hardest-chart__track" role="img" aria-label="{{ $item['character'] }}: всего {{ $total }}, снова {{ $again }}, сложно {{ $hard }}">
+                                                <div class="admin-hardest-chart__fill" style="width: {{ max($fillPct, $total > 0 ? 8 : 0) }}%;">
+                                                    @if($again > 0)
+                                                        <span class="admin-hardest-chart__segment admin-hardest-chart__segment--again" style="width: {{ $againShare }}%;"></span>
+                                                    @endif
+                                                    @if($hard > 0)
+                                                        <span class="admin-hardest-chart__segment admin-hardest-chart__segment--hard" style="width: {{ $hardShare }}%;"></span>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                            <span class="admin-hardest-chart__count">{{ $total }}</span>
+                                        </li>
+                                    @endforeach
+                                </ol>
+                            </div>
                         </div>
-                        <p class="chart-footnote">Топ по числу карт с последней оценкой «Снова» или «Сложно» у всех пользователей. Наведите на столбец — разбивка по типу оценки.</p>
+                        <p class="chart-footnote">Топ-12 иероглифов. Число справа — карточек с последней оценкой «Снова» или «Сложно». Наведите на строку — значение и разбивка.</p>
                     @else
-                        <p class="chart-placeholder">Пока нет данных: пользователи ещё не отмечали иероглифы как сложные при повторении.</p>
+                        <div class="chart-container__body">
+                            <p class="chart-placeholder">Пока нет данных: пользователи ещё не отмечали иероглифы как сложные при повторении.</p>
+                        </div>
                     @endif
                 </div>
             </div>

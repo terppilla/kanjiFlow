@@ -39,14 +39,12 @@ class CharacterController extends Controller
 
         match ($sort) {
             'hsk_desc' => $query->orderByDesc('hsk_level')->orderBy('character'),
-            'char_asc' => $query->orderBy('character'),
-            'char_desc' => $query->orderByDesc('character'),
             'newest' => $query->orderByDesc('id'),
             'oldest' => $query->orderBy('id'),
             default => $query->orderBy('hsk_level')->orderBy('character'),
         };
 
-        $characters = $query->paginate(30)->withQueryString();
+        $characters = $query->paginate(10)->withQueryString();
 
         if ($request->ajax()) {
             return view('admin.characters.partials.list-content', compact('characters', 'q', 'hsk', 'sort'));

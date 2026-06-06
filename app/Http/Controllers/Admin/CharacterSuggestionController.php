@@ -9,17 +9,22 @@ use Illuminate\Support\Facades\Auth;
 
 class CharacterSuggestionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $suggestions = CharacterSuggestion::query()
             ->with(['user:id,name,email', 'collection:id,name,user_id'])
             ->orderByRaw("CASE WHEN status = 'pending' THEN 0 ELSE 1 END")
             ->orderByDesc('created_at')
-            ->paginate(30);
+            ->paginate(10)
+            ->withQueryString();
 
         $pendingCount = CharacterSuggestion::query()
             ->where('status', CharacterSuggestion::STATUS_PENDING)
             ->count();
+
+        if ($request->ajax()) {
+            return view('admin.character_suggestions.partials.list-content', compact('suggestions'));
+        }
 
         return view('admin.character_suggestions.index', compact('suggestions', 'pendingCount'));
     }

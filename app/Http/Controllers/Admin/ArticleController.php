@@ -31,7 +31,7 @@ class ArticleController extends Controller
             default => $query->orderByDesc('id'),
         };
 
-        $articles = $query->paginate(15)->withQueryString();
+        $articles = $query->paginate(10)->withQueryString();
 
         if ($request->ajax()) {
             return view('admin.articles.partials.list-content', compact('articles', 'q', 'sort'));

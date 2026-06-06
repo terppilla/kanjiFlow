@@ -44,6 +44,4 @@
     </table>
 </div>
 
-<div class="pagination admin-pagination">
-    {{ $articles->links('vendor.pagination.my-pagination') }}
-</div>
+@include('admin.partials.pagination', ['paginator' => $articles])

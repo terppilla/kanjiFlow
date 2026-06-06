@@ -88,8 +88,13 @@ public function index()
 
 
 
-    public function adminIndex()
+    public function adminIndex(Request $request)
     {
+        $activityPeriod = $request->query('activity_period', 'week');
+        if (! in_array($activityPeriod, ['day', 'week', 'month'], true)) {
+            $activityPeriod = 'week';
+        }
+
         $totalCharacters = Character::count();
         $totalUsers = User::count();
         $totalArticles = Article::query()->count();
@@ -105,17 +110,9 @@ public function index()
         $learnedGlyphRecords = UserCharacter::where('is_learned', true)->count();
         $totalReviews = (int) UserCharacter::query()->sum('total_reviews');
 
-        $reviewsPerDay = [];
-        $maxReviewsDay = 1;
-        for ($i = 6; $i >= 0; $i--) {
-            $day = now()->subDays($i);
-            $count = UserCharacter::whereDate('last_reviewed_at', $day->toDateString())->count();
-            $reviewsPerDay[] = [
-                'label' => $day->format('d.m'),
-                'count' => $count,
-            ];
-            $maxReviewsDay = max($maxReviewsDay, $count);
-        }
+        $activityChart = $this->buildReviewsActivityChart($activityPeriod);
+        $reviewsPerDay = $activityChart['points'];
+        $maxReviewsDay = $activityChart['max'];
 
         $hardestCharacters = DB::table('user_characters')
             ->join('characters', 'user_characters.character_id', '=', 'characters.id')
@@ -130,7 +127,7 @@ public function index()
             )
             ->groupBy('characters.id', 'characters.character', 'characters.meaning')
             ->orderByDesc('difficult_count')
-            ->limit(8)
+            ->limit(12)
             ->get()
             ->map(fn ($row) => [
                 'id' => (int) $row->id,
@@ -167,11 +164,105 @@ public function index()
             'totalReviews',
             'reviewsPerDay',
             'maxReviewsDay',
+            'activityPeriod',
+            'activityChart',
             'hardestCharacters',
             'maxHardestCount',
             'builtinTemplatesCount',
             'pendingCharacterSuggestions',
         ));
+    }
+
+    /**
+     * @return array{
+     *     points: list<array{label: string, count: int}>,
+     *     max: int,
+     *     title: string,
+     *     badge: string,
+     *     footnote: string,
+     *     chartClass: string
+     * }
+     */
+    private function buildReviewsActivityChart(string $period): array
+    {
+        return match ($period) {
+            'day' => $this->reviewsActivityByHour(),
+            'month' => $this->reviewsActivityByDays(29),
+            default => $this->reviewsActivityByDays(6),
+        };
+    }
+
+    private function reviewsActivityByHour(): array
+    {
+        $hourlyCounts = array_fill(0, 24, 0);
+
+        UserCharacter::query()
+            ->whereNotNull('last_reviewed_at')
+            ->where('last_reviewed_at', '>=', now()->startOfDay())
+            ->pluck('last_reviewed_at')
+            ->each(function ($timestamp) use (&$hourlyCounts) {
+                $hour = (int) $timestamp->format('G');
+                $hourlyCounts[$hour]++;
+            });
+
+        $points = [];
+        $max = 1;
+
+        for ($hour = 0; $hour < 24; $hour++) {
+            $count = $hourlyCounts[$hour];
+            $points[] = [
+                'label' => sprintf('%02d', $hour),
+                'count' => $count,
+            ];
+            $max = max($max, $count);
+        }
+
+        return [
+            'points' => $points,
+            'max' => $max,
+            'title' => 'Активность: повторения по часам',
+            'badge' => 'Сегодня',
+            'footnote' => 'По числу записей с обновлённым полем «последнее повторение» в каждый час текущего дня.',
+            'chartClass' => 'admin-bar-chart--dense',
+        ];
+    }
+
+    private function reviewsActivityByDays(int $daysBack): array
+    {
+        $startDate = now()->subDays($daysBack)->startOfDay();
+
+        $countsByDate = DB::table('user_characters')
+            ->whereNotNull('last_reviewed_at')
+            ->where('last_reviewed_at', '>=', $startDate)
+            ->selectRaw('DATE(last_reviewed_at) as review_day, COUNT(*) as review_count')
+            ->groupBy('review_day')
+            ->pluck('review_count', 'review_day');
+
+        $points = [];
+        $max = 1;
+
+        for ($offset = $daysBack; $offset >= 0; $offset--) {
+            $day = now()->subDays($offset);
+            $dateKey = $day->toDateString();
+            $count = (int) ($countsByDate[$dateKey] ?? 0);
+
+            $points[] = [
+                'label' => $day->format('d.m'),
+                'count' => $count,
+            ];
+            $max = max($max, $count);
+        }
+
+        $isMonth = $daysBack > 6;
+
+        return [
+            'points' => $points,
+            'max' => $max,
+            'title' => 'Активность: повторения по дням',
+            'badge' => $isMonth ? '30 дней' : '7 дней',
+            'footnote' => 'По числу записей с обновлённым полем «последнее повторение» в этот календарный день.',
+            'chartClass' => $isMonth ? 'admin-bar-chart--dense' : '',
+        ];
     }
     
     public function stats()
