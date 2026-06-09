@@ -27,7 +27,7 @@
                     <td class="characters-index__actions">
                         <a href="{{ route('admin.builtin-collections.edit', $tpl) }}" class="table-actions">Изменить</a>
                         <form action="{{ route('admin.builtin-collections.destroy', $tpl) }}" method="POST" class="table-actions"
-                            onsubmit="return confirm('Удалить шаблон и все пользовательские копии?');">
+                            onsubmit="return confirm('Удалить базовую коллекцию и все пользовательские копии?');">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="table-actions-link">Удалить</button>
@@ -36,7 +36,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5" class="admin-list-empty">Шаблонов по запросу не найдено.</td>
+                    <td colspan="5" class="admin-list-empty">Базовых коллекций по запросу не найдено.</td>
                 </tr>
             @endforelse
         </tbody>

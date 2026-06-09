@@ -2,7 +2,10 @@
     <div class="characters-index admin-articles-page admin-list-page" data-admin-list-page="{{ parse_url(route('admin.articles.index'), PHP_URL_PATH) }}">
         <header class="admin-list-header">
             <h1>Статьи</h1>
-            <p class="admin-page-subtitle">Управление материалами для пользователей. Всего: <span data-admin-list-header-total>{{ $articles->total() }}</span>.</p>
+            <p class="admin-page-subtitle">
+                Управление материалами для пользователей.
+                <span class="admin-page-subtitle-total">Всего: <span data-admin-list-header-total>{{ $articles->total() }}</span>.</span>
+            </p>
         </header>
 
         @include('admin.partials.page-toolbar', [

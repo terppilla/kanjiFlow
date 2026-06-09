@@ -803,8 +803,17 @@
     margin: 0 0 0.25rem;
 }
 
+.admin-list-page {
+    padding-bottom: 5rem;
+}
+
 .admin-list-page .admin-page-subtitle {
     margin-bottom: 0.85rem;
+}
+
+.admin-page-subtitle-total {
+    display: block;
+    margin-top: 0.35rem;
 }
 
 .admin-list-filters {
@@ -1485,12 +1494,26 @@ input[type="file"].admin-file-input::-webkit-file-upload-button {
     object-fit: cover;
 }
 
-.admin-article-image-card .remove-check {
-    display: flex;
-    align-items: center;
-    gap: 0.45rem;
+.admin-article-image-delete {
+    align-self: flex-start;
+    border: 1px solid rgba(193, 18, 31, 0.25);
+    background: rgba(193, 18, 31, 0.08);
     color: var(--color-dark-red);
     font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 0.35rem 0.65rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.admin-article-image-delete:hover {
+    background: rgba(193, 18, 31, 0.14);
+}
+
+.admin-article-image-delete:disabled {
+    opacity: 0.6;
+    cursor: wait;
 }
 
 .admin-article-form-page .form-actions {

@@ -86,6 +86,8 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->group(functio
         ->name('admin.character-suggestions.index');
     Route::post('/character-suggestions/{characterSuggestion}/dismiss', [AdminCharacterSuggestionController::class, 'dismiss'])
         ->name('admin.character-suggestions.dismiss');
+    Route::delete('/articles/{article}/images/{image}', [AdminArticleController::class, 'destroyImage'])
+        ->name('admin.articles.images.destroy');
     Route::resource('/articles', AdminArticleController::class)->except(['show'])->names('admin.articles');
 });
 

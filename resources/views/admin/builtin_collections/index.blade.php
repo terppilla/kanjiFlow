@@ -1,10 +1,11 @@
 <x-app-layout>
     <div class="characters-index admin-articles-page admin-builtin-templates-page admin-list-page" data-admin-list-page="{{ parse_url(route('admin.builtin-collections.index'), PHP_URL_PATH) }}">
         <header class="admin-list-header">
-            <h1>Тематические подборки (шаблоны)</h1>
+            <h1>Базовые коллекции</h1>
             <p class="admin-page-subtitle">
-                Шаблоны копируются пользователям как встроенные коллекции. После изменений — «Обновить у всех» или
-                <code>php artisan collections:sync-builtin</code>. Всего: <span data-admin-list-header-total>{{ $templates->total() }}</span>.
+                Базовые коллекции копируются пользователям как встроенные коллекции. После изменений — «Обновить у всех» или
+                <code>php artisan collections:sync-builtin</code>.
+                <span class="admin-page-subtitle-total">Всего: <span data-admin-list-header-total>{{ $templates->total() }}</span>.</span>
             </p>
         </header>
 
@@ -14,7 +15,7 @@
 
         @include('admin.partials.page-toolbar', [
             'createUrl' => route('admin.builtin-collections.create'),
-            'createLabel' => 'Добавить шаблон',
+            'createLabel' => 'Добавить базовую коллекцию',
             'toolbarAppend' => view('admin.builtin_collections.partials.sync-form')->render(),
         ])
 

@@ -22,7 +22,7 @@
 
                 <div class="article-card-actions">
                     <a href="{{ route('articles.show', $article) }}" class="btn btn-ghost">Читать далее</a>
-                    <form method="POST" action="{{ route('articles.favorite.toggle', $article) }}">
+                    <form method="POST" action="{{ route('articles.favorite.toggle', $article) }}" data-article-favorite-form>
                         @csrf
                         <button
                             type="submit"

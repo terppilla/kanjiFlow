@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Article;
+use App\Models\ArticleImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -114,8 +115,24 @@ class ArticleController extends Controller
         $this->syncImages($article, $request);
 
         return redirect()
-            ->route('admin.articles.index')
+            ->route('articles.show', $article)
             ->with('success', 'Статья успешно обновлена.');
+    }
+
+    public function destroyImage(Article $article, ArticleImage $image)
+    {
+        if ($image->article_id !== $article->id) {
+            abort(404);
+        }
+
+        Storage::disk('public')->delete($image->image_path);
+        $image->delete();
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true]);
+        }
+
+        return back()->with('success', 'Фотография удалена.');
     }
 
     public function destroy(Article $article)

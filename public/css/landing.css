@@ -1068,25 +1068,6 @@ header {
         0 0 0 4px var(--color-white-gold);
 }
 
-/* Вертикальная линия-опора лестницы */
-.why .staircase::before {
-    content: '';
-    position: absolute;
-    left: 40px;
-    top: 0;
-    bottom: 0;
-    width: 8px;
-    background: linear-gradient(
-        to bottom,
-        var(--color-gold),
-        var(--color-white-gold),
-        var(--color-gold)
-    );
-    border-radius: 4px;
-    z-index: 1;
-    opacity: 0.7;
-}
-
 /* Горизонтальные перекладины лестницы */
 .why .step::after {
     content: '';
@@ -1109,7 +1090,6 @@ header {
         margin-left: 0 !important;
     }
     
-    .why .staircase::before,
     .why .step::after {
         display: none;
     }

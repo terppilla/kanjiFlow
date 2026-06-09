@@ -67,16 +67,26 @@ class ArticleController extends Controller
         return view('user.articles.show', compact('article', 'isFavorite'));
     }
 
-    public function toggleFavorite(Article $article)
+    public function toggleFavorite(Request $request, Article $article)
     {
         $user = Auth::user();
+        $isFavorite = $user->favoriteArticles()->where('articles.id', $article->id)->exists();
 
-        if ($user->favoriteArticles()->where('articles.id', $article->id)->exists()) {
+        if ($isFavorite) {
             $user->favoriteArticles()->detach($article->id);
-            return back()->with('success', 'Статья удалена из избранного.');
+            $message = 'Статья удалена из избранного.';
+        } else {
+            $user->favoriteArticles()->attach($article->id);
+            $message = 'Статья добавлена в избранное.';
         }
 
-        $user->favoriteArticles()->attach($article->id);
-        return back()->with('success', 'Статья добавлена в избранное.');
+        if ($request->expectsJson()) {
+            return response()->json([
+                'is_favorite' => ! $isFavorite,
+                'message' => $message,
+            ]);
+        }
+
+        return back()->with('success', $message);
     }
 }

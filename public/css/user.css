@@ -3169,6 +3169,23 @@ nav.site-nav .nav-menu button.text-lg:hover {
 .articles-grid {
     display: block;
 }
+
+#articles-index-page .articles-shell {
+    max-width: 780px;
+}
+
+#articles-index-page .article-card-image-wrap {
+    height: auto;
+    aspect-ratio: 16 / 10;
+    max-height: 300px;
+    padding: 0.65rem;
+}
+
+#articles-index-page .article-card-image {
+    object-fit: contain;
+    max-height: 100%;
+}
+
 .article-card,
 .article-show-card {
     background: #fff;
@@ -3268,12 +3285,17 @@ nav.site-nav .nav-menu button.text-lg:hover {
     gap: 0.9rem;
 }
 .article-gallery figure {
-    margin: 0;
+    margin: 0 auto;
+    max-width: 100%;
+    text-align: center;
 }
 .article-gallery img {
-    width: 100%;
+    width: auto;
+    max-width: 100%;
     max-height: 420px;
     object-fit: contain;
+    display: block;
+    margin: 0 auto;
 }
 .article-gallery-media {
     width: 100%;
@@ -3291,6 +3313,7 @@ nav.site-nav .nav-menu button.text-lg:hover {
     margin-top: 0.4rem;
     color: #64748b;
     font-size: 0.86rem;
+    text-align: center;
 }
 .article-content {
     padding: 1.6rem 1.9rem 2rem;
@@ -3303,7 +3326,10 @@ nav.site-nav .nav-menu button.text-lg:hover {
 }
 
 .article-content img {
+    display: block;
     max-width: 100%;
+    width: auto;
+    margin: 0.75rem auto;
     border-radius: 10px;
 }
 .btn {
@@ -3995,6 +4021,31 @@ nav.site-nav .nav-menu button.text-lg:hover {
     color: #64748b;
 }
 
+.achievements-category-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.achievements-category-group {
+    background: #fff;
+    border: 1px solid rgba(214, 155, 100, 0.22);
+    border-radius: 14px;
+    padding: 1rem 1.1rem 1.1rem;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.05);
+}
+
+.achievements-category-title {
+    margin: 0 0 0.85rem;
+    padding-bottom: 0.55rem;
+    border-bottom: 1px solid rgba(214, 155, 100, 0.28);
+    color: var(--color-dark-blue);
+    font-family: 'Noto Serif SC', serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
 .achievements-full-list {
     list-style: none;
     margin: 0;
@@ -4032,7 +4083,6 @@ nav.site-nav .nav-menu button.text-lg:hover {
     flex-direction: column;
     gap: 0.55rem;
     padding: 0.85rem 1rem 0.8rem;
-    padding-right: 6.5rem;
     border-radius: 12px;
     border: 1px solid rgba(31, 41, 51, 0.12);
     background: #fafafa;

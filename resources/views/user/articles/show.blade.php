@@ -16,7 +16,7 @@
                         <span>Автор: {{ $article->author->name ?? 'Администратор' }}</span>
                         <span>Дата: {{ $article->created_at->format('d.m.Y') }}</span>
                     </div>
-                    <form method="POST" action="{{ route('articles.favorite.toggle', $article) }}">
+                    <form method="POST" action="{{ route('articles.favorite.toggle', $article) }}" data-article-favorite-form>
                         @csrf
                         <button
                             type="submit"
@@ -52,4 +52,6 @@
             </article>
         </div>
     </div>
+
+    <script src="{{ asset('js/article-favorites.js') }}" defer></script>
 </x-app-layout>

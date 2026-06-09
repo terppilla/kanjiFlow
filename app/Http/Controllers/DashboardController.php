@@ -23,12 +23,12 @@ class DashboardController extends Controller
         $this->middleware('auth');
     }
     
-public function index()
+public function index(Request $request)
 {
     $user = Auth::user();
     
     if ($user->isAdmin()) {
-        return $this->adminIndex();
+        return $this->adminIndex($request);
     }
     
     $collections = $user->collections()->withCount('characters')->get();
@@ -127,7 +127,7 @@ public function index()
             )
             ->groupBy('characters.id', 'characters.character', 'characters.meaning')
             ->orderByDesc('difficult_count')
-            ->limit(12)
+            ->limit(8)
             ->get()
             ->map(fn ($row) => [
                 'id' => (int) $row->id,

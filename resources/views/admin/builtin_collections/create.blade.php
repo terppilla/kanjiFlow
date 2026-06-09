@@ -1,7 +1,7 @@
 <x-app-layout>
     <div class="form-container admin-article-form-page">
         @include('admin.partials.form-back-bar')
-        <h1 class="form-title">Новый шаблон подборки</h1>
+        <h1 class="form-title">Новая базовая коллекция</h1>
         <p class="admin-form-subtitle">
             Код латиницей (например <code>travel</code>). Состав подберите поиском по базе (как у пользователя в коллекции) или импортируйте список из JSON.
         </p>
@@ -35,7 +35,7 @@
             @error('character_ids')<div class="error-message admin-builtin-character-ids-error">{{ $message }}</div>@enderror
 
             <div class="form-actions">
-                <button type="submit" class="btn-submit">Создать шаблон</button>
+                <button type="submit" class="btn-submit">Создать базовую коллекцию</button>
                 <a href="{{ route('admin.builtin-collections.index') }}" class="btn-cancel">Отмена</a>
             </div>
         </form>

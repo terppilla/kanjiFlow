@@ -7,7 +7,7 @@
                 @if($pendingCount > 0)
                     <strong> Ожидают: {{ $pendingCount }}</strong>
                 @endif
-                Всего: <span data-admin-list-header-total>{{ $suggestions->total() }}</span>.
+                <span class="admin-page-subtitle-total">Всего: <span data-admin-list-header-total>{{ $suggestions->total() }}</span>.</span>
             </p>
         </header>
 

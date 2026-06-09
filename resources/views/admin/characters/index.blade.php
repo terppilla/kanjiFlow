@@ -2,7 +2,10 @@
     <div class="characters-index admin-list-page" data-admin-list-page="{{ parse_url(route('admin.characters.index'), PHP_URL_PATH) }}">
         <header class="admin-list-header">
             <h1>Все иероглифы</h1>
-            <p class="admin-page-subtitle">Поиск, фильтр по HSK и сортировка. Всего в базе: <span data-admin-list-header-total>{{ $characters->total() }}</span>.</p>
+            <p class="admin-page-subtitle">
+                Поиск, фильтр по HSK и сортировка.
+                <span class="admin-page-subtitle-total">Всего в базе: <span data-admin-list-header-total>{{ $characters->total() }}</span>.</span>
+            </p>
         </header>
 
         @include('admin.partials.page-toolbar', [

@@ -1,6 +1,9 @@
 <x-app-layout>
     <div class="form-container admin-article-form-page">
-        @include('admin.partials.form-back-bar')
+        @include('admin.partials.form-back-bar', [
+            'backUrl' => route('admin.articles.index'),
+            'backLabel' => '← К списку статей',
+        ])
         <h1 class="form-title">Редактирование статьи</h1>
         <p class="admin-form-subtitle">Обновите заголовки, контент и фотографии в едином светлом стиле формы.</p>
 
@@ -34,16 +37,19 @@
             @if($article->images->isNotEmpty())
                 <div class="form-group">
                     <label class="optional">Текущие фото</label>
-                    <div class="admin-article-images-grid">
+                    <div class="admin-article-images-grid" id="adminArticleImagesGrid">
                         @foreach($article->images as $image)
-                            <label class="admin-article-image-card">
+                            <div class="admin-article-image-card" data-admin-article-image-card data-image-id="{{ $image->id }}">
                                 <img src="{{ $image->image_url }}" alt="article image">
                                 <span>{{ $image->caption ?: 'Без подписи' }}</span>
-                                <span class="remove-check">
-                                    <input type="checkbox" name="remove_images[]" value="{{ $image->id }}">
+                                <button
+                                    type="button"
+                                    class="admin-article-image-delete"
+                                    data-delete-url="{{ route('admin.articles.images.destroy', [$article, $image]) }}"
+                                >
                                     Удалить
-                                </span>
-                            </label>
+                                </button>
+                            </div>
                         @endforeach
                     </div>
                 </div>
@@ -109,5 +115,54 @@
                 captionsList.appendChild(wrap);
             });
         });
+
+        const imagesGrid = document.getElementById('adminArticleImagesGrid');
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+        if (imagesGrid) {
+            imagesGrid.addEventListener('click', async (event) => {
+                const button = event.target.closest('.admin-article-image-delete');
+                if (!button || button.disabled) {
+                    return;
+                }
+
+                const card = button.closest('[data-admin-article-image-card]');
+                const deleteUrl = button.getAttribute('data-delete-url');
+                if (!card || !deleteUrl) {
+                    return;
+                }
+
+                if (!window.confirm('Удалить эту фотографию?')) {
+                    return;
+                }
+
+                button.disabled = true;
+
+                try {
+                    const response = await fetch(deleteUrl, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                        },
+                        credentials: 'same-origin',
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Request failed');
+                    }
+
+                    card.remove();
+
+                    if (!imagesGrid.querySelector('[data-admin-article-image-card]')) {
+                        imagesGrid.closest('.form-group')?.remove();
+                    }
+                } catch (error) {
+                    button.disabled = false;
+                    window.alert('Не удалось удалить фотографию. Попробуйте ещё раз.');
+                }
+            });
+        }
     </script>
 </x-app-layout>

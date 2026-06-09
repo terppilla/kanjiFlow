@@ -18,12 +18,15 @@
 
         <div id="site-nav-menu" class="nav-menu">
             @auth
-                <a href="{{ route('learning.select-level') }}" class="text-lg">Обучение</a>
-                <a href="{{ route('collections.index') }}" class="text-lg">Коллекции</a>
-                <a href="{{ route('articles.index') }}" class="text-lg">Статьи</a>
-                <a href="{{ route('articles.favorites') }}" class="text-lg">Избранные статьи</a>
                 @if(auth()->user()->isAdmin())
-                    <a href="{{ route('admin.dashboard') }}" class="text-lg">Админ-панель</a>
+                    <a href="{{ route('admin.articles.index') }}" class="text-lg">Статьи</a>
+                    <a href="{{ route('admin.characters.index') }}" class="text-lg">Иероглифы</a>
+                    <a href="{{ route('admin.builtin-collections.index') }}" class="text-lg">Коллекции</a>
+                @else
+                    <a href="{{ route('learning.select-level') }}" class="text-lg">Обучение</a>
+                    <a href="{{ route('collections.index') }}" class="text-lg">Коллекции</a>
+                    <a href="{{ route('articles.index') }}" class="text-lg">Статьи</a>
+                    <a href="{{ route('articles.favorites') }}" class="text-lg">Избранные статьи</a>
                 @endif
                 <a href="{{ route('profile.edit') }}" class="text-lg">Профиль</a>
                 <form method="POST" action="{{ route('logout') }}" class="nav-menu__logout">

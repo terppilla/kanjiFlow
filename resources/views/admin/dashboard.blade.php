@@ -8,7 +8,7 @@
                     <strong>{{ number_format($totalUsers, 0, ',', ' ') }}</strong> пользователей,
                     <strong>{{ number_format($totalCharacters, 0, ',', ' ') }}</strong> иероглифов,
                     <strong>{{ number_format($totalArticles, 0, ',', ' ') }}</strong> статей,
-                    <strong>{{ number_format($builtinTemplatesCount, 0, ',', ' ') }}</strong> шаблонов тематических подборок.
+                    <strong>{{ number_format($builtinTemplatesCount, 0, ',', ' ') }}</strong> базовых коллекций.
                 </p>
             </div>
 
@@ -82,7 +82,7 @@
                 <div class="chart-container">
                     <div class="chart-header">
                         <h3>Самые сложные иероглифы</h3>
-                        <span class="chart-badge">топ-12 · «Снова» / «Сложно»</span>
+                        <span class="chart-badge">топ-8 · «Не помню» / «Сложно»</span>
                     </div>
                     @if(count($hardestCharacters) > 0)
                         <div class="chart-container__body">
@@ -90,7 +90,7 @@
                                 <div class="admin-hardest-chart__legend" aria-hidden="true">
                                     <span class="admin-hardest-chart__legend-item">
                                         <span class="admin-hardest-chart__legend-dot admin-hardest-chart__legend-dot--again"></span>
-                                        Снова
+                                        Не помню
                                     </span>
                                     <span class="admin-hardest-chart__legend-item">
                                         <span class="admin-hardest-chart__legend-dot admin-hardest-chart__legend-dot--hard"></span>
@@ -107,12 +107,12 @@
                                             $fillPct = $maxHardestCount > 0 ? round(($total / $maxHardestCount) * 100) : 0;
                                             $againShare = $total > 0 ? round(($again / $total) * 100) : 0;
                                             $hardShare = $total > 0 ? 100 - $againShare : 0;
-                                            $rowTitle = $item['meaning'] . ' — Снова: ' . $again . ', Сложно: ' . $hard;
+                                            $rowTitle = $item['meaning'] . ' — Не помню: ' . $again . ', Сложно: ' . $hard;
                                         @endphp
                                         <li class="admin-hardest-chart__row" title="{{ $rowTitle }}">
                                             <span class="admin-hardest-chart__rank">{{ $index + 1 }}</span>
                                             <span class="admin-hardest-chart__glyph">{{ $item['character'] }}</span>
-                                            <div class="admin-hardest-chart__track" role="img" aria-label="{{ $item['character'] }}: всего {{ $total }}, снова {{ $again }}, сложно {{ $hard }}">
+                                            <div class="admin-hardest-chart__track" role="img" aria-label="{{ $item['character'] }}: всего {{ $total }}, не помню {{ $again }}, сложно {{ $hard }}">
                                                 <div class="admin-hardest-chart__fill" style="width: {{ max($fillPct, $total > 0 ? 8 : 0) }}%;">
                                                     @if($again > 0)
                                                         <span class="admin-hardest-chart__segment admin-hardest-chart__segment--again" style="width: {{ $againShare }}%;"></span>
@@ -128,7 +128,7 @@
                                 </ol>
                             </div>
                         </div>
-                        <p class="chart-footnote">Топ-12 иероглифов. Число справа — карточек с последней оценкой «Снова» или «Сложно». Наведите на строку — значение и разбивка.</p>
+                        <p class="chart-footnote">Топ-8 иероглифов. Число справа — карточек с последней оценкой «Не помню» или «Сложно». Наведите на строку — значение и разбивка.</p>
                     @else
                         <div class="chart-container__body">
                             <p class="chart-placeholder">Пока нет данных: пользователи ещё не отмечали иероглифы как сложные при повторении.</p>
@@ -140,7 +140,7 @@
             <section class="admin-content-hub" aria-labelledby="admin-content-hub-title">
                 <header class="admin-content-hub-header">
                     <h3 id="admin-content-hub-title">Управление контентом</h3>
-                    <p class="admin-content-hub-lead">Разделы базы: иероглифы для обучения, статьи для чтения и шаблоны тематических коллекций.</p>
+                    <p class="admin-content-hub-lead">Разделы базы: иероглифы для обучения, статьи для чтения и базовые коллекции.</p>
                 </header>
 
                 <div class="admin-content-hub-grid">
@@ -183,14 +183,14 @@
                     <article class="admin-content-group admin-content-group--templates">
                         <header class="admin-content-group-head">
                             <div>
-                                <h4 class="admin-content-group-title">Шаблоны подборок</h4>
-                                <p class="admin-content-group-meta">{{ number_format($builtinTemplatesCount, 0, ',', ' ') }} шаблонов</p>
+                                <h4 class="admin-content-group-title">Базовые коллекции</h4>
+                                <p class="admin-content-group-meta">{{ number_format($builtinTemplatesCount, 0, ',', ' ') }} базовых коллекций</p>
                             </div>
                         </header>
-                        <p class="admin-content-group-desc">Тематические коллекции, синхронизируемые пользователям.</p>
-                        <a href="{{ route('admin.builtin-collections.index') }}" class="admin-content-group-primary">Открыть шаблоны</a>
+                        <p class="admin-content-group-desc">Коллекции по умолчанию, синхронизируемые всем пользователям.</p>
+                        <a href="{{ route('admin.builtin-collections.index') }}" class="admin-content-group-primary">Открыть базовые коллекции</a>
                         <ul class="admin-content-group-links">
-                            <li><a href="{{ route('admin.builtin-collections.create') }}">Создать шаблон</a></li>
+                            <li><a href="{{ route('admin.builtin-collections.create') }}">Создать базовую коллекцию</a></li>
                         </ul>
                     </article>
                 </div>

@@ -46,13 +46,18 @@
 
                     @auth
                         <nav class="site-footer-nav" aria-label="Разделы сайта">
-                            <a href="{{ route('dashboard') }}">Дашборд</a>
-                            <a href="{{ route('learning.select-level') }}">Обучение</a>
-                            <a href="{{ route('articles.index') }}">Статьи</a>
-                            <a href="{{ route('collections.index') }}">Коллекции</a>
-                            <a href="{{ route('profile.edit') }}">Профиль</a>
                             @if (auth()->user()?->isAdmin())
                                 <a href="{{ route('admin.dashboard') }}">Админ-панель</a>
+                                <a href="{{ route('admin.articles.index') }}">Статьи</a>
+                                <a href="{{ route('admin.characters.index') }}">Иероглифы</a>
+                                <a href="{{ route('admin.builtin-collections.index') }}">Коллекции</a>
+                                <a href="{{ route('profile.edit') }}">Профиль</a>
+                            @else
+                                <a href="{{ route('dashboard') }}">Дашборд</a>
+                                <a href="{{ route('learning.select-level') }}">Обучение</a>
+                                <a href="{{ route('articles.index') }}">Статьи</a>
+                                <a href="{{ route('collections.index') }}">Коллекции</a>
+                                <a href="{{ route('profile.edit') }}">Профиль</a>
                             @endif
                         </nav>
                     @endauth

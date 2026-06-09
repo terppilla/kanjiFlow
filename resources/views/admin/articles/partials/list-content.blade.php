@@ -25,7 +25,7 @@
                     <td>{{ $article->images_count }}</td>
                     <td>{{ $article->created_at->format('d.m.Y H:i') }}</td>
                     <td class="characters-index__actions">
-                        <a href="{{ route('articles.show', $article) }}" class="table-actions table-actions-view" target="_blank" rel="noopener noreferrer" title="Открыть так, как видит пользователь">Просмотр</a>
+                        <a href="{{ route('articles.show', $article) }}" class="table-actions table-actions-view" title="Открыть так, как видит пользователь">Просмотр</a>
                         <a href="{{ route('admin.articles.edit', $article) }}" class="table-actions">Изменить</a>
                         <form action="{{ route('admin.articles.destroy', $article) }}" method="POST" class="table-actions"
                             onsubmit="return confirm('Удалить статью?');">

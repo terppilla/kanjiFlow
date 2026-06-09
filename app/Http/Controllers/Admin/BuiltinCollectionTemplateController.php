@@ -85,7 +85,7 @@ class BuiltinCollectionTemplateController extends Controller
                 ->withInput();
         }
 
-        return redirect()->route('admin.builtin-collections.index')->with('success', 'Шаблон тематической подборки создан.');
+        return redirect()->route('admin.builtin-collections.index')->with('success', 'Базовая коллекция создана.');
     }
 
     public function edit(BuiltinCollectionTemplate $template)
@@ -136,7 +136,7 @@ class BuiltinCollectionTemplateController extends Controller
             ->where('builtin_slug', $template->slug)
             ->update(['name' => $template->name]);
 
-        return redirect()->route('admin.builtin-collections.index')->with('success', 'Шаблон обновлён.');
+        return redirect()->route('admin.builtin-collections.index')->with('success', 'Базовая коллекция обновлена.');
     }
 
     public function destroy(BuiltinCollectionTemplate $template)
@@ -145,7 +145,7 @@ class BuiltinCollectionTemplateController extends Controller
         Collection::query()->where('is_builtin', true)->where('builtin_slug', $slug)->delete();
         $template->delete();
 
-        return redirect()->route('admin.builtin-collections.index')->with('success', 'Шаблон удалён; встроенные подборки с этим кодом у пользователей удалены.');
+        return redirect()->route('admin.builtin-collections.index')->with('success', 'Базовая коллекция удалена; встроенные подборки с этим кодом у пользователей удалены.');
     }
 
     public function syncAll()

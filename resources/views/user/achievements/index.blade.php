@@ -24,19 +24,37 @@
                     <p>Достижения пока не настроены.</p>
                 </div>
             @else
-                <ul class="achievements-full-list" role="list">
-                    @foreach($sortedAchievements as $achievement)
-                        <li class="achievements-full-item" role="listitem">
-                            @include('user.achievements.partials.card', [
-                                'achievement' => $achievement,
-                                'earnedAtByAchievementId' => $earnedAtByAchievementId,
-                            ])
-                            <span class="achievement-category-badge">
-                                {{ $categoryLabels[$achievement->category] ?? $achievement->category }}
-                            </span>
-                        </li>
+                @php
+                    $categoryOrder = array_keys($categoryLabels);
+                    $achievementsByCategory = $sortedAchievements->groupBy(
+                        fn ($achievement) => $achievement->category ?? 'other'
+                    );
+                    $orderedCategories = collect($categoryOrder)
+                        ->filter(fn ($category) => $achievementsByCategory->has($category))
+                        ->merge(
+                            $achievementsByCategory->keys()->diff($categoryOrder)->sort()->values()
+                        );
+                @endphp
+
+                <div class="achievements-category-groups">
+                    @foreach($orderedCategories as $category)
+                        <section class="achievements-category-group" aria-labelledby="achievements-cat-{{ $category }}">
+                            <h2 class="achievements-category-title" id="achievements-cat-{{ $category }}">
+                                {{ $categoryLabels[$category] ?? $category }}
+                            </h2>
+                            <ul class="achievements-full-list" role="list">
+                                @foreach($achievementsByCategory[$category] as $achievement)
+                                    <li class="achievements-full-item" role="listitem">
+                                        @include('user.achievements.partials.card', [
+                                            'achievement' => $achievement,
+                                            'earnedAtByAchievementId' => $earnedAtByAchievementId,
+                                        ])
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </section>
                     @endforeach
-                </ul>
+                </div>
             @endif
         </div>
     </div>

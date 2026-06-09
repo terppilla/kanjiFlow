@@ -20,6 +20,7 @@
         </div>
     </div>
 
+    <script src="{{ asset('js/article-favorites.js') }}" defer></script>
     <script>
         (function () {
             var root = document.getElementById('articles-index-async');

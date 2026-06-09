@@ -11,7 +11,7 @@
 
             <div class="articles-grid">
                 @forelse($articles as $article)
-                    <article class="article-card">
+                    <article class="article-card" data-article-favorite-card>
                         @if($article->images->first())
                             <a href="{{ route('articles.show', $article) }}">
                                 <div class="article-card-image-wrap">
@@ -31,7 +31,7 @@
 
                             <div class="article-card-actions">
                                 <a href="{{ route('articles.show', $article) }}" class="btn btn-ghost">Читать</a>
-                                <form method="POST" action="{{ route('articles.favorite.toggle', $article) }}">
+                                <form method="POST" action="{{ route('articles.favorite.toggle', $article) }}" data-article-favorite-form>
                                     @csrf
                                     <button
                                         type="submit"
@@ -59,4 +59,6 @@
             </div>
         </div>
     </div>
+
+    <script src="{{ asset('js/article-favorites.js') }}" defer></script>
 </x-app-layout>
