@@ -121,6 +121,6 @@ return [
     | Set to false to re-enable regular 2FA behavior.
     |
     */
-    'two_factor_globally_disabled' => true,
+    'two_factor_globally_disabled' => env('TWO_FACTOR_GLOBALLY_DISABLED', false),
 
 ];

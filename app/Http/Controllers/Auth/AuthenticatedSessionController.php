@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Models\User;
 use App\Services\LoginLockoutService;
+use App\Services\TwoFactorMailService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,7 +18,8 @@ use Illuminate\View\View;
 class AuthenticatedSessionController extends Controller
 {
     public function __construct(
-        private readonly LoginLockoutService $lockout
+        private readonly LoginLockoutService $lockout,
+        private readonly TwoFactorMailService $twoFactorMail,
     ) {}
 
     public function create(Request $request): View
@@ -76,6 +78,22 @@ class AuthenticatedSessionController extends Controller
         ]);
 
         Log::info("2FA код для пользователя {$user->email}: {$twoFactorCode}");
+
+        try {
+            $this->twoFactorMail->sendCode($user, $twoFactorCode);
+        } catch (\Throwable $e) {
+            $user->update([
+                'two_factor_code' => null,
+                'two_factor_expires_at' => null,
+            ]);
+
+            Auth::logout();
+
+            return $this->loginErrorRedirect(
+                $request,
+                'Не удалось отправить код подтверждения на email. Проверьте настройки почты и попробуйте снова.'
+            );
+        }
 
         Auth::logout();
 

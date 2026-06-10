@@ -9,11 +9,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
-use App\Mail\TwoFactorCodeMail;
-
+use App\Services\TwoFactorMailService;
 
 class TwoFactorController extends Controller
 {
+    public function __construct(
+        private readonly TwoFactorMailService $twoFactorMail,
+    ) {}
+
     public function showVerifyForm() {
         if ($this->isTwoFactorGloballyDisabled()) {
             Session::forget('two_factor_user_id');
@@ -104,14 +107,16 @@ class TwoFactorController extends Controller
         ]);
 
         Log::info("Новый 2FA код для пользователя {$user->email}: {$twoFactorCode}");
-        
-        // try {
-        //     Mail::to($user->email)->send(new TwoFactorCodeMail($twoFactorCode));
-        // } catch (\Exception $e) {
-        //     Log::error("Ошибка отправки нового 2FA кода: " . $e->getMessage());
-        // }
-        
-        return back()->with('status', 'Новый код отправлен!');
+
+        try {
+            $this->twoFactorMail->sendCode($user, $twoFactorCode);
+        } catch (\Throwable $e) {
+            return back()->withErrors([
+                'code' => 'Не удалось отправить код на email. Попробуйте позже.',
+            ]);
+        }
+
+        return back()->with('status', 'Новый код отправлен на ваш email.');
     }
 
     private function handleFailed2FAAttempt(User $user) {
