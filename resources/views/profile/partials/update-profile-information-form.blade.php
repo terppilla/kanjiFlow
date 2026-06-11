@@ -6,10 +6,6 @@
         </p>
     </header>
 
-    <form id="send-verification" method="post" action="{{ route('verification.send') }}">
-        @csrf
-    </form>
-
     <form method="post" action="{{ route('profile.update') }}" class="profile-form-vertical">
         @csrf
         @method('patch')
@@ -28,18 +24,6 @@
             @error('email')
                 <p class="profile-field-error">{{ $message }}</p>
             @enderror
-
-            @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
-                <div class="profile-verify-hint">
-                    <p>
-                        Адрес почты не подтверждён.
-                        <button type="submit" form="send-verification" class="profile-link-inline">Выслать письмо ещё раз</button>
-                    </p>
-                    @if (session('status') === 'verification-link-sent')
-                        <p class="profile-flash profile-flash--success">Новая ссылка отправлена на вашу почту.</p>
-                    @endif
-                </div>
-            @endif
         </div>
 
         <div class="profile-form-actions">

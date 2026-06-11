@@ -51,13 +51,13 @@ Route::middleware('guest')->group(function () {
 });
 
 // Главный дашборд
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/achievements', [AchievementController::class, 'index'])->name('achievements.index');
 });
 
 // Админка
-Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->group(function () {
+Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'adminIndex'])->name('admin.dashboard');
     Route::post('/builtin-collections/sync-all', [BuiltinCollectionTemplateController::class, 'syncAll'])
         ->name('admin.builtin-collections.sync-all');
