@@ -106,7 +106,7 @@ class TwoFactorController extends Controller
             'two_factor_expires_at' => Carbon::now()->addMinutes(5)
         ]);
 
-        Log::info("Новый 2FA код для пользователя {$user->email}: {$twoFactorCode}");
+        Log::info("Новый 2FA код отправлен пользователю {$user->email}");
 
         try {
             $this->twoFactorMail->sendCode($user, $twoFactorCode);

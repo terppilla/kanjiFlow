@@ -100,6 +100,7 @@ class ProfileTest extends TestCase
     public function test_user_can_disable_two_factor_with_password(): void
     {
         $user = User::factory()->create([
+            'email' => 'ischakovaa999@gmail.com',
             'two_factor_enabled' => true,
         ]);
 
@@ -118,6 +119,7 @@ class ProfileTest extends TestCase
     public function test_user_cannot_disable_two_factor_without_password(): void
     {
         $user = User::factory()->create([
+            'email' => 'ischakovaa999@gmail.com',
             'two_factor_enabled' => true,
         ]);
 
@@ -132,9 +134,10 @@ class ProfileTest extends TestCase
         $this->assertTrue($user->fresh()->two_factor_enabled);
     }
 
-    public function test_user_can_enable_two_factor_without_password(): void
+    public function test_allowed_user_can_enable_two_factor_without_password(): void
     {
         $user = User::factory()->create([
+            'email' => 'ischakovaa999@gmail.com',
             'two_factor_enabled' => false,
         ]);
 
@@ -146,5 +149,20 @@ class ProfileTest extends TestCase
             ->assertRedirect('/profile');
 
         $this->assertTrue($user->fresh()->two_factor_enabled);
+    }
+
+    public function test_other_users_cannot_enable_two_factor(): void
+    {
+        $user = User::factory()->create([
+            'two_factor_enabled' => false,
+        ]);
+
+        $this->actingAs($user)
+            ->patch('/profile/two-factor', [
+                'two_factor_enabled' => true,
+            ])
+            ->assertForbidden();
+
+        $this->assertFalse($user->fresh()->two_factor_enabled);
     }
 }

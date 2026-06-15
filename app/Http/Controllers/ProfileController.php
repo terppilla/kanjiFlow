@@ -68,6 +68,16 @@ class ProfileController extends Controller
         $enable = $request->boolean('two_factor_enabled');
 
         if ($enable) {
+            if (! $user->canUseTwoFactor()) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'message' => 'Двухфакторная аутентификация недоступна для этого аккаунта.',
+                    ], 403);
+                }
+
+                abort(403, 'Двухфакторная аутентификация недоступна для этого аккаунта.');
+            }
+
             if (! $user->two_factor_enabled) {
                 $user->update([
                     'two_factor_enabled' => true,

@@ -2,6 +2,7 @@
     $twoFactorOn = $user->two_factor_enabled;
 @endphp
 
+@if ($user->canUseTwoFactor())
 <section class="profile-section">
     <header class="profile-section-header">
         <h2 class="profile-section-title">Двухфакторная аутентификация</h2>
@@ -213,3 +214,4 @@
     });
 })();
 </script>
+@endif

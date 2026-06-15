@@ -3,8 +3,7 @@
         <header class="admin-list-header">
             <h1>Базовые коллекции</h1>
             <p class="admin-page-subtitle">
-                Базовые коллекции копируются пользователям как встроенные коллекции. После изменений — «Обновить у всех» или
-                <code>php artisan collections:sync-builtin</code>.
+                Базовые коллекции автоматически копируются пользователям как встроенные подборки при входе и после изменений здесь.
                 <span class="admin-page-subtitle-total">Всего: <span data-admin-list-header-total>{{ $templates->total() }}</span>.</span>
             </p>
         </header>

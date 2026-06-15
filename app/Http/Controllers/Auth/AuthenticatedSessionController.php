@@ -62,7 +62,7 @@ class AuthenticatedSessionController extends Controller
         $user = Auth::user();
         $this->lockout->clear($user);
 
-        if ($this->isTwoFactorGloballyDisabled() || ! $user->two_factor_enabled) {
+        if ($this->isTwoFactorGloballyDisabled() || ! $user->two_factor_enabled || ! $user->canUseTwoFactor()) {
             $request->session()->regenerate();
 
             return redirect()->intended(route('dashboard'));
@@ -77,7 +77,7 @@ class AuthenticatedSessionController extends Controller
             'two_factor_expires_at' => Carbon::now()->addMinutes(5),
         ]);
 
-        Log::info("2FA код для пользователя {$user->email}: {$twoFactorCode}");
+        Log::info("2FA код отправлен пользователю {$user->email}");
 
         try {
             $this->twoFactorMail->sendCode($user, $twoFactorCode);

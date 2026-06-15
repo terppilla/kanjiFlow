@@ -6,13 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Models\BuiltinCollectionTemplate;
 use App\Models\Character;
 use App\Models\Collection;
+use App\Services\BuiltinCollectionsSync;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
 class BuiltinCollectionTemplateController extends Controller
 {
+    public function __construct(
+        private readonly BuiltinCollectionsSync $builtinCollectionsSync,
+    ) {}
+
     public function index(Request $request)
     {
         $q = trim((string) $request->get('q', ''));
@@ -85,7 +89,10 @@ class BuiltinCollectionTemplateController extends Controller
                 ->withInput();
         }
 
-        return redirect()->route('admin.builtin-collections.index')->with('success', 'Базовая коллекция создана.');
+        $this->builtinCollectionsSync->bustTemplatesRevisionCache();
+        $this->dispatchBuiltinSyncToAllUsers();
+
+        return redirect()->route('admin.builtin-collections.index')->with('success', 'Базовая коллекция создана. Подборки обновляются у пользователей.');
     }
 
     public function edit(BuiltinCollectionTemplate $template)
@@ -136,7 +143,10 @@ class BuiltinCollectionTemplateController extends Controller
             ->where('builtin_slug', $template->slug)
             ->update(['name' => $template->name]);
 
-        return redirect()->route('admin.builtin-collections.index')->with('success', 'Базовая коллекция обновлена.');
+        $this->builtinCollectionsSync->bustTemplatesRevisionCache();
+        $this->dispatchBuiltinSyncToAllUsers();
+
+        return redirect()->route('admin.builtin-collections.index')->with('success', 'Базовая коллекция обновлена. Подборки обновляются у пользователей.');
     }
 
     public function destroy(BuiltinCollectionTemplate $template)
@@ -145,14 +155,18 @@ class BuiltinCollectionTemplateController extends Controller
         Collection::query()->where('is_builtin', true)->where('builtin_slug', $slug)->delete();
         $template->delete();
 
-        return redirect()->route('admin.builtin-collections.index')->with('success', 'Базовая коллекция удалена; встроенные подборки с этим кодом у пользователей удалены.');
+        $this->builtinCollectionsSync->bustTemplatesRevisionCache();
+        $this->dispatchBuiltinSyncToAllUsers();
+
+        return redirect()->route('admin.builtin-collections.index')->with('success', 'Базовая коллекция удалена; встроенные подборки у пользователей обновляются.');
     }
 
     public function syncAll()
     {
-        Artisan::call('collections:sync-builtin');
+        $this->builtinCollectionsSync->bustTemplatesRevisionCache();
+        $count = $this->builtinCollectionsSync->syncAllUsers();
 
-        return redirect()->route('admin.builtin-collections.index')->with('success', 'Встроенные подборки обновлены у всех пользователей (команда collections:sync-builtin).');
+        return redirect()->route('admin.builtin-collections.index')->with('success', "Встроенные подборки обновлены у {$count} пользователей.");
     }
 
     /**
@@ -322,6 +336,14 @@ class BuiltinCollectionTemplateController extends Controller
             $sync[(int) $id] = ['sort_order' => $order++];
         }
         $template->characters()->sync($sync);
+        $template->touch();
+    }
+
+    private function dispatchBuiltinSyncToAllUsers(): void
+    {
+        dispatch(function () {
+            app(BuiltinCollectionsSync::class)->syncAllUsers();
+        })->afterResponse();
     }
 
     /**

@@ -6,6 +6,7 @@ use App\Models\BuiltinCollectionTemplate;
 use App\Models\Character;
 use App\Models\Collection;
 use App\Models\User;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 
 class BuiltinCollectionsSync
@@ -127,5 +128,129 @@ class BuiltinCollectionsSync
             ->whereNotNull('builtin_slug')
             ->whereNotIn('builtin_slug', $allowedSlugs)
             ->delete();
+    }
+
+    public function templatesRevision(): string
+    {
+        return Cache::remember('builtin_collections_templates_revision', 3600, function () {
+            return $this->computeTemplatesRevision();
+        });
+    }
+
+    public function bustTemplatesRevisionCache(): void
+    {
+        Cache::forget('builtin_collections_templates_revision');
+    }
+
+    private function computeTemplatesRevision(): string
+    {
+        if (! Schema::hasTable('builtin_collection_templates')) {
+            return 'fallback:'.md5(json_encode($this->fallbackDefinitions()));
+        }
+
+        $templates = BuiltinCollectionTemplate::query()
+            ->orderBy('id')
+            ->with(['characters' => fn ($q) => $q->orderByPivot('sort_order')])
+            ->get();
+
+        if ($templates->isEmpty()) {
+            return 'fallback:'.md5(json_encode($this->fallbackDefinitions()));
+        }
+
+        $parts = $templates->map(function (BuiltinCollectionTemplate $template) {
+            $ids = $template->characters->pluck('id')->join(',');
+
+            return $template->slug.'|'.$template->updated_at?->timestamp.'|'.$ids;
+        })->join(';');
+
+        return 'tpl:'.md5($parts);
+    }
+
+    public function syncForUserIfNeeded(User $user): void
+    {
+        if (! Character::query()->exists()) {
+            return;
+        }
+
+        $revision = $this->templatesRevision();
+        $sessionKey = 'builtin_collections_revision_'.$user->id;
+        $cachedRevision = session($sessionKey);
+
+        if ($cachedRevision === $revision) {
+            return;
+        }
+
+        if ($cachedRevision !== null) {
+            $this->syncForUser($user);
+            session([$sessionKey => $revision]);
+
+            return;
+        }
+
+        if ($this->userCollectionsIncomplete($user)) {
+            $this->syncForUser($user);
+        }
+
+        session([$sessionKey => $revision]);
+    }
+
+    public function syncAllUsers(): int
+    {
+        if (! Character::query()->exists()) {
+            return 0;
+        }
+
+        $count = 0;
+        User::query()->orderBy('id')->each(function (User $user) use (&$count) {
+            $this->syncForUser($user);
+            $count++;
+        });
+
+        return $count;
+    }
+
+    private function userCollectionsIncomplete(User $user): bool
+    {
+        $definitions = $this->definitions();
+        if ($definitions === []) {
+            return false;
+        }
+
+        $glyphs = collect($definitions)
+            ->pluck('characters')
+            ->flatten()
+            ->unique()
+            ->values()
+            ->all();
+
+        $byChar = Character::query()
+            ->whereIn('character', $glyphs)
+            ->pluck('id', 'character');
+
+        foreach ($definitions as $slug => $def) {
+            $hasResolvable = false;
+            foreach ($def['characters'] as $ch) {
+                if ($byChar->has($ch)) {
+                    $hasResolvable = true;
+                    break;
+                }
+            }
+
+            if (! $hasResolvable) {
+                continue;
+            }
+
+            $collection = Collection::query()
+                ->where('user_id', $user->id)
+                ->where('builtin_slug', $slug)
+                ->withCount('characters')
+                ->first();
+
+            if ($collection === null || $collection->characters_count < 1) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

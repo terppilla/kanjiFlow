@@ -25,6 +25,7 @@
         <!-- <env name="DB_DATABASE" value=":memory:"/> -->
         <env name="MAIL_MAILER" value="array"/>
         <env name="TWO_FACTOR_GLOBALLY_DISABLED" value="false"/>
+        <env name="TWO_FACTOR_ALLOWED_EMAIL" value="ischakovaa999@gmail.com"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>

@@ -6,7 +6,6 @@ use App\Http\Controllers\Concerns\InteractsWithReviewFeedback;
 use App\Models\Character;
 use App\Models\Collection;
 use App\Models\UserCharacter;
-use App\Services\BuiltinCollectionsSync;
 use App\Services\GamificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -42,10 +41,6 @@ class LearningController extends Controller
                 'learned' => $learnedInLevel,
                 'progress' => $totalInLevel > 0 ? round(($learnedInLevel / $totalInLevel) * 100) : 0,
             ];
-        }
-
-        if (Character::query()->exists()) {
-            app(BuiltinCollectionsSync::class)->syncForUser($user);
         }
 
         $builtinCollections = $user->collections()

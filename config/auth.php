@@ -123,4 +123,14 @@ return [
     */
     'two_factor_globally_disabled' => env('TWO_FACTOR_GLOBALLY_DISABLED', false),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Two-Factor Allowed Account
+    |--------------------------------------------------------------------------
+    |
+    | Only this email may enable 2FA in profile. Other users cannot turn it on.
+    |
+    */
+    'two_factor_allowed_email' => env('TWO_FACTOR_ALLOWED_EMAIL', 'ischakovaa999@gmail.com'),
+
 ];

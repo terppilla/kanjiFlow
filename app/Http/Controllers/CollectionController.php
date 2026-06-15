@@ -67,12 +67,24 @@ class CollectionController extends Controller
     {
         $this->authorizeCollection($collection);
 
+        if ($collection->is_builtin) {
+            return redirect()
+                ->route('collections.show', $collection)
+                ->withErrors('Встроенные подборки нельзя редактировать.');
+        }
+
         return view('user.collections.edit', compact('collection'));
     }
 
     public function update(Request $request, Collection $collection)
     {
         $this->authorizeCollection($collection);
+
+        if ($collection->is_builtin) {
+            return redirect()
+                ->route('collections.show', $collection)
+                ->withErrors('Встроенные подборки нельзя переименовывать.');
+        }
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
@@ -106,6 +118,10 @@ class CollectionController extends Controller
     {
         $this->authorizeCollection($collection);
 
+        if ($collection->is_builtin) {
+            return back()->withErrors('Встроенные подборки нельзя изменять.');
+        }
+
         $data = $request->validate([
             'character_id' => ['required', 'integer', 'exists:characters,id'],
         ]);
@@ -122,6 +138,10 @@ class CollectionController extends Controller
     public function addMultipleCharacters(Request $request, Collection $collection)
     {
         $this->authorizeCollection($collection);
+
+        if ($collection->is_builtin) {
+            return back()->withErrors('Встроенные подборки нельзя изменять.');
+        }
 
         $data = $request->validate([
             'character_ids' => ['required', 'array', 'min:1'],
@@ -143,6 +163,10 @@ class CollectionController extends Controller
     public function removeCharacter(Collection $collection, Character $character)
     {
         $this->authorizeCollection($collection);
+
+        if ($collection->is_builtin) {
+            return back()->withErrors('Встроенные подборки нельзя изменять.');
+        }
 
         $collection->characters()->detach($character->id);
 

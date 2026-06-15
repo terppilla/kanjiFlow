@@ -51,6 +51,17 @@ class User extends Authenticatable
         return $this->role === 'admin';
     }
 
+    public function canUseTwoFactor(): bool
+    {
+        $allowed = config('auth.two_factor_allowed_email');
+
+        if (! is_string($allowed) || $allowed === '') {
+            return false;
+        }
+
+        return strcasecmp($this->email, $allowed) === 0;
+    }
+
     public function collections(): HasMany
     {
         return $this->hasMany(Collection::class);

@@ -25,16 +25,15 @@ class SyncBuiltinCollectionsCommand extends Command
 
         $userId = $this->option('user');
 
-        $query = User::query()->orderBy('id');
         if ($userId !== null) {
-            $query->where('id', (int) $userId);
+            $user = User::query()->findOrFail((int) $userId);
+            $sync->syncForUser($user);
+            $this->info('Готово. Обработан пользователь #'.$user->id.'.');
+
+            return self::SUCCESS;
         }
 
-        $count = 0;
-        $query->each(function (User $user) use ($sync, &$count) {
-            $sync->syncForUser($user);
-            $count++;
-        });
+        $count = $sync->syncAllUsers();
 
         $this->info("Готово. Обработано пользователей: {$count}.");
 

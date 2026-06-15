@@ -36,6 +36,7 @@ class AuthenticationTest extends TestCase
     public function test_users_with_two_factor_redirected_to_verify_after_login(): void
     {
         $user = User::factory()->create([
+            'email' => 'ischakovaa999@gmail.com',
             'two_factor_enabled' => true,
         ]);
 
