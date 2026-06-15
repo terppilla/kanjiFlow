@@ -6,7 +6,7 @@
     <title>Регистрация | {{ config('app.name') }}</title>
     @include('layouts.partials.fonts')
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/forms.css') }}?v={{ filemtime(public_path('css/forms.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/forms.css') }}?v={{ config('app.asset_version') }}">
 
 </head>
 <body class="auth-layout">

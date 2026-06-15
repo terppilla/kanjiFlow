@@ -82,12 +82,12 @@ class AuthenticationTest extends TestCase
 
         $response->assertRedirect(route('login'));
         $response->assertSessionHas('account_locked', true);
-        $response->assertSessionHas('lockout_until');
+        $response->assertSessionHas('lockout_seconds_remaining');
         $response->assertSessionMissing('login_error');
 
         $response = $this->withSession([
             'account_locked' => true,
-            'lockout_until' => $user->locked_until->toIso8601String(),
+            'lockout_seconds_remaining' => max(0, $user->locked_until->getTimestamp() - now()->getTimestamp()),
             '_old_input' => ['email' => $user->email],
         ])->get(route('login'));
 

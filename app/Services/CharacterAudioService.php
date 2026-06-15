@@ -256,7 +256,35 @@ class CharacterAudioService
         }
         $rel = ltrim($rel, '/');
 
-        return storage_path('app/public/' . $rel);
+        if ($rel === '' || str_contains($rel, '..') || str_contains($rel, "\0")) {
+            throw new \InvalidArgumentException('Invalid storage path.');
+        }
+
+        $base = storage_path('app/public');
+        $path = $base . DIRECTORY_SEPARATOR . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $rel);
+        $realBase = realpath($base);
+
+        if ($realBase === false) {
+            throw new \RuntimeException('Storage directory not found.');
+        }
+
+        $realPath = realpath($path);
+        if ($realPath !== false) {
+            if ($realPath !== $realBase && ! str_starts_with($realPath, $realBase . DIRECTORY_SEPARATOR)) {
+                throw new \InvalidArgumentException('Invalid storage path.');
+            }
+
+            return $realPath;
+        }
+
+        $normalized = str_replace('\\', '/', $path);
+        $normalizedBase = str_replace('\\', '/', $realBase);
+
+        if ($normalized !== $normalizedBase && ! str_starts_with($normalized, $normalizedBase . '/')) {
+            throw new \InvalidArgumentException('Invalid storage path.');
+        }
+
+        return $path;
     }
 
     private function forgetEdgeTtsCache(string $text, array $options = []): void

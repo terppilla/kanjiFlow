@@ -6,7 +6,7 @@
     <title>Вход | {{ config('app.name') }}</title>
     @include('layouts.partials.fonts')
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/forms.css') }}?v={{ filemtime(public_path('css/forms.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/forms.css') }}?v={{ config('app.asset_version') }}">
 </head>
 <body class="auth-layout">
     <div class="auth-decoration top-left">入</div>
@@ -22,7 +22,7 @@
             <div class="auth-status">{{ session('status') }}</div>
         @endif
 
-        @if(!empty($accountLocked) && !empty($lockoutUntil))
+        @if(!empty($accountLocked) && isset($lockoutSecondsRemaining) && $lockoutSecondsRemaining > 0)
             <div class="auth-alert auth-alert-lockout" role="alert" id="lockout-alert">
                 <strong class="auth-alert-title">Аккаунт временно заблокирован</strong>
                 <p class="auth-alert-text">
@@ -101,10 +101,10 @@
         </form>
     </div>
 
-    @if(!empty($accountLocked) && !empty($lockoutUntil))
+        @if(!empty($accountLocked) && isset($lockoutSecondsRemaining) && $lockoutSecondsRemaining > 0)
         <script>
             (function () {
-                const lockoutUntil = new Date(@json($lockoutUntil));
+                let secondsLeft = {{ (int) $lockoutSecondsRemaining }};
                 const timerEl = document.getElementById('lockout-timer');
                 const submitBtn = document.getElementById('login-submit');
                 const passwordInput = document.getElementById('password');
@@ -125,8 +125,6 @@
                 }
 
                 function tick() {
-                    const secondsLeft = Math.max(0, Math.ceil((lockoutUntil.getTime() - Date.now()) / 1000));
-
                     if (secondsLeft <= 0) {
                         timerEl.textContent = '00:00';
                         unlockForm();
@@ -134,6 +132,7 @@
                     }
 
                     timerEl.textContent = formatTime(secondsLeft);
+                    secondsLeft--;
                 }
 
                 tick();

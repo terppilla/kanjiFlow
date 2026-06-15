@@ -116,7 +116,7 @@ class AuthenticatedSessionController extends Controller
     private function buildLoginViewData(?string $email): array
     {
         $accountLocked = (bool) session('account_locked');
-        $lockoutUntil = session('lockout_until');
+        $lockoutSecondsRemaining = session('lockout_seconds_remaining');
         $loginError = session('login_error');
 
         if ($email) {
@@ -127,7 +127,7 @@ class AuthenticatedSessionController extends Controller
 
                 if ($lockoutEndsAt !== null) {
                     $accountLocked = true;
-                    $lockoutUntil = $lockoutEndsAt->toIso8601String();
+                    $lockoutSecondsRemaining = max(0, $lockoutEndsAt->getTimestamp() - now()->getTimestamp());
                     $loginError = null;
                 }
             }
@@ -135,7 +135,7 @@ class AuthenticatedSessionController extends Controller
 
         return [
             'accountLocked' => $accountLocked,
-            'lockoutUntil' => $lockoutUntil,
+            'lockoutSecondsRemaining' => $lockoutSecondsRemaining,
             'loginError' => $loginError,
         ];
     }
@@ -151,13 +151,16 @@ class AuthenticatedSessionController extends Controller
     private function loginLockoutRedirect(LoginRequest $request, User $user): RedirectResponse
     {
         $lockoutEndsAt = $this->lockout->lockoutEndsAt($user);
+        $lockoutSecondsRemaining = $lockoutEndsAt !== null
+            ? max(0, $lockoutEndsAt->getTimestamp() - now()->getTimestamp())
+            : 0;
 
         return redirect()
             ->route('login')
             ->withInput($request->only('email'))
             ->with([
                 'account_locked' => true,
-                'lockout_until' => $lockoutEndsAt?->toIso8601String(),
+                'lockout_seconds_remaining' => $lockoutSecondsRemaining,
                 'login_error' => null,
             ]);
     }

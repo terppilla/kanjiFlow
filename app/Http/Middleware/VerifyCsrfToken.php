@@ -14,4 +14,12 @@ class VerifyCsrfToken extends Middleware
     protected $except = [
         //
     ];
+
+    /**
+     * CSRF token is passed via meta tag; no XSRF-TOKEN cookie needed.
+     */
+    protected function addCookieToResponse($request, $response)
+    {
+        return $response;
+    }
 }
