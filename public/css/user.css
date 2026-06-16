@@ -3184,6 +3184,7 @@ nav.site-nav .nav-menu button.text-lg:hover {
 #articles-index-page .article-card-image {
     object-fit: contain;
     max-height: 100%;
+    margin: 0 auto;
 }
 
 .article-card,
@@ -3194,13 +3195,22 @@ nav.site-nav .nav-menu button.text-lg:hover {
     border: 1px solid rgba(214, 155, 100, 0.22);
     box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
 }
-.article-card-image {
+.article-card > a:has(.article-card-image-wrap) {
+    display: block;
     width: 100%;
-    height: 100%;
+}
+.article-card-image {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: 100%;
+    margin: 0 auto;
     object-fit: contain;
     border-radius: 0;
 }
 .article-card-image-wrap {
+    width: 100%;
     height: 210px;
     display: flex;
     align-items: center;
@@ -3209,6 +3219,7 @@ nav.site-nav .nav-menu button.text-lg:hover {
     border-radius: 14px 14px 0 0;
     padding: 0.45rem;
     border-bottom: 1px solid rgba(214, 155, 100, 0.18);
+    overflow: hidden;
 }
 .article-card-body {
     padding: 1rem;
